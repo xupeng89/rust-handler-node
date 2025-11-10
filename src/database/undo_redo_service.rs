@@ -1,11 +1,10 @@
 use crate::database::entity::model_undo_entity_cache::{
-  self, ActiveModel, Entity as UndoEntity, Model,
+  self, ActiveModel, Column as UndoEntityColumn, Entity as UndoEntity, Model,
 };
 
 use chrono::Utc;
 use sea_orm::{entity::*, query::*, ActiveValue::Set, Database, DatabaseConnection, DbErr};
 
-use serde_json;
 use tokio::sync::OnceCell;
 
 // ====================
@@ -40,6 +39,7 @@ pub async fn get_db() -> Result<DatabaseConnection, DbErr> {
 // 服务函数实现
 // ====================
 
+// 添加一条记录
 pub async fn add_undo_log_service(
   op_type: String,
   table_name: String,
@@ -64,20 +64,45 @@ pub async fn add_undo_log_service(
   Ok(())
 }
 
-pub async fn list_undo_logs_service() -> Result<String, DbErr> {
+// 查看所有记录
+pub async fn list_undo_logs_service(model_id: String) -> Result<String, DbErr> {
   let db = get_db().await?;
-  let logs: Vec<Model> = UndoEntity::find().all(&db).await?;
+  let logs: Vec<Model> = UndoEntity::find()
+    .filter(UndoEntityColumn::ModelId.eq(model_id))
+    .all(&db)
+    .await?;
   Ok(serde_json::to_string(&logs).unwrap())
 }
 
-pub async fn update_status_service(id: i32, status: i32) -> Result<(), DbErr> {
+// 更新一条记录
+pub async fn update_status(id: i32, model_id: String, status: i32) -> Result<bool, DbErr> {
   let db = get_db().await?;
 
-  if let Some(record) = UndoEntity::find_by_id(id).one(&db).await? {
+  if let Some(record) = UndoEntity::find()
+    .filter(UndoEntityColumn::Id.eq(id))
+    .filter(UndoEntityColumn::ModelId.eq(model_id))
+    .one(&db)
+    .await?
+  {
     let mut active: ActiveModel = record.into();
     active.status = Set(status);
     active.update(&db).await?;
+    return Ok(true);
   }
 
-  Ok(())
+  Ok(false)
+}
+
+// 根据id, model_id删除记录
+pub async fn delete_undo_logs_service(id: i32, model_id: String) -> Result<bool, DbErr> {
+  let db = get_db().await?;
+  // 执行删除
+  let result = UndoEntity::delete_many()
+    .filter(UndoEntityColumn::Id.eq(id))
+    .filter(UndoEntityColumn::ModelId.eq(model_id))
+    .exec(&db)
+    .await?;
+
+  // result.rows_affected 返回删除的行数
+  Ok(result.rows_affected > 0)
 }

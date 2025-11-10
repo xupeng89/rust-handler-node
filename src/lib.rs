@@ -20,19 +20,31 @@ pub async fn add_undo_log(
   Ok(())
 }
 
-/// 获取所有操作记录（JSON 格式）
+/// 获取所有操作记录（JSON 格式）根据model_id
 #[napi]
-pub async fn list_undo_logs() -> Result<String> {
-  list_undo_logs_service()
+pub async fn list_undo_logs(model_id: String) -> Result<String> {
+  list_undo_logs_service(model_id)
     .await
     .map_err(|e| Error::new(Status::GenericFailure, e.to_string()))
 }
 
 /// 更新状态（撤销 / 重做）
 #[napi]
-pub async fn update_undo_status(id: i32, status: i32) -> Result<()> {
-  update_status_service(id, status)
+pub async fn update_undo_status(id: i32, model_id: String, status: i32) -> Result<()> {
+  update_status(id, model_id, status)
     .await
     .map_err(|e| Error::new(Status::GenericFailure, e.to_string()))?;
   Ok(())
 }
+
+/// 删除一条记录
+#[napi]
+pub async fn delete_undo_logs_by_id(id: i32, model_id: String) -> Result<bool> {
+  let delete = delete_undo_logs_service(id, model_id)
+    .await
+    .map_err(|e| Error::new(Status::GenericFailure, e.to_string()))?;
+  Ok(delete)
+}
+
+/// 回滚最近一次的操作记录
+/// 重做最近一次的操作记录

@@ -56,4 +56,6 @@ const {
   },
 })
 export default __napiModule.exports
-export const plus100 = __napiModule.exports.plus100
+export const addUndoLog = __napiModule.exports.addUndoLog
+export const listUndoLogs = __napiModule.exports.listUndoLogs
+export const updateUndoStatus = __napiModule.exports.updateUndoStatus
