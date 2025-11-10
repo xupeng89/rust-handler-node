@@ -18,7 +18,6 @@ pub struct Model {
 #[derive(Copy, Clone, Debug, EnumIter)]
 pub enum Relation {}
 
-// ✅ 为 Relation 实现 RelationTrait（即使没有外键）
 impl RelationTrait for Relation {
   fn def(&self) -> RelationDef {
     panic!("No RelationDef for this Entity") // 或者 return RelationDef::new(...)，如果以后添加外键关系
