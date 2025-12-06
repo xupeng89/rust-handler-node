@@ -152,7 +152,7 @@ pub async fn update_model_shutter_entity(
         .one(db)
         .await?
         .ok_or(DbErr::RecordNotFound("Model Shutter not found".to_string()))?;
-    let result_index_num = current_model.index_num.clone();
+    let result_index_num = current_model.index_num;
     let mut active_model: ModelShutterActiveModel = current_model.into_active_model();
 
     // 核心修复点：使用 !data.field.eq(active_model.field.as_ref()) 检查差异
