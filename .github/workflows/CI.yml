@@ -27,18 +27,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - uses: pnpm/action-setup@v4
-
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: pnpm
-
       - uses: dtolnay/rust-toolchain@stable
         with:
           components: clippy, rustfmt
-
       - run: pnpm install --no-frozen-lockfile
       - run: pnpm lint
       - run: cargo fmt -- --check
@@ -49,45 +45,38 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        target:
-          - x86_64-apple-darwin
-          - aarch64-apple-darwin
-          - x86_64-pc-windows-msvc
-          - i686-pc-windows-msvc
-          - x86_64-unknown-linux-gnu
-          - x86_64-unknown-linux-musl
-          - aarch64-unknown-linux-gnu
-          - aarch64-unknown-linux-musl
-          - armv7-unknown-linux-gnueabihf
-        host:
-          - macos-latest
-          - macos-latest
-          - windows-latest
-          - windows-latest
-          - ubuntu-latest
-          - ubuntu-latest
-          - ubuntu-latest
-          - ubuntu-latest
-          - ubuntu-latest
-        node: [22]
-
-    runs-on: ${{ matrix.host }}
+        target-host:
+          - target: x86_64-apple-darwin
+            host: macos-latest
+          - target: aarch64-apple-darwin
+            host: macos-latest
+          - target: x86_64-pc-windows-msvc
+            host: windows-latest
+          - target: i686-pc-windows-msvc
+            host: windows-latest
+          - target: x86_64-unknown-linux-gnu
+            host: ubuntu-latest
+          - target: x86_64-unknown-linux-musl
+            host: ubuntu-latest
+          - target: aarch64-unknown-linux-gnu
+            host: ubuntu-latest
+          - target: aarch64-unknown-linux-musl
+            host: ubuntu-latest
+          - target: armv7-unknown-linux-gnueabihf
+            host: ubuntu-latest
+    runs-on: ${{ matrix.target-host.host }}
 
     steps:
       - uses: actions/checkout@v4
-
       - uses: pnpm/action-setup@v4
-
       - uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node }}
+          node-version: 22
           cache: pnpm
-
       - uses: dtolnay/rust-toolchain@stable
         with:
           toolchain: stable
-          targets: ${{ matrix.target }}
-
+          targets: ${{ matrix.target-host.target }}
       - name: Cache cargo
         uses: actions/cache@v4
         with:
@@ -96,28 +85,35 @@ jobs:
             ~/.cargo/git/
             ~/.napi-rs
             target/
-          key: cargo-${{ matrix.target }}
+          key: cargo-${{ matrix.target-host.target }}
 
       - name: Install dependencies
         run: pnpm install --no-frozen-lockfile
 
-      - uses: mlugg/setup-zig@v2
-        if: startsWith(matrix.target, 'x86_64') && endsWith(matrix.target, 'musl') || startsWith(matrix.target, 'aarch64') && endsWith(matrix.target, 'musl')
+      # Linux 上 cross 编译 musl / macOS target
+      - name: Setup zig for cross compilation
+        if: startsWith(matrix.target-host.target, 'aarch64') || endsWith(matrix.target-host.target, 'musl')
+        uses: mlugg/setup-zig@v2
         with:
           version: 0.15.1
 
       - name: Install cargo-zigbuild
-        if: startsWith(matrix.target, 'x86_64') && endsWith(matrix.target, 'musl') || startsWith(matrix.target, 'aarch64') && endsWith(matrix.target, 'musl')
+        if: startsWith(matrix.target-host.target, 'aarch64') || endsWith(matrix.target-host.target, 'musl')
         uses: taiki-e/install-action@v2
         with:
           tool: cargo-zigbuild
 
-      - name: Build
-        run: pnpm build --platform --release --target ${{ matrix.target }}
+      - name: Build .node
+        run: |
+          if [[ "$RUNNER_OS" == "Linux" ]] && [[ "$TARGET" == *apple* ]]; then
+            echo "Skipping macOS build on Linux runner"
+          else
+            pnpm build --target ${{ matrix.target-host.target }} --release $( [[ "$RUNNER_OS" == "Linux" && "$TARGET" == *musl* ]] && echo "--use-napi-cross" )
+          fi
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: bindings-${{ matrix.target }}
+          name: bindings-${{ matrix.target-host.target }}
           path: '*.node'
           if-no-files-found: ignore

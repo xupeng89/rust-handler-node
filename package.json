@@ -111,11 +111,8 @@
   },
   "packageManager": "pnpm@10.24.0",
   "optionalDependencies": {
-    "rust-handler-node-android-arm-eabi": "0.0.1",
-    "rust-handler-node-android-arm64": "0.0.1",
     "rust-handler-node-darwin-arm64": "0.0.1",
     "rust-handler-node-darwin-x64": "0.0.1",
-    "rust-handler-node-freebsd-x64": "0.0.1",
     "rust-handler-node-linux-arm-gnueabihf": "0.0.1",
     "rust-handler-node-linux-arm64-gnu": "0.0.1",
     "rust-handler-node-linux-arm64-musl": "0.0.1",
