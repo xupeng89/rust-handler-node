@@ -108,6 +108,10 @@ const { instance: __napiInstance, module: __wasiModule, napiModule: __napiModule
   },
 })
 module.exports = __napiModule.exports
-module.exports.addUndoLog = __napiModule.exports.addUndoLog
-module.exports.listUndoLogs = __napiModule.exports.listUndoLogs
-module.exports.updateUndoStatus = __napiModule.exports.updateUndoStatus
+module.exports.autoShutter = __napiModule.exports.autoShutter
+module.exports.autoShutterCache = __napiModule.exports.autoShutterCache
+module.exports.initDB = __napiModule.exports.initDB
+module.exports.pointInfor = __napiModule.exports.pointInfor
+module.exports.shutterHandle = __napiModule.exports.shutterHandle
+module.exports.undoRedoHandle = __napiModule.exports.undoRedoHandle
+module.exports.variableCurveHandle = __napiModule.exports.variableCurveHandle

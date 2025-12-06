@@ -1,14 +1,27 @@
 {
   "compilerOptions": {
     "target": "ESNext",
+    // "target": "ES2020",
     "strict": true,
     "moduleResolution": "node",
     "module": "CommonJS",
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true
+    // "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "noEmit": true,
+    "allowImportingTsExtensions": true, // 允许导入 .ts 后缀
+
+    // --- 必须开启这两个选项 ---
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+
+    // --- 推荐设置 ---
+    "strictPropertyInitialization": false, // 防止 TypeORM 实体报错 "Property has no initializer"
+    "useDefineForClassFields": true, // 配合 type: module 时通常建议开启
+    "esModuleInterop": true
   },
+
   "include": ["."],
-  "exclude": ["node_modules", "benchmark", "__test__"]
+  "exclude": ["node_modules", "benchmark"]
 }

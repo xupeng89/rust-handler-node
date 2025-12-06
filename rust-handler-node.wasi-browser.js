@@ -56,6 +56,10 @@ const {
   },
 })
 export default __napiModule.exports
-export const addUndoLog = __napiModule.exports.addUndoLog
-export const listUndoLogs = __napiModule.exports.listUndoLogs
-export const updateUndoStatus = __napiModule.exports.updateUndoStatus
+export const autoShutter = __napiModule.exports.autoShutter
+export const autoShutterCache = __napiModule.exports.autoShutterCache
+export const initDB = __napiModule.exports.initDB
+export const pointInfor = __napiModule.exports.pointInfor
+export const shutterHandle = __napiModule.exports.shutterHandle
+export const undoRedoHandle = __napiModule.exports.undoRedoHandle
+export const variableCurveHandle = __napiModule.exports.variableCurveHandle

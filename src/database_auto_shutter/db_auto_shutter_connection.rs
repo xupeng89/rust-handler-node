@@ -1,0 +1,98 @@
+use std::fs::{self, File};
+use std::path::Path;
+use std::time::Duration;
+use tokio::sync::OnceCell;
+
+use sea_orm_migration::sea_orm as migration_orm;
+use sea_orm_migration::MigratorTrait;
+
+// 确保引入了正确的 Migrator
+use crate::database_auto_shutter::migration::Migrator;
+use migration_orm::ConnectionTrait;
+
+// 全局 DB 连接单例
+pub static DB: OnceCell<migration_orm::DatabaseConnection> = OnceCell::const_new();
+static DB_URL: OnceCell<String> = OnceCell::const_new();
+
+/// **公共初始化入口**
+pub async fn initialize_auto_shutter_db(
+    file_path: String, // 传入文件路径，例如: "/app/data/shutter.db"
+) -> Result<&'static migration_orm::DatabaseConnection, migration_orm::DbErr> {
+    // ---------------------------------------------------------
+    // 1. 增强的文件系统处理 (确保目录和文件存在)
+    // ---------------------------------------------------------
+    let path = Path::new(&file_path);
+
+    // 自动创建父目录
+    if let Some(parent) = path.parent() {
+        if !parent.exists() {
+            eprintln!("📂 [AutoShutterDB] 父目录不存在，正在创建: {:?}", parent);
+            fs::create_dir_all(parent)
+                .map_err(|e| migration_orm::DbErr::Custom(format!("无法创建数据库目录: {}", e)))?;
+        }
+    }
+
+    // 如果文件不存在，手动创建一个空文件 (虽然 sqlite mode=rwc 会做，但显式创建更稳健)
+    if !path.exists() {
+        eprintln!(
+            "🆕 [AutoShutterDB] 数据库文件不存在，创建新文件: {:?}",
+            path
+        );
+        File::create(path)
+            .map_err(|e| migration_orm::DbErr::Custom(format!("无法创建数据库文件: {}", e)))?;
+    } else {
+        eprintln!("📂 [AutoShutterDB] 检测到现有数据库文件: {:?}", path);
+    }
+
+    // 构造 SQLite 连接字符串
+    // 注意: 使用 protocol 格式，确保路径正确转义
+    // mode=rwc: 读写创建
+    let db_url = format!("sqlite://{}?mode=rwc", file_path);
+    DB_URL.set(db_url.clone()).ok();
+
+    DB.get_or_try_init(|| async {
+        let final_db_url = DB_URL.get().unwrap().as_str();
+
+        eprintln!("🔌 [AutoShutterDB] 正在连接数据库...");
+
+        let mut opt = migration_orm::ConnectOptions::new(final_db_url.to_owned());
+        opt.max_connections(16)
+            .min_connections(4)
+            .connect_timeout(Duration::from_secs(10))
+            .acquire_timeout(Duration::from_secs(5))
+            .idle_timeout(Duration::from_secs(60))
+            .sqlx_logging(true); // 开发调试时建议开启
+
+        // 2. 创建连接
+        let db = migration_orm::Database::connect(opt).await?;
+        eprintln!("✅ [AutoShutterDB] 数据库连接成功");
+
+        // 3. 运行 Migration (核心步骤)
+        // 如果这里没报错，但表不存在，说明 Migrator 代码有问题
+        eprintln!("🚀 [AutoShutterDB] 开始执行 Migration...");
+        Migrator::up(&db, None).await.map_err(|e| {
+            eprintln!("❌ [AutoShutterDB] Migration 失败: {}", e);
+            e
+        })?;
+        eprintln!("✅ [AutoShutterDB] Migration 执行完成");
+
+        // 4. 设置 WAL 模式
+        db.execute_unprepared("PRAGMA journal_mode = WAL;").await?;
+        db.execute_unprepared("PRAGMA synchronous = NORMAL;")
+            .await?;
+
+        Ok::<migration_orm::DatabaseConnection, migration_orm::DbErr>(db)
+    })
+    .await
+}
+
+// get_shutter_db 保持不变...
+pub async fn get_auto_shutter_db(
+) -> Result<&'static migration_orm::DatabaseConnection, migration_orm::DbErr> {
+    match DB.get() {
+        Some(db_conn) => Ok(db_conn),
+        None => Err(migration_orm::DbErr::Custom(
+            "AutoShutterDB Database not initialized.".to_string(),
+        )),
+    }
+}
