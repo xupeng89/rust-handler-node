@@ -92,8 +92,7 @@ jobs:
       - name: Install dependencies
         run: pnpm install --no-frozen-lockfile
 
-      # Linux ARM / MUSL 构建需要 zig
-      - name: Setup zig for cross compilation
+      - name: Setup zig for Linux ARM / MUSL
         if: startsWith(matrix.target-host.target, 'aarch64') || endsWith(matrix.target-host.target, 'musl')
         uses: mlugg/setup-zig@v2
         with:
@@ -105,36 +104,100 @@ jobs:
         with:
           tool: cargo-zigbuild
 
-      # Build step (根据 runner OS 分开处理)
-      - name: Build .node
+      - name: Build .node (Linux / macOS)
+        if: runner.os != 'Windows'
         shell: bash
         run: |
           if [[ "$RUNNER_OS" == "Linux" ]]; then
             if [[ "$TARGET" == *musl* ]] || [[ "$TARGET" == aarch64* ]]; then
-              pnpm build --target $TARGET --release --use-napi-cross
+              pnpm build --target "$TARGET" --release --use-napi-cross
             else
-              pnpm build --target $TARGET --release
+              pnpm build --target "$TARGET" --release
             fi
           elif [[ "$RUNNER_OS" == "macOS" ]]; then
-            pnpm build --target $TARGET --release
+            pnpm build --target "$TARGET" --release
           fi
         env:
           TARGET: ${{ matrix.target-host.target }}
 
-      # Windows runner 用 PowerShell 语法
       - name: Build .node (Windows)
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
-          if ($Env:TARGET -like "*musl*" -or $Env:TARGET -like "aarch64*") {
-            pnpm build --target $Env:TARGET --release --use-napi-cross
+          if ($env:TARGET -like "*musl*" -or $env:TARGET -like "aarch64*") {
+              pnpm build --target ${env:TARGET} --release --use-napi-cross
           } else {
-            pnpm build --target $Env:TARGET --release
+              pnpm build --target ${env:TARGET} --release
           }
+        env:
+          TARGET: ${{ matrix.target-host.target }}
 
-      - name: Upload artifact
+      - name: Upload npm artifact
+        shell: bash
+        run: |
+          mkdir -p npm/${TARGET}/bindings
+          cp *.node npm/${TARGET}/bindings/
+          cp index.d.ts npm/${TARGET}/
+          cp package.json npm/${TARGET}/
+        env:
+          TARGET: ${{ matrix.target-host.target }}
+
+      - uses: actions/upload-artifact@v5
+        with:
+          name: rust-handler-node-${{ matrix.target-host.target }}
+          path: npm/${{ matrix.target-host.target }}
+
+  package:
+    name: Package all artifacts into single npm
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/download-artifact@v6
+        with:
+          name: rust-handler-node-x86_64-apple-darwin
+          path: artifacts/x86_64-apple-darwin
+      - uses: actions/download-artifact@v6
+        with:
+          name: rust-handler-node-aarch64-apple-darwin
+          path: artifacts/aarch64-apple-darwin
+      - uses: actions/download-artifact@v6
+        with:
+          name: rust-handler-node-x86_64-pc-windows-msvc
+          path: artifacts/x86_64-pc-windows-msvc
+      - uses: actions/download-artifact@v6
+        with:
+          name: rust-handler-node-aarch64-pc-windows-msvc
+          path: artifacts/aarch64-pc-windows-msvc
+      - uses: actions/download-artifact@v6
+        with:
+          name: rust-handler-node-x86_64-unknown-linux-gnu
+          path: artifacts/x86_64-unknown-linux-gnu
+      - uses: actions/download-artifact@v6
+        with:
+          name: rust-handler-node-x86_64-unknown-linux-musl
+          path: artifacts/x86_64-unknown-linux-musl
+      - uses: actions/download-artifact@v6
+        with:
+          name: rust-handler-node-aarch64-unknown-linux-gnu
+          path: artifacts/aarch64-unknown-linux-gnu
+      - uses: actions/download-artifact@v6
+        with:
+          name: rust-handler-node-aarch64-unknown-linux-musl
+          path: artifacts/aarch64-unknown-linux-musl
+
+      - name: Merge all into single npm package
+        shell: bash
+        run: |
+          mkdir -p npm-package/bindings
+          for d in artifacts/*; do
+            cp -r $d/bindings/* npm-package/bindings/
+            cp -n $d/index.d.ts npm-package/ || true
+            cp -n $d/package.json npm-package/ || true
+          done
+
+      - name: Upload final npm package
         uses: actions/upload-artifact@v5
         with:
-          name: bindings-${{ matrix.target-host.target }}
-          path: '*.node'
-          if-no-files-found: ignore
+          name: rust-handler-node-npm
+          path: npm-package
