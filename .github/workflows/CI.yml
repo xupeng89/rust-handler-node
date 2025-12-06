@@ -26,9 +26,9 @@ jobs:
     name: Lint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version: 22
           cache: pnpm
@@ -46,12 +46,17 @@ jobs:
       fail-fast: false
       matrix:
         target-host:
+          # macOS
           - target: x86_64-apple-darwin
             host: macos-latest
           - target: aarch64-apple-darwin
             host: macos-latest
+          # Windows
           - target: x86_64-pc-windows-msvc
             host: windows-latest
+          - target: aarch64-pc-windows-msvc
+            host: windows-latest
+          # Linux
           - target: x86_64-unknown-linux-gnu
             host: ubuntu-latest
           - target: x86_64-unknown-linux-musl
@@ -63,9 +68,9 @@ jobs:
     runs-on: ${{ matrix.target-host.host }}
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version: 22
           cache: pnpm
@@ -87,7 +92,7 @@ jobs:
       - name: Install dependencies
         run: pnpm install --no-frozen-lockfile
 
-      # Linux ARM / MUSL 架构使用 zig cross
+      # Linux ARM / MUSL 构建需要 zig
       - name: Setup zig for cross compilation
         if: startsWith(matrix.target-host.target, 'aarch64') || endsWith(matrix.target-host.target, 'musl')
         uses: mlugg/setup-zig@v2
@@ -100,20 +105,35 @@ jobs:
         with:
           tool: cargo-zigbuild
 
+      # Build step (根据 runner OS 分开处理)
       - name: Build .node
+        shell: bash
         run: |
-          if [[ "$RUNNER_OS" == "Linux" ]] && [[ "$TARGET" == *apple* ]]; then
-            echo "Skipping macOS build on Linux runner"
-          elif [[ "$RUNNER_OS" == "Linux" ]] && ([[ "$TARGET" == *musl* ]] || [[ "$TARGET" == aarch64* ]]); then
-            pnpm build --target ${{ matrix.target-host.target }} --release --use-napi-cross
-          else
-            pnpm build --target ${{ matrix.target-host.target }} --release
+          if [[ "$RUNNER_OS" == "Linux" ]]; then
+            if [[ "$TARGET" == *musl* ]] || [[ "$TARGET" == aarch64* ]]; then
+              pnpm build --target $TARGET --release --use-napi-cross
+            else
+              pnpm build --target $TARGET --release
+            fi
+          elif [[ "$RUNNER_OS" == "macOS" ]]; then
+            pnpm build --target $TARGET --release
           fi
         env:
           TARGET: ${{ matrix.target-host.target }}
 
+      # Windows runner 用 PowerShell 语法
+      - name: Build .node (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          if ($Env:TARGET -like "*musl*" -or $Env:TARGET -like "aarch64*") {
+            pnpm build --target $Env:TARGET --release --use-napi-cross
+          } else {
+            pnpm build --target $Env:TARGET --release
+          }
+
       - name: Upload artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: bindings-${{ matrix.target-host.target }}
           path: '*.node'
