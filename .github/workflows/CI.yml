@@ -52,8 +52,6 @@ jobs:
             host: macos-latest
           - target: x86_64-pc-windows-msvc
             host: windows-latest
-          - target: i686-pc-windows-msvc
-            host: windows-latest
           - target: x86_64-unknown-linux-gnu
             host: ubuntu-latest
           - target: x86_64-unknown-linux-musl
@@ -61,8 +59,6 @@ jobs:
           - target: aarch64-unknown-linux-gnu
             host: ubuntu-latest
           - target: aarch64-unknown-linux-musl
-            host: ubuntu-latest
-          - target: armv7-unknown-linux-gnueabihf
             host: ubuntu-latest
     runs-on: ${{ matrix.target-host.host }}
 
@@ -77,6 +73,7 @@ jobs:
         with:
           toolchain: stable
           targets: ${{ matrix.target-host.target }}
+
       - name: Cache cargo
         uses: actions/cache@v4
         with:
@@ -90,7 +87,7 @@ jobs:
       - name: Install dependencies
         run: pnpm install --no-frozen-lockfile
 
-      # Linux 上 cross 编译 musl / macOS target
+      # Linux ARM / MUSL 架构使用 zig cross
       - name: Setup zig for cross compilation
         if: startsWith(matrix.target-host.target, 'aarch64') || endsWith(matrix.target-host.target, 'musl')
         uses: mlugg/setup-zig@v2
@@ -107,9 +104,13 @@ jobs:
         run: |
           if [[ "$RUNNER_OS" == "Linux" ]] && [[ "$TARGET" == *apple* ]]; then
             echo "Skipping macOS build on Linux runner"
+          elif [[ "$RUNNER_OS" == "Linux" ]] && ([[ "$TARGET" == *musl* ]] || [[ "$TARGET" == aarch64* ]]); then
+            pnpm build --target ${{ matrix.target-host.target }} --release --use-napi-cross
           else
-            pnpm build --target ${{ matrix.target-host.target }} --release $( [[ "$RUNNER_OS" == "Linux" && "$TARGET" == *musl* ]] && echo "--use-napi-cross" )
+            pnpm build --target ${{ matrix.target-host.target }} --release
           fi
+        env:
+          TARGET: ${{ matrix.target-host.target }}
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
