@@ -1,4 +1,4 @@
-name: Build NAPI Binaries
+name: Build NAPI Binaries (Stable)
 
 on:
   push:
@@ -7,37 +7,11 @@ on:
 
 jobs:
   build:
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          # macOS
-          - platform: macos-latest
-            target: x86_64-apple-darwin
-          - platform: macos-latest
-            target: aarch64-apple-darwin
-
-          # Linux GNU
-          - platform: ubuntu-latest
-            target: x86_64-unknown-linux-gnu
-          - platform: ubuntu-latest
-            target: aarch64-unknown-linux-gnu
-
-          # Linux MUSL
-          - platform: ubuntu-latest
-            target: x86_64-unknown-linux-musl
-          - platform: ubuntu-latest
-            target: aarch64-unknown-linux-musl
-
-          # Windows
-          - platform: windows-latest
-            target: x86_64-pc-windows-msvc
-
-    runs-on: ${{ matrix.platform }}
+    name: Build on Ubuntu x86_64-unknown-linux-gnu
+    runs-on: ubuntu-latest
 
     env:
       APP_NAME: rust-handler-node
-      MACOSX_DEPLOYMENT_TARGET: 10.13
       CARGO_INCREMENTAL: 1
       RING_BUILD_INTERNAL: 1
       RING_OFFICIAL: 1
@@ -46,79 +20,44 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # Node + pnpm (版本由 package.json 决定)
+      # Node + pnpm
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: 'pnpm'
 
       - uses: pnpm/action-setup@v4
         with:
-          run_install: false
+          version: 9
 
-      - name: Install dependencies
-        run: pnpm install
-
-      # Rust toolchain + targets
+      # Rust toolchain
       - uses: dtolnay/rust-toolchain@stable
         with:
-          targets: |
-            x86_64-unknown-linux-gnu
-            aarch64-unknown-linux-gnu
-            x86_64-unknown-linux-musl
-            aarch64-unknown-linux-musl
-            x86_64-apple-darwin
-            aarch64-apple-darwin
-            x86_64-pc-windows-msvc
+          targets: x86_64-unknown-linux-gnu
 
-      # Cache Cargo registry/git + target
-      - uses: actions/cache@v4
+      # Cache cargo for speed
+      - uses: Swatinem/rust-cache@v2
         with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-            target
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          workspaces: './ -> target'
 
-      # sccache for speed
+      # sccache for faster builds
       - uses: mozilla-actions/sccache-action@v0.0.3
       - run: echo "RUSTC_WRAPPER=sccache" >> $GITHUB_ENV
 
-      # MUSL toolchain (Linux MUSL)
-      - name: Install MUSL toolchains
-        if: contains(matrix.target, 'musl')
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y musl musl-dev musl-tools
-
-      # AArch64 cross compiler (Linux GNU)
-      - name: Install AARCH64 cross compiler
-        if: contains(matrix.target, 'aarch64') && contains(matrix.platform, 'ubuntu')
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
-
-      # Set linker for aarch64-unknown-linux-gnu
-      - name: Set linker for AARCH64 + GNU
-        if: matrix.target == 'aarch64-unknown-linux-gnu'
-        run: |
-          echo "CC_aarch64_unknown_linux_gnu=aarch64-linux-gnu-gcc" >> $GITHUB_ENV
-          echo "CXX_aarch64_unknown_linux_gnu=aarch64-linux-gnu-g++" >> $GITHUB_ENV
-
-      # Build
+      # Build napi-rs crate
       - name: Build
-        run: pnpm build --platform --release --target ${{ matrix.target }}
+        run: pnpm build --platform --release --target x86_64-unknown-linux-gnu
 
       # Prepare artifacts
       - name: Prepare artifacts
         shell: bash
         run: |
-          OUT_DIR=npm/${{ matrix.target }}
+          OUT_DIR=npm/x86_64-unknown-linux-gnu
           mkdir -p $OUT_DIR/bindings
           cp *.node $OUT_DIR/bindings/
           cp package.json index.d.ts $OUT_DIR/
 
+      # Upload artifacts
       - uses: actions/upload-artifact@v4
         with:
-          name: bindings-${{ matrix.target }}
-          path: npm/${{ matrix.target }}
+          name: bindings-x86_64-unknown-linux-gnu
+          path: npm/x86_64-unknown-linux-gnu
