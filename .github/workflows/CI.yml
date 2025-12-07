@@ -41,7 +41,7 @@ jobs:
       - run: cargo clippy
 
   build:
-    name: Build cross-platform
+    name: Build Windows & macOS
     strategy:
       fail-fast: false
       matrix:
@@ -56,13 +56,6 @@ jobs:
             host: windows-latest
           - target: aarch64-pc-windows-msvc
             host: windows-latest
-          # Linux
-          - target: x86_64-unknown-linux-gnu
-            host: ubuntu-latest
-          - target: x86_64-unknown-linux-musl
-            host: ubuntu-latest
-          - target: aarch64-unknown-linux-gnu
-            host: ubuntu-latest
     runs-on: ${{ matrix.target-host.host }}
 
     steps:
@@ -90,31 +83,11 @@ jobs:
       - name: Install dependencies
         run: pnpm install --no-frozen-lockfile
 
-      - name: Setup zig for Linux ARM / MUSL
-        if: startsWith(matrix.target-host.target, 'aarch64') || endsWith(matrix.target-host.target, 'musl')
-        uses: mlugg/setup-zig@v2
-        with:
-          version: 0.15.1
-
-      - name: Install cargo-zigbuild
-        if: startsWith(matrix.target-host.target, 'aarch64') || endsWith(matrix.target-host.target, 'musl')
-        uses: taiki-e/install-action@v2
-        with:
-          tool: cargo-zigbuild
-
       - name: Build .node (Linux / macOS)
         if: runner.os != 'Windows'
         shell: bash
         run: |
-          if [[ "$RUNNER_OS" == "Linux" ]]; then
-            if [[ "$TARGET" == *musl* ]] || [[ "$TARGET" == aarch64* ]]; then
-              pnpm build --target "$TARGET" --release --use-napi-cross
-            else
-              pnpm build --target "$TARGET" --release
-            fi
-          elif [[ "$RUNNER_OS" == "macOS" ]]; then
-            pnpm build --target "$TARGET" --release
-          fi
+          pnpm build --target "$TARGET" --release
         env:
           TARGET: ${{ matrix.target-host.target }}
 
@@ -122,11 +95,7 @@ jobs:
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
-          if ($env:TARGET -like "*musl*" -or $env:TARGET -like "aarch64*") {
-              pnpm build --target ${env:TARGET} --release --use-napi-cross
-          } else {
-              pnpm build --target ${env:TARGET} --release
-          }
+          pnpm build --target ${env:TARGET} --release
         env:
           TARGET: ${{ matrix.target-host.target }}
 
@@ -152,7 +121,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      # 下载各个平台 artifact（去掉 aarch64-unknown-linux-musl）
+      # 下载 Windows & macOS artifact
       - uses: actions/download-artifact@v6
         with:
           name: rust-handler-node-x86_64-apple-darwin
@@ -169,18 +138,6 @@ jobs:
         with:
           name: rust-handler-node-aarch64-pc-windows-msvc
           path: artifacts/aarch64-pc-windows-msvc
-      - uses: actions/download-artifact@v6
-        with:
-          name: rust-handler-node-x86_64-unknown-linux-gnu
-          path: artifacts/x86_64-unknown-linux-gnu
-      - uses: actions/download-artifact@v6
-        with:
-          name: rust-handler-node-x86_64-unknown-linux-musl
-          path: artifacts/x86_64-unknown-linux-musl
-      - uses: actions/download-artifact@v6
-        with:
-          name: rust-handler-node-aarch64-unknown-linux-gnu
-          path: artifacts/aarch64-unknown-linux-gnu
 
       - name: Merge all into single npm package
         shell: bash
