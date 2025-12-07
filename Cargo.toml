@@ -8,11 +8,11 @@ version = "0.1.0"
 crate-type = ["cdylib"]
 
 [dependencies]
-napi = { version = "3.5.2", features = ["async", "tokio_rt"] }
-napi-derive = "3.3.3"
+napi = { version = "3.6.1", features = ["async", "tokio_rt"] }
+napi-derive = "3.4.0"
 
 # SeaORM（禁用 rustls-openssl 自动检测，避免 ring）
-sea-orm = { version = "~2.0.0-rc",features = ["runtime-tokio", "sqlx-sqlite", "macros" ]}
+sea-orm = { version = "~2.0.0-rc",features = ["runtime-tokio-native-tls", "sqlx-sqlite", "macros" ]}
 
 
 tokio = { version = "1", features = ["full"] }
@@ -30,3 +30,5 @@ napi-build = "2"
 lto = true
 codegen-units = 1
 strip = "symbols"
+
+
