@@ -1,4 +1,3 @@
-
 [package]
 authors = ["xupeng <710324612@qq.com>"]
 edition = "2021"
@@ -11,8 +10,16 @@ crate-type = ["cdylib"]
 [dependencies]
 napi = { version = "3.5.2", features = ["async", "tokio_rt"] }
 napi-derive = "3.3.3"
-sea-orm = { version = "~2.0.0-rc", features = ["runtime-tokio-rustls", "sqlx-sqlite", "macros" ] }
+
+# SeaORM（禁用 rustls-openssl 自动检测，避免 ring）
+sea-orm = { 
+    version = "~2.0.0-rc", 
+    features = ["runtime-tokio", "sqlx-sqlite", "macros" ]
+}
+
+# 避免 rustls（rustls → ring），改成纯 tokio runtime
 tokio = { version = "1", features = ["full"] }
+
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 once_cell = "1"
