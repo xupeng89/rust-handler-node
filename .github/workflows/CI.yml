@@ -1,66 +1,203 @@
-name: Build NAPI Binaries (Linux x86_64 GNU)
+name: CI
+
+env:
+  DEBUG: napi:*
+  APP_NAME: rust-handler-node
+  MACOSX_DEPLOYMENT_TARGET: '10.13'
+  CARGO_INCREMENTAL: '1'
 
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - '**/*.md'
+      - LICENSE
+      - '**/*.gitignore'
+      - .editorconfig
+      - docs/**
   pull_request:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  build:
+  lint:
+    name: Lint
     runs-on: ubuntu-latest
-
-    env:
-      APP_NAME: rust-handler-node
-      CARGO_INCREMENTAL: 0
-      RING_BUILD_INTERNAL: 1
-      RING_OFFICIAL: 1
-      RING_PREGENERATE_ASM: 1
-
     steps:
-      - uses: actions/checkout@v4
-
-      # Node + pnpm
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v6
         with:
           node-version: 22
+          cache: pnpm
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
+      - run: pnpm install --no-frozen-lockfile
+      - run: pnpm lint
+      - run: cargo fmt -- --check
+      - run: cargo clippy
 
+  build:
+    name: Build cross-platform
+    strategy:
+      fail-fast: false
+      matrix:
+        target-host:
+          # macOS
+          - target: x86_64-apple-darwin
+            host: macos-latest
+          - target: aarch64-apple-darwin
+            host: macos-latest
+          # Windows
+          - target: x86_64-pc-windows-msvc
+            host: windows-latest
+          - target: aarch64-pc-windows-msvc
+            host: windows-latest
+          # Linux
+          - target: x86_64-unknown-linux-gnu
+            host: ubuntu-latest
+          - target: x86_64-unknown-linux-musl
+            host: ubuntu-latest
+          - target: aarch64-unknown-linux-gnu
+            host: ubuntu-latest
+          - target: aarch64-unknown-linux-musl
+            host: ubuntu-latest
+    runs-on: ${{ matrix.target-host.host }}
+
+    steps:
+      - uses: actions/checkout@v5
       - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: pnpm
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: stable
+          targets: ${{ matrix.target-host.target }}
+
+      - name: Cache cargo
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry/
+            ~/.cargo/git/
+            ~/.napi-rs
+            target/
+          key: cargo-${{ matrix.target-host.target }}
 
       - name: Install dependencies
         run: pnpm install --no-frozen-lockfile
 
-      # Rust toolchain
-      - uses: dtolnay/rust-toolchain@stable
+      - name: Setup zig for Linux ARM / MUSL
+        if: startsWith(matrix.target-host.target, 'aarch64') || endsWith(matrix.target-host.target, 'musl')
+        uses: mlugg/setup-zig@v2
         with:
-          targets: x86_64-unknown-linux-gnu
+          version: 0.15.1
 
-      # 缓存 cargo
-      - uses: Swatinem/rust-cache@v2
+      - name: Install cargo-zigbuild
+        if: startsWith(matrix.target-host.target, 'aarch64') || endsWith(matrix.target-host.target, 'musl')
+        uses: taiki-e/install-action@v2
         with:
-          workspaces: './ -> target'
+          tool: cargo-zigbuild
 
-      # sccache 加速
-      - uses: mozilla-actions/sccache-action@v0.0.3
-      - run: echo "RUSTC_WRAPPER=sccache" >> $GITHUB_ENV
-
-      # 清理 ring 临时文件，避免 AlreadyExists
-      - name: Clean ring tmp
-        run: rm -rf target/napi-rs/rust_handler_node-*
-
-      # 构建
-      - name: Build NAPI
-        run: pnpm build --platform --release --target x86_64-unknown-linux-gnu
-
-      # 准备 artifact
-      - name: Prepare artifacts
+      - name: Build .node (Linux / macOS)
+        if: runner.os != 'Windows'
         shell: bash
         run: |
-          OUT_DIR=npm/x86_64-unknown-linux-gnu
-          mkdir -p $OUT_DIR/bindings
-          cp *.node $OUT_DIR/bindings/
-          cp package.json index.d.ts $OUT_DIR/
+          if [[ "$RUNNER_OS" == "Linux" ]]; then
+            if [[ "$TARGET" == *musl* ]] || [[ "$TARGET" == aarch64* ]]; then
+              pnpm build --target "$TARGET" --release --use-napi-cross
+            else
+              pnpm build --target "$TARGET" --release
+            fi
+          elif [[ "$RUNNER_OS" == "macOS" ]]; then
+            pnpm build --target "$TARGET" --release
+          fi
+        env:
+          TARGET: ${{ matrix.target-host.target }}
 
-      - uses: actions/upload-artifact@v4
+      - name: Build .node (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          if ($env:TARGET -like "*musl*" -or $env:TARGET -like "aarch64*") {
+              pnpm build --target ${env:TARGET} --release --use-napi-cross
+          } else {
+              pnpm build --target ${env:TARGET} --release
+          }
+        env:
+          TARGET: ${{ matrix.target-host.target }}
+
+      - name: Upload npm artifact
+        shell: bash
+        run: |
+          mkdir -p npm/${TARGET}/bindings
+          cp *.node npm/${TARGET}/bindings/
+          cp index.d.ts npm/${TARGET}/
+          cp package.json npm/${TARGET}/
+        env:
+          TARGET: ${{ matrix.target-host.target }}
+
+      - uses: actions/upload-artifact@v5
         with:
-          name: bindings-x86_64-unknown-linux-gnu
-          path: npm/x86_64-unknown-linux-gnu
+          name: rust-handler-node-${{ matrix.target-host.target }}
+          path: npm/${{ matrix.target-host.target }}
+
+  package:
+    name: Package all artifacts into single npm
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/download-artifact@v6
+        with:
+          name: rust-handler-node-x86_64-apple-darwin
+          path: artifacts/x86_64-apple-darwin
+      - uses: actions/download-artifact@v6
+        with:
+          name: rust-handler-node-aarch64-apple-darwin
+          path: artifacts/aarch64-apple-darwin
+      - uses: actions/download-artifact@v6
+        with:
+          name: rust-handler-node-x86_64-pc-windows-msvc
+          path: artifacts/x86_64-pc-windows-msvc
+      - uses: actions/download-artifact@v6
+        with:
+          name: rust-handler-node-aarch64-pc-windows-msvc
+          path: artifacts/aarch64-pc-windows-msvc
+      - uses: actions/download-artifact@v6
+        with:
+          name: rust-handler-node-x86_64-unknown-linux-gnu
+          path: artifacts/x86_64-unknown-linux-gnu
+      - uses: actions/download-artifact@v6
+        with:
+          name: rust-handler-node-x86_64-unknown-linux-musl
+          path: artifacts/x86_64-unknown-linux-musl
+      - uses: actions/download-artifact@v6
+        with:
+          name: rust-handler-node-aarch64-unknown-linux-gnu
+          path: artifacts/aarch64-unknown-linux-gnu
+      - uses: actions/download-artifact@v6
+        with:
+          name: rust-handler-node-aarch64-unknown-linux-musl
+          path: artifacts/aarch64-unknown-linux-musl
+
+      - name: Merge all into single npm package
+        shell: bash
+        run: |
+          mkdir -p npm-package/bindings
+          for d in artifacts/*; do
+            cp -r $d/bindings/* npm-package/bindings/
+            cp -n $d/index.d.ts npm-package/ || true
+            cp -n $d/package.json npm-package/ || true
+          done
+
+      - name: Upload final npm package
+        uses: actions/upload-artifact@v5
+        with:
+          name: rust-handler-node-npm
+          path: npm-package
