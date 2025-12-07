@@ -26,8 +26,6 @@ jobs:
           node-version: 22
 
       - uses: pnpm/action-setup@v4
-        with:
-          version: 9
 
       # Rust toolchain
       - uses: dtolnay/rust-toolchain@stable
