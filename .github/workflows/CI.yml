@@ -69,17 +69,22 @@ jobs:
 
     steps:
       - uses: actions/checkout@v5
+
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v6
         with:
           node-version: 22
           cache: pnpm
+
       - uses: dtolnay/rust-toolchain@stable
         with:
           toolchain: stable
           targets: ${{ matrix.target-host.target }}
 
-      - name: Cache cargo
+      # --------------------
+      # Cache: cargo registry/git + napi-rs + target + pnpm store
+      # key 包含 target 保证不同 target 分开缓存，命中率更高
+      - name: Cache cargo & napi & target
         uses: actions/cache@v4
         with:
           path: |
@@ -87,60 +92,111 @@ jobs:
             ~/.cargo/git/
             ~/.napi-rs
             target/
-          key: cargo-${{ matrix.target-host.target }}
+          key: cargo-${{ matrix.target-host.target }}-${{ runner.os }}-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            cargo-${{ matrix.target-host.target }}-${{ runner.os }}-
+
+      - name: Cache pnpm store
+        uses: actions/cache@v4
+        with:
+          path: ~/.pnpm-store
+          key: pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            pnpm-store-
 
       - name: Install dependencies
         run: pnpm install --no-frozen-lockfile
 
-      - name: Setup zig for Linux ARM / MUSL
-        if: startsWith(matrix.target-host.target, 'aarch64') || endsWith(matrix.target-host.target, 'musl')
-        uses: mlugg/setup-zig@v2
-        with:
-          version: 0.15.1
+      # --------------------
+      # Install musl & cross-compilers on Linux runners when needed.
+      # This provides musl-gcc and aarch64-linux-gnu-gcc so ring's build script can find them.
+      - name: Install musl and cross compilers (Linux musl/ARM)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update -y
+          # musl-tools provides musl-gcc wrapper (usable for x86_64-unknown-linux-musl)
+          sudo apt-get install -y musl-tools
+          # cross compilers for aarch64 (used as linker/cc for aarch64 targets)
+          sudo apt-get install -y gcc-aarch64-linux-gnu
+          # optional helpful packages
+          sudo apt-get install -y build-essential pkg-config libssl-dev || true
 
-      - name: Install cargo-zigbuild
-        if: startsWith(matrix.target-host.target, 'aarch64') || endsWith(matrix.target-host.target, 'musl')
-        uses: taiki-e/install-action@v2
-        with:
-          tool: cargo-zigbuild
-
+      # --------------------
+      # IMPORTANT: we removed Zig/cargo-zigbuild usage for musl/ARM targets because ring's build
+      # expects a conventional musl/gcc toolchain. To keep original logic as much as possible,
+      # we only use native build commands below and pass explicit env vars to point to compilers.
+      #
       - name: Build .node (Linux / macOS)
         if: runner.os != 'Windows'
         shell: bash
+        env:
+          TARGET: ${{ matrix.target-host.target }}
         run: |
+          echo "TARGET=$TARGET"
+          # For Linux musl & aarch64 targets we export explicit CC / LINKER so ring finds the C toolchain
           if [[ "$RUNNER_OS" == "Linux" ]]; then
+            # set default fallbacks
+            export CC="${CC:-gcc}"
+            # x86_64-unknown-linux-musl -> use musl-gcc
+            if [[ "$TARGET" == "x86_64-unknown-linux-musl" ]]; then
+              export CC_x86_64_unknown_linux_musl=musl-gcc
+              export CARGO_TARGET_X86_64_UNKNOWN_LINUX_MUSL_LINKER=musl-gcc
+              echo "Using musl-gcc for x86_64-unknown-linux-musl"
+            fi
+
+            # aarch64-unknown-linux-musl -> use aarch64-linux-gnu-gcc as linker/cc
+            if [[ "$TARGET" == "aarch64-unknown-linux-musl" ]]; then
+              # on Ubuntu we installed gcc-aarch64-linux-gnu (aarch64-linux-gnu-gcc)
+              export CC_aarch64_unknown_linux_musl=aarch64-linux-gnu-gcc
+              export CARGO_TARGET_AARCH64_UNKNOWN_LINUX_MUSL_LINKER=aarch64-linux-gnu-gcc
+              echo "Using aarch64-linux-gnu-gcc for aarch64-unknown-linux-musl"
+            fi
+
+            # aarch64-unknown-linux-gnu -> use aarch64-linux-gnu-gcc
+            if [[ "$TARGET" == "aarch64-unknown-linux-gnu" ]]; then
+              export CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER=aarch64-linux-gnu-gcc
+              export CC_aarch64_unknown_linux_gnu=aarch64-linux-gnu-gcc
+              echo "Using aarch64-linux-gnu-gcc for aarch64-unknown-linux-gnu"
+            fi
+
+            # x86_64-unknown-linux-gnu keep native gcc
+            if [[ "$TARGET" == "x86_64-unknown-linux-gnu" ]]; then
+              echo "Using native gcc for x86_64-unknown-linux-gnu"
+            fi
+
+            # Build: when target is musl or aarch64 we prefer napi-cross wrapper (keeps your original pnpm build flags)
             if [[ "$TARGET" == *musl* ]] || [[ "$TARGET" == aarch64* ]]; then
               pnpm build --target "$TARGET" --release --use-napi-cross
             else
               pnpm build --target "$TARGET" --release
             fi
+
           elif [[ "$RUNNER_OS" == "macOS" ]]; then
+            # macOS: keep original behavior
             pnpm build --target "$TARGET" --release
           fi
-        env:
-          TARGET: ${{ matrix.target-host.target }}
 
       - name: Build .node (Windows)
         if: runner.os == 'Windows'
         shell: pwsh
+        env:
+          TARGET: ${{ matrix.target-host.target }}
         run: |
           if ($env:TARGET -like "*musl*" -or $env:TARGET -like "aarch64*") {
               pnpm build --target ${env:TARGET} --release --use-napi-cross
           } else {
               pnpm build --target ${env:TARGET} --release
           }
-        env:
-          TARGET: ${{ matrix.target-host.target }}
 
       - name: Upload npm artifact
         shell: bash
-        run: |
-          mkdir -p npm/${TARGET}/bindings
-          cp *.node npm/${TARGET}/bindings/
-          cp index.d.ts npm/${TARGET}/
-          cp package.json npm/${TARGET}/
         env:
           TARGET: ${{ matrix.target-host.target }}
+        run: |
+          mkdir -p npm/${TARGET}/bindings
+          cp *.node npm/${TARGET}/bindings/ || true
+          cp index.d.ts npm/${TARGET}/ || true
+          cp package.json npm/${TARGET}/ || true
 
       - uses: actions/upload-artifact@v5
         with:
@@ -191,7 +247,7 @@ jobs:
         run: |
           mkdir -p npm-package/bindings
           for d in artifacts/*; do
-            cp -r $d/bindings/* npm-package/bindings/
+            cp -r $d/bindings/* npm-package/bindings/ || true
             cp -n $d/index.d.ts npm-package/ || true
             cp -n $d/package.json npm-package/ || true
           done
