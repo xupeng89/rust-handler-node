@@ -143,14 +143,16 @@ jobs:
         shell: bash
         run: |
           mkdir -p npm-package
+          shopt -s nullglob  # 如果没有匹配文件，循环为空，不报错
+
           # 拷贝各平台 .node 文件到根目录
           for d in artifacts/*; do
-            for f in $d/*.node; do
+            for f in "$d"/*.node; do
               cp "$f" npm-package/
             done
             # 拷贝 index.d.ts 和 package.json（只保留第一个）
-            cp -n $d/index.d.ts npm-package/ || true
-            cp -n $d/package.json npm-package/ || true
+            cp -n "$d"/index.d.ts npm-package/ || true
+            cp -n "$d"/package.json npm-package/ || true
           done
 
           # 拷贝项目根目录的 index.js
