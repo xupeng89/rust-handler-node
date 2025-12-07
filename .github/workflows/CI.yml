@@ -28,7 +28,7 @@ jobs:
 
       # 安装依赖，确保 napi 可用
       - name: Install dependencies
-        run: pnpm install
+        run: pnpm install --no-frozen-lockfile
 
       # Rust toolchain
       - uses: dtolnay/rust-toolchain@stable
