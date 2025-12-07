@@ -142,15 +142,16 @@ jobs:
       - name: Merge all into single npm package
         shell: bash
         run: |
-          mkdir -p npm-package/bindings
+          mkdir -p npm-package
+          # 拷贝各平台 .node 文件到根目录
           for d in artifacts/*; do
-            cp -r $d/bindings/* npm-package/bindings/
+            for f in $d/*.node; do
+              cp "$f" npm-package/
+            done
+            # 拷贝 index.d.ts 和 package.json（只保留第一个）
             cp -n $d/index.d.ts npm-package/ || true
             cp -n $d/package.json npm-package/ || true
           done
 
-      - name: Upload final npm package
-        uses: actions/upload-artifact@v5
-        with:
-          name: rust-handler-node-npm
-          path: npm-package
+          # 拷贝项目根目录的 index.js
+          cp index.js npm-package/
