@@ -2,7 +2,7 @@
 authors = ["xupeng <710324612@qq.com>"]
 edition = "2021"
 name = "rust_handler_node"
-version = "0.1.0"
+version = "0.2.0"
 
 [lib]
 crate-type = ["cdylib"]
@@ -11,29 +11,24 @@ crate-type = ["cdylib"]
 napi = { version = "3.6.1", features = ["async", "tokio_rt"] }
 napi-derive = "3.4.0"
 
-# SeaORM SQLite 完全不需要 OpenSSL
-# 关键点：禁用 default-features !
-sea-orm = { version = "2.0.0-rc.3", default-features = false, features = [
-    "macros",
-    "sqlx-sqlite",
-    "runtime-tokio-rustls",
-] }
+# SeaORM（禁用 rustls-openssl 自动检测，避免 ring）
+sea-orm = { version = "~2.0.0-rc",features = ["runtime-tokio", "sqlx-sqlite", "macros" ]}
+
 
 tokio = { version = "1", features = ["full"] }
+
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 once_cell = "1"
 chrono = { version = "0.4", features = ["serde"] }
-
-# 同样禁用其 default-features，避免意外启用 native-tls / openssl
-sea-orm-migration = { version = "2.0.0-rc.3", default-features = false, features = [
-    "runtime-tokio-rustls"
-] }
+sea-orm-migration = "~2.0.0-rc"
 
 [build-dependencies]
-napi-build = "2"
+napi-build = "2.3.0"
 
 [profile.release]
 lto = true
 codegen-units = 1
 strip = "symbols"
+
+
