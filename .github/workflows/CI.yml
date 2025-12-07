@@ -11,7 +11,7 @@ jobs:
 
     env:
       APP_NAME: rust-handler-node
-      CARGO_INCREMENTAL: 1
+      CARGO_INCREMENTAL: 0
       RING_BUILD_INTERNAL: 1
       RING_OFFICIAL: 1
       RING_PREGENERATE_ASM: 1
@@ -25,8 +25,9 @@ jobs:
           node-version: 22
 
       - uses: pnpm/action-setup@v4
+        with:
+          version: 10
 
-      # 安装依赖，确保 napi 可用
       - name: Install dependencies
         run: pnpm install --no-frozen-lockfile
 
@@ -44,12 +45,9 @@ jobs:
       - uses: mozilla-actions/sccache-action@v0.0.3
       - run: echo "RUSTC_WRAPPER=sccache" >> $GITHUB_ENV
 
-      # 安装 AARCH64 cross compiler，如果未来需要
-      - name: Install AARCH64 cross compiler
-        if: false
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
+      # 清理 ring 临时文件，避免 AlreadyExists
+      - name: Clean ring tmp
+        run: rm -rf target/napi-rs/rust_handler_node-*
 
       # 构建
       - name: Build NAPI
