@@ -1,259 +1,166 @@
-name: CI
-
-env:
-  DEBUG: napi:*
-  APP_NAME: rust-handler-node
-  MACOSX_DEPLOYMENT_TARGET: '10.13'
-  CARGO_INCREMENTAL: '1'
+name: Build NAPI binaries
 
 on:
   push:
-    branches: [main]
-    paths-ignore:
-      - '**/*.md'
-      - LICENSE
-      - '**/*.gitignore'
-      - .editorconfig
-      - docs/**
+    tags:
+      - 'v*'
+    branches:
+      - main
   pull_request:
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
-  lint:
-    name: Lint
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v5
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v6
-        with:
-          node-version: 22
-          cache: pnpm
-      - uses: dtolnay/rust-toolchain@stable
-        with:
-          components: clippy, rustfmt
-      - run: pnpm install --no-frozen-lockfile
-      - run: pnpm lint
-      - run: cargo fmt -- --check
-      - run: cargo clippy
-
   build:
-    name: Build cross-platform
+    name: Build (${{ matrix.target-host.target }} / ${{ matrix.target-host.host }})
+    runs-on: ${{ matrix.target-host.host }}
+
     strategy:
       fail-fast: false
       matrix:
         target-host:
           # macOS
-          - target: x86_64-apple-darwin
-            host: macos-latest
-          - target: aarch64-apple-darwin
-            host: macos-latest
+          - { target: aarch64-apple-darwin, host: macos-latest }
+          - { target: x86_64-apple-darwin, host: macos-latest }
+
           # Windows
-          - target: x86_64-pc-windows-msvc
-            host: windows-latest
-          - target: aarch64-pc-windows-msvc
-            host: windows-latest
-          # Linux
-          - target: x86_64-unknown-linux-gnu
-            host: ubuntu-latest
-          - target: x86_64-unknown-linux-musl
-            host: ubuntu-latest
-          - target: aarch64-unknown-linux-gnu
-            host: ubuntu-latest
-          - target: aarch64-unknown-linux-musl
-            host: ubuntu-latest
-    runs-on: ${{ matrix.target-host.host }}
+          - { target: x86_64-pc-windows-msvc, host: windows-latest }
+          - { target: i686-pc-windows-msvc, host: windows-latest }
+          - { target: aarch64-pc-windows-msvc, host: windows-latest }
+
+          # Linux GNU
+          - { target: x86_64-unknown-linux-gnu, host: ubuntu-latest }
+          - { target: aarch64-unknown-linux-gnu, host: ubuntu-latest }
+
+          # Linux MUSL (hardest)
+          - { target: x86_64-unknown-linux-musl, host: ubuntu-latest }
+          - { target: aarch64-unknown-linux-musl, host: ubuntu-latest }
 
     steps:
-      - uses: actions/checkout@v5
+      # ------------------------------
+      # 1. Checkout
+      # ------------------------------
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v6
-        with:
-          node-version: 22
-          cache: pnpm
+      # ------------------------------
+      # 2. Install system deps (Linux only)
+      # ------------------------------
+      - name: Install Linux base deps
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential pkg-config
 
-      - uses: dtolnay/rust-toolchain@stable
+      - name: Install musl toolchain
+        if: runner.os == 'Linux' && contains(matrix.target-host.target, 'musl')
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y musl-tools gcc
+
+          # patch: fix missing libgcc_s.so.1 required for ring/sqlite3
+          sudo ln -s /usr/lib/gcc/x86_64-linux-gnu/*/libgcc_s.so.1 /usr/lib/libgcc_s.so.1 || true
+
+      - name: Install ARM toolchain (for aarch64 gnu/musl)
+        if: runner.os == 'Linux' && startsWith(matrix.target-host.target, 'aarch64')
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc-aarch64-linux-gnu || true
+          sudo apt-get install -y gcc-aarch64-linux-musl || true
+
+      # ------------------------------
+      # 3. Setup Rust + component
+      # ------------------------------
+      - uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
-          targets: ${{ matrix.target-host.target }}
+          target: ${{ matrix.target-host.target }}
+          override: true
+          components: rustfmt, clippy
 
-      # --------------------
-      # Cache: cargo registry/git + napi-rs + target + pnpm store
-      # key 包含 target 保证不同 target 分开缓存，命中率更高
-      - name: Cache cargo & napi & target
+      # ------------------------------
+      # 4. Enable Rust caching (3× faster)
+      # ------------------------------
+      - name: Cargo cache
         uses: actions/cache@v4
         with:
           path: |
-            ~/.cargo/registry/
-            ~/.cargo/git/
-            ~/.napi-rs
-            target/
-          key: cargo-${{ matrix.target-host.target }}-${{ runner.os }}-${{ hashFiles('**/Cargo.lock') }}
-          restore-keys: |
-            cargo-${{ matrix.target-host.target }}-${{ runner.os }}-
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: cargo-${{ runner.os }}-${{ matrix.target-host.target }}-${{ hashFiles('**/Cargo.lock') }}
 
-      - name: Cache pnpm store
-        uses: actions/cache@v4
+      # ------------------------------
+      # 5. Setup Node.js + pnpm + pnpm cache
+      # ------------------------------
+      - uses: actions/setup-node@v4
         with:
-          path: ~/.pnpm-store
-          key: pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            pnpm-store-
+          node-version: 20
+          cache: 'pnpm'
 
-      - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
+      - uses: pnpm/action-setup@v3
+        with:
+          version: 8
 
-      # --------------------
-      # Install musl & cross-compilers on Linux runners when needed.
-      # This provides musl-gcc and aarch64-linux-gnu-gcc so ring's build script can find them.
-      - name: Install musl and cross compilers (Linux musl/ARM)
+      - name: Install JS deps
+        run: pnpm install --frozen-lockfile
+
+      # ------------------------------
+      # 6. Build NAPI .node
+      # ------------------------------
+      - name: Build napi binary (Linux)
         if: runner.os == 'Linux'
         run: |
-          sudo apt-get update -y
-          # musl-tools provides musl-gcc wrapper (usable for x86_64-unknown-linux-musl)
-          sudo apt-get install -y musl-tools
-          # cross compilers for aarch64 (used as linker/cc for aarch64 targets)
-          sudo apt-get install -y gcc-aarch64-linux-gnu
-          # optional helpful packages
-          sudo apt-get install -y build-essential pkg-config libssl-dev || true
-
-      # --------------------
-      # IMPORTANT: we removed Zig/cargo-zigbuild usage for musl/ARM targets because ring's build
-      # expects a conventional musl/gcc toolchain. To keep original logic as much as possible,
-      # we only use native build commands below and pass explicit env vars to point to compilers.
-      #
-      - name: Build .node (Linux / macOS)
-        if: runner.os != 'Windows'
-        shell: bash
-        env:
-          TARGET: ${{ matrix.target-host.target }}
-        run: |
-          echo "TARGET=$TARGET"
-          # For Linux musl & aarch64 targets we export explicit CC / LINKER so ring finds the C toolchain
-          if [[ "$RUNNER_OS" == "Linux" ]]; then
-            # set default fallbacks
-            export CC="${CC:-gcc}"
-            # x86_64-unknown-linux-musl -> use musl-gcc
-            if [[ "$TARGET" == "x86_64-unknown-linux-musl" ]]; then
-              export CC_x86_64_unknown_linux_musl=musl-gcc
-              export CARGO_TARGET_X86_64_UNKNOWN_LINUX_MUSL_LINKER=musl-gcc
-              echo "Using musl-gcc for x86_64-unknown-linux-musl"
-            fi
-
-            # aarch64-unknown-linux-musl -> use aarch64-linux-gnu-gcc as linker/cc
-            if [[ "$TARGET" == "aarch64-unknown-linux-musl" ]]; then
-              # on Ubuntu we installed gcc-aarch64-linux-gnu (aarch64-linux-gnu-gcc)
-              export CC_aarch64_unknown_linux_musl=aarch64-linux-gnu-gcc
-              export CARGO_TARGET_AARCH64_UNKNOWN_LINUX_MUSL_LINKER=aarch64-linux-gnu-gcc
-              echo "Using aarch64-linux-gnu-gcc for aarch64-unknown-linux-musl"
-            fi
-
-            # aarch64-unknown-linux-gnu -> use aarch64-linux-gnu-gcc
-            if [[ "$TARGET" == "aarch64-unknown-linux-gnu" ]]; then
-              export CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER=aarch64-linux-gnu-gcc
-              export CC_aarch64_unknown_linux_gnu=aarch64-linux-gnu-gcc
-              echo "Using aarch64-linux-gnu-gcc for aarch64-unknown-linux-gnu"
-            fi
-
-            # x86_64-unknown-linux-gnu keep native gcc
-            if [[ "$TARGET" == "x86_64-unknown-linux-gnu" ]]; then
-              echo "Using native gcc for x86_64-unknown-linux-gnu"
-            fi
-
-            # Build: when target is musl or aarch64 we prefer napi-cross wrapper (keeps your original pnpm build flags)
-            if [[ "$TARGET" == *musl* ]] || [[ "$TARGET" == aarch64* ]]; then
-              pnpm build --target "$TARGET" --release --use-napi-cross
-            else
-              pnpm build --target "$TARGET" --release
-            fi
-
-          elif [[ "$RUNNER_OS" == "macOS" ]]; then
-            # macOS: keep original behavior
+          if [[ "$TARGET" == *musl* || "$TARGET" == aarch64* ]]; then
+            pnpm build --target "$TARGET" --release --use-napi-cross
+          else
             pnpm build --target "$TARGET" --release
           fi
-
-      - name: Build .node (Windows)
-        if: runner.os == 'Windows'
-        shell: pwsh
         env:
           TARGET: ${{ matrix.target-host.target }}
-        run: |
-          if ($env:TARGET -like "*musl*" -or $env:TARGET -like "aarch64*") {
-              pnpm build --target ${env:TARGET} --release --use-napi-cross
-          } else {
-              pnpm build --target ${env:TARGET} --release
-          }
 
-      - name: Upload npm artifact
-        shell: bash
+      - name: Build napi binary (macOS / Windows)
+        if: runner.os != 'Linux'
+        run: pnpm build --target "$TARGET" --release
         env:
           TARGET: ${{ matrix.target-host.target }}
-        run: |
-          mkdir -p npm/${TARGET}/bindings
-          cp *.node npm/${TARGET}/bindings/ || true
-          cp index.d.ts npm/${TARGET}/ || true
-          cp package.json npm/${TARGET}/ || true
 
-      - uses: actions/upload-artifact@v5
+      # ------------------------------
+      # 7. Upload artifacts
+      # ------------------------------
+      - name: Upload binary artifact
+        uses: actions/upload-artifact@v4
         with:
-          name: rust-handler-node-${{ matrix.target-host.target }}
-          path: npm/${{ matrix.target-host.target }}
+          name: ${{ matrix.target-host.target }}.node
+          path: rust-handler-node.*/*.node
 
-  package:
-    name: Package all artifacts into single npm
+  # ------------------------------
+  # Publishing job
+  # ------------------------------
+  publish:
+    name: Publish to NPM
+    needs: [build]
     runs-on: ubuntu-latest
-    needs: build
+    if: startsWith(github.ref, 'refs/tags/')
+
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/download-artifact@v6
-        with:
-          name: rust-handler-node-x86_64-apple-darwin
-          path: artifacts/x86_64-apple-darwin
-      - uses: actions/download-artifact@v6
-        with:
-          name: rust-handler-node-aarch64-apple-darwin
-          path: artifacts/aarch64-apple-darwin
-      - uses: actions/download-artifact@v6
-        with:
-          name: rust-handler-node-x86_64-pc-windows-msvc
-          path: artifacts/x86_64-pc-windows-msvc
-      - uses: actions/download-artifact@v6
-        with:
-          name: rust-handler-node-aarch64-pc-windows-msvc
-          path: artifacts/aarch64-pc-windows-msvc
-      - uses: actions/download-artifact@v6
-        with:
-          name: rust-handler-node-x86_64-unknown-linux-gnu
-          path: artifacts/x86_64-unknown-linux-gnu
-      - uses: actions/download-artifact@v6
-        with:
-          name: rust-handler-node-x86_64-unknown-linux-musl
-          path: artifacts/x86_64-unknown-linux-musl
-      - uses: actions/download-artifact@v6
-        with:
-          name: rust-handler-node-aarch64-unknown-linux-gnu
-          path: artifacts/aarch64-unknown-linux-gnu
-      - uses: actions/download-artifact@v6
-        with:
-          name: rust-handler-node-aarch64-unknown-linux-musl
-          path: artifacts/aarch64-unknown-linux-musl
+      - uses: actions/checkout@v4
 
-      - name: Merge all into single npm package
-        shell: bash
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: 'https://registry.npmjs.org'
+
+      - uses: pnpm/action-setup@v3
+        with:
+          version: 8
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Publish to npm
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
-          mkdir -p npm-package/bindings
-          for d in artifacts/*; do
-            cp -r $d/bindings/* npm-package/bindings/ || true
-            cp -n $d/index.d.ts npm-package/ || true
-            cp -n $d/package.json npm-package/ || true
-          done
-
-      - name: Upload final npm package
-        uses: actions/upload-artifact@v5
-        with:
-          name: rust-handler-node-npm
-          path: npm-package
+          ls -R artifacts
+          pnpm publish --access public
