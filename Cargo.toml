@@ -12,12 +12,9 @@ napi = { version = "3.5.2", features = ["async", "tokio_rt"] }
 napi-derive = "3.3.3"
 
 # SeaORM（禁用 rustls-openssl 自动检测，避免 ring）
-sea-orm = { 
-    version = "~2.0.0-rc", 
-    features = ["runtime-tokio", "sqlx-sqlite", "macros" ]
-}
+sea-orm = { version = "~2.0.0-rc",features = ["runtime-tokio", "sqlx-sqlite", "macros" ]}
 
-# 避免 rustls（rustls → ring），改成纯 tokio runtime
+
 tokio = { version = "1", features = ["full"] }
 
 serde = { version = "1", features = ["derive"] }

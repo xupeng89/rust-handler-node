@@ -8,27 +8,33 @@ importers:
 
   .:
     dependencies:
+      '@octokit/core':
+        specifier: 0.0.1
+        version: 7.0.6
       better-sqlite3:
         specifier: ^12.5.0
         version: 12.5.0
       reflect-metadata:
         specifier: ^0.2.2
         version: 0.2.2
+      typanion:
+        specifier: 0.0.1
+        version: 3.14.0
       typeorm:
-        specifier: ^0.3.27
+        specifier: ^0.3.28
         version: 0.3.28(better-sqlite3@12.5.0)
     devDependencies:
       '@emnapi/core':
-        specifier: ^1.5.0
+        specifier: ^1.7.1
         version: 1.7.1
       '@emnapi/runtime':
-        specifier: ^1.5.0
+        specifier: ^1.7.1
         version: 1.7.1
       '@napi-rs/cli':
-        specifier: ^3.2.0
+        specifier: ^3.5.0
         version: 3.5.0(@emnapi/runtime@1.7.1)
       '@napi-rs/wasm-runtime':
-        specifier: ^1.0.4
+        specifier: ^1.1.0
         version: 1.1.0
       '@oxc-node/core':
         specifier: ^0.0.32
@@ -37,37 +43,37 @@ importers:
         specifier: ^0.7.0
         version: 0.7.0
       '@tybys/wasm-util':
-        specifier: ^0.10.0
+        specifier: ^0.10.1
         version: 0.10.1
       chalk:
         specifier: ^5.6.2
         version: 5.6.2
       emnapi:
-        specifier: ^1.5.0
+        specifier: ^1.7.1
         version: 1.7.1
       husky:
         specifier: ^9.1.7
         version: 9.1.7
       lint-staged:
-        specifier: ^16.1.6
+        specifier: ^16.2.7
         version: 16.2.7
       npm-run-all2:
         specifier: ^8.0.4
         version: 8.0.4
       oxlint:
-        specifier: ^1.14.0
+        specifier: ^1.31.0
         version: 1.31.0
       prettier:
-        specifier: ^3.6.2
+        specifier: ^3.7.4
         version: 3.7.4
       tinybench:
-        specifier: ^5.0.1
+        specifier: ^5.1.0
         version: 5.1.0
       tsx:
-        specifier: ^4.20.6
+        specifier: ^4.21.0
         version: 4.21.0
       typescript:
-        specifier: ^5.9.2
+        specifier: ^5.9.3
         version: 5.9.3
 
 packages:

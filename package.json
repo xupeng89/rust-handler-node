@@ -59,23 +59,23 @@
     "version": "napi version"
   },
   "devDependencies": {
-    "@emnapi/core": "^1.5.0",
-    "@emnapi/runtime": "^1.5.0",
-    "@napi-rs/cli": "^3.2.0",
-    "@napi-rs/wasm-runtime": "^1.0.4",
+    "@emnapi/core": "^1.7.1",
+    "@emnapi/runtime": "^1.7.1",
+    "@napi-rs/cli": "^3.5.0",
+    "@napi-rs/wasm-runtime": "^1.1.0",
     "@oxc-node/core": "^0.0.32",
     "@taplo/cli": "^0.7.0",
-    "@tybys/wasm-util": "^0.10.0",
+    "@tybys/wasm-util": "^0.10.1",
     "chalk": "^5.6.2",
-    "emnapi": "^1.5.0",
+    "emnapi": "^1.7.1",
     "husky": "^9.1.7",
-    "lint-staged": "^16.1.6",
+    "lint-staged": "^16.2.7",
     "npm-run-all2": "^8.0.4",
-    "oxlint": "^1.14.0",
-    "prettier": "^3.6.2",
-    "tinybench": "^5.0.1",
-    "tsx": "^4.20.6",
-    "typescript": "^5.9.2"
+    "oxlint": "^1.31.0",
+    "prettier": "^3.7.4",
+    "tinybench": "^5.1.0",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3"
   },
   "lint-staged": {
     "*.@(js|ts|tsx)": [
@@ -124,8 +124,10 @@
     "rust-handler-node-win32-x64-msvc": "0.0.1"
   },
   "dependencies": {
+    "@octokit/core": "0.0.1",
     "better-sqlite3": "^12.5.0",
     "reflect-metadata": "^0.2.2",
-    "typeorm": "^0.3.27"
+    "typanion": "0.0.1",
+    "typeorm": "^0.3.28"
   }
 }
