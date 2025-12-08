@@ -56,7 +56,7 @@ jobs:
             host: windows-latest
           - target: aarch64-pc-windows-msvc
             host: windows-latest
-          # Linux (Added)
+          # Linux (需要交叉编译环境)
           - target: x86_64-unknown-linux-gnu
             host: ubuntu-latest
           - target: aarch64-unknown-linux-gnu
@@ -74,6 +74,14 @@ jobs:
         with:
           toolchain: stable
           targets: ${{ matrix.target-host.target }}
+
+      # 🚀 修复 Linux 交叉编译的关键步骤：安装 C/C++ 交叉编译器
+      - name: Install C Cross-Compilers (Linux ARM64)
+        if: runner.os == 'Linux' && matrix.target-host.target == 'aarch64-unknown-linux-gnu'
+        run: |
+          sudo apt-get update
+          # 安装 aarch64-linux-gnu-gcc 和 g++
+          sudo apt-get install -y gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
 
       - name: Cache cargo
         uses: actions/cache@v4
@@ -163,7 +171,7 @@ jobs:
             cp -n $d/index.d.ts npm-package/ || true
             cp -n $d/package.json npm-package/ || true
           done
-          # Copy index.js from the project root into the final package (Added)
+          # 复制项目中的 index.js 到最终的 npm 包中
           if [ -f index.js ]; then
             cp index.js npm-package/
             echo "Successfully copied index.js to npm-package/"
