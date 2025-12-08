@@ -56,7 +56,7 @@ jobs:
             host: windows-latest
           - target: aarch64-pc-windows-msvc
             host: windows-latest
-          # Linux (需要交叉编译环境)
+          # Linux
           - target: x86_64-unknown-linux-gnu
             host: ubuntu-latest
           - target: aarch64-unknown-linux-gnu
@@ -75,7 +75,7 @@ jobs:
           toolchain: stable
           targets: ${{ matrix.target-host.target }}
 
-      # 🚀 修复 Linux 交叉编译的关键步骤：安装 C/C++ 交叉编译器
+      # 1. 修复：安装 C/C++ 交叉编译器 (解决 'aarch64-linux-gnu-gcc' not found)
       - name: Install C Cross-Compilers (Linux ARM64)
         if: runner.os == 'Linux' && matrix.target-host.target == 'aarch64-unknown-linux-gnu'
         run: |
@@ -103,6 +103,11 @@ jobs:
           pnpm build --target "$TARGET" --release
         env:
           TARGET: ${{ matrix.target-host.target }}
+          # 2. 修复：明确指定交叉链接器 (解决 linking with `cc` failed: exit status: 1)
+          # 告诉 Cargo/Rustc 使用正确的 aarch64-linux-gnu-gcc 作为链接器
+          CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER: aarch64-linux-gnu-gcc
+          # 告诉 cc-rs crate (用于编译 C 依赖如 sqlite) 使用正确的 aarch64-linux-gnu-gcc
+          CC_aarch64_unknown_linux_gnu: aarch64-linux-gnu-gcc
 
       - name: Build .node (Windows)
         if: runner.os == 'Windows'

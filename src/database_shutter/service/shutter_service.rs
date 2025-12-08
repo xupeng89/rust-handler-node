@@ -174,6 +174,10 @@ pub async fn update_model_shutter_entity(
     if data.update_at != *active_model.update_at.as_ref() {
         active_model.update_at = Set(data.update_at);
     }
+    // 4. 更新名称
+    if data.name != *active_model.name.as_ref() {
+        active_model.name = Set(data.name);
+    }
     // 您可以根据需要添加其他字段，如 name, user_name 等
 
     // 4. 执行更新
