@@ -14,6 +14,20 @@ export interface AutoShutterListItem {
   status: string
 }
 
+export interface ConfigDto {
+  id: number
+  propertyParams: string
+  controlParams: string
+  rateParams: string
+  flashParams: string
+  filterLabelParams: string
+  modelState: number
+  showLabelParams: string
+  rangeStatus: number
+  autoShutterParams: string
+  oilParams: string
+}
+
 export interface CurveModel {
   id: number
   simTime: string
@@ -117,11 +131,20 @@ export declare namespace autoShutterCache {
   export function updateAutoShutterCacheApi(data: AutoShutterData, modelId: string): Promise<number>
 }
 
+export declare namespace confConfig {
+  /** 根据 type_num 列表查询点位信息 (返回 JSON 字符串) */
+  export function getConfConfigOneMessageApi(): Promise<ConfigDto>
+  /** 批量更新或插入点位信息 */
+  export function updateOrInsertConfConfigApi(data: ConfigDto): Promise<void>
+}
+
 export declare namespace initDB {
   /** 初始化自动快照数据库 */
   export function initAutoShutterDb(url: string): Promise<void>
   /** 初始化缓存数据库 */
   export function initCacheDb(): Promise<void>
+  /** 初始化自动快照数据库 */
+  export function initConfigDb(url: string): Promise<void>
   /** 初始化快照数据库 */
   export function initShutterDb(url: string): Promise<void>
 }

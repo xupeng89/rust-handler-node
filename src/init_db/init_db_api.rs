@@ -41,15 +41,15 @@ pub async fn init_auto_shutter_db(url: String) -> Result<()> {
     Ok(())
 }
 
-// #[napi(namespace = "initDB")]
-// /// 初始化自动快照数据库
-// pub async fn init_config_db(url: String) -> Result<()> {
-//     // 初始化cache数据库
-//     match crate::database_config::db_config_connection::initialize_config_db(url).await {
-//         Ok(_) => {}
-//         Err(e) => {
-//             eprintln!("init_config_db error: {}", e);
-//         }
-//     };
-//     Ok(())
-// }
+#[napi(namespace = "initDB")]
+/// 初始化自动快照数据库
+pub async fn init_config_db(url: String) -> Result<()> {
+    // 初始化cache数据库
+    match crate::database_config::db_config_connection::initialize_config_db(url).await {
+        Ok(_) => {}
+        Err(e) => {
+            eprintln!("init_config_db error: {}", e);
+        }
+    };
+    Ok(())
+}

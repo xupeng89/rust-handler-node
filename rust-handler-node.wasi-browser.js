@@ -58,6 +58,7 @@ const {
 export default __napiModule.exports
 export const autoShutter = __napiModule.exports.autoShutter
 export const autoShutterCache = __napiModule.exports.autoShutterCache
+export const confConfig = __napiModule.exports.confConfig
 export const initDB = __napiModule.exports.initDB
 export const pointInfor = __napiModule.exports.pointInfor
 export const shutterHandle = __napiModule.exports.shutterHandle

@@ -574,6 +574,7 @@ if (!nativeBinding) {
 module.exports = nativeBinding
 module.exports.autoShutter = nativeBinding.autoShutter
 module.exports.autoShutterCache = nativeBinding.autoShutterCache
+module.exports.confConfig = nativeBinding.confConfig
 module.exports.initDB = nativeBinding.initDB
 module.exports.pointInfor = nativeBinding.pointInfor
 module.exports.shutterHandle = nativeBinding.shutterHandle
