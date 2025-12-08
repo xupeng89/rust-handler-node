@@ -41,7 +41,7 @@ jobs:
       - run: cargo clippy
 
   build:
-    name: Build Windows & macOS
+    name: Build Windows, macOS & Linux
     strategy:
       fail-fast: false
       matrix:
@@ -56,6 +56,11 @@ jobs:
             host: windows-latest
           - target: aarch64-pc-windows-msvc
             host: windows-latest
+          # Linux (Added)
+          - target: x86_64-unknown-linux-gnu
+            host: ubuntu-latest
+          - target: aarch64-unknown-linux-gnu
+            host: ubuntu-latest
     runs-on: ${{ matrix.target-host.host }}
 
     steps:
@@ -121,7 +126,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      # 下载 Windows & macOS artifact
+      # 下载所有 artifact
       - uses: actions/download-artifact@v6
         with:
           name: rust-handler-node-x86_64-apple-darwin
@@ -138,18 +143,33 @@ jobs:
         with:
           name: rust-handler-node-aarch64-pc-windows-msvc
           path: artifacts/aarch64-pc-windows-msvc
+      - uses: actions/download-artifact@v6
+        with:
+          name: rust-handler-node-x86_64-unknown-linux-gnu
+          path: artifacts/x86_64-unknown-linux-gnu
+      - uses: actions/download-artifact@v6
+        with:
+          name: rust-handler-node-aarch64-unknown-linux-gnu
+          path: artifacts/aarch64-unknown-linux-gnu
 
       - name: Merge all into single npm package
         shell: bash
         run: |
           mkdir -p npm-package/
           for d in artifacts/*; do
-
+            # Copy all .node files from bindings directory
             cp -r $d/bindings/* npm-package/
+            # Copy index.d.ts and package.json only if they don't exist yet
             cp -n $d/index.d.ts npm-package/ || true
-            cp -n $d/index.js npm-package/ || true
             cp -n $d/package.json npm-package/ || true
           done
+          # Copy index.js from the project root into the final package (Added)
+          if [ -f index.js ]; then
+            cp index.js npm-package/
+            echo "Successfully copied index.js to npm-package/"
+          else
+            echo "Warning: index.js not found in project root. Skipping copy."
+          fi
 
       - name: Upload final npm package
         uses: actions/upload-artifact@v5
