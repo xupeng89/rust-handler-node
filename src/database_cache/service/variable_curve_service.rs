@@ -13,7 +13,8 @@ use napi_derive::napi;
 #[derive(Debug, Serialize, Deserialize)]
 #[napi(object)]
 pub struct DatasetItem {
-    pub label: String,
+    pub id: String,
+    pub name: String,
     pub value: String,
 }
 

@@ -8,7 +8,7 @@ use sea_orm::{
 use serde::{Deserialize, Serialize};
 // ======================================
 // 假设 ConfFunctionPic 的实体定义在这里
-use crate::database_config::entity::conf_function_pic::{
+use crate::database_config::entity::conf_function_pic_entity::{
     ActiveModel as ConfFunctionPicActiveModel,
     Column as ConfFunctionPicColumn, // 需要引入 Column 枚举来按 code 查询
     Entity as ConfFunctionPicEntity,
