@@ -25,7 +25,7 @@ impl From<AutoShutterModel> for FullCacheData {
             sysvars: ele.sysvars,
             update_at: ele.update_at,
             sim_time: ele.sim_time,
-            status: ele.status,
+            base_state_code: ele.base_state_code,
             user_name: None,
             state_index: None,
             state_desc: None,
@@ -53,7 +53,7 @@ pub async fn read_current_model_auto_shutter_entity(data: Vec<FullCacheData>) ->
             sysvars: Set(d.sysvars),
             update_at: Set(d.update_at),
             sim_time: Set(d.sim_time),
-            status: Set(d.status),
+            base_state_code: Set(d.base_state_code),
             ..Default::default()
         })
         .collect();

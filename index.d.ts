@@ -4,14 +4,14 @@ export interface AutoShutterData {
   objects: string
   sysvars: string
   simTime: string
-  status: string
+  baseStateCode: string
 }
 
 export interface AutoShutterListItem {
   id: number
   updateAt: string
   simTime: string
-  status: string
+  baseStateCode: string
 }
 
 export interface ConfigDto {
@@ -50,7 +50,7 @@ export interface FullCacheData {
   sysvars: string
   updateAt: string
   simTime: string
-  status: string
+  baseStateCode: string
   userName?: string
   stateIndex?: number
   stateDesc?: string
@@ -64,7 +64,7 @@ export interface FullShutterData {
   objects: string
   sysvars: string
   updateAt: string
-  status: string
+  baseStateCode: string
   userName?: string
   stateIndex?: number
   stateDesc?: string
@@ -83,7 +83,7 @@ export interface FullShutterModel {
   typeNum?: number
   stateIndex?: number
   stateDesc?: string
-  status: string
+  baseStateCode: string
 }
 
 export interface FunctionPicDto {
@@ -111,7 +111,7 @@ export interface ShutterListItem {
   name: string
   updateAt: string
   indexNum: number
-  status: string
+  baseStateCode: string
 }
 
 export interface UndoRedoData {

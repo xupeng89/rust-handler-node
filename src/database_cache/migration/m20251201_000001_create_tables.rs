@@ -123,7 +123,7 @@ impl MigrationTrait for Migration {
                             .default(""),
                     )
                     .col(
-                        ColumnDef::new(ModelAutoShutterEntityCache::Status)
+                        ColumnDef::new(ModelAutoShutterEntityCache::BaseStateCode)
                             .string_len(32)
                             .default(""),
                     )
@@ -266,7 +266,7 @@ enum ModelAutoShutterEntityCache {
     Objects,
     Sysvars,
     ModelId,
-    Status,
+    BaseStateCode,
     UserName,
     StateIndex,
     StateDesc,

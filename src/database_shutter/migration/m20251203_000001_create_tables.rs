@@ -71,7 +71,7 @@ impl MigrationTrait for Migration {
                     )
                     // 对应 TypeORM 的 status: string @Column(name: "status", default: "")
                     .col(
-                        ColumnDef::new(ModelShutterEntity::Status)
+                        ColumnDef::new(ModelShutterEntity::BaseStateCode)
                             .string_len(32)
                             .default(""),
                     )
@@ -106,5 +106,5 @@ enum ModelShutterEntity {
     Type,
     StateIndex,
     StateDesc,
-    Status,
+    BaseStateCode,
 }

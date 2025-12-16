@@ -51,7 +51,7 @@ pub struct Model {
 
     // 对应 TypeORM 的 status: string @Column(name: "status", default: "")
     #[sea_orm(default = "")]
-    pub status: String,
+    pub base_state_code: String,
 }
 
 impl ActiveModelBehavior for ActiveModel {}

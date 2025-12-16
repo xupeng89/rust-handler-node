@@ -31,7 +31,7 @@ pub struct FullShutterModel {
     pub type_num: Option<i32>, // Rust 字段名改为 type_num 避免与保留关键字冲突
     pub state_index: Option<i32>,
     pub state_desc: Option<String>,
-    pub status: String,
+    pub base_state_code: String,
 }
 #[derive(Clone, Debug, Serialize, FromQueryResult)]
 #[napi(object)]
@@ -41,7 +41,7 @@ pub struct ShutterListItem {
     pub update_at: String,
 
     pub index_num: i32,
-    pub status: String,
+    pub base_state_code: String,
 }
 
 // 读取完整数据 (列表 DTO)
@@ -52,7 +52,7 @@ impl From<ModelShutterModel> for ShutterListItem {
             name: ele.name,
             update_at: ele.update_at,
             index_num: ele.index_num,
-            status: ele.status,
+            base_state_code: ele.base_state_code,
         }
     }
 }
@@ -68,7 +68,7 @@ pub struct FullShutterData {
     pub objects: String,
     pub sysvars: String,
     pub update_at: String,
-    pub status: String,
+    pub base_state_code: String,
     pub user_name: Option<String>,
     pub state_index: Option<i32>,
     pub state_desc: Option<String>,
@@ -86,7 +86,7 @@ impl From<ModelShutterModel> for FullShutterData {
             objects: ele.objects,
             sysvars: ele.sysvars,
             update_at: ele.update_at,
-            status: ele.status,
+            base_state_code: ele.base_state_code,
             user_name: ele.user_name,
             state_index: ele.state_index,
             state_desc: ele.state_desc,
@@ -113,7 +113,7 @@ pub async fn get_all_model_shutter_entity_list(
             ModelShutterColumn::Name,
             ModelShutterColumn::UpdateAt,
             ModelShutterColumn::IndexNum, // 使用实体中的 index 字段
-            ModelShutterColumn::Status,
+            ModelShutterColumn::BaseStateCode,
         ])
         .filter(ModelShutterColumn::ModelId.eq(model_id))
         .into_model::<ShutterListItem>()
@@ -167,8 +167,8 @@ pub async fn update_model_shutter_entity(
         active_model.sysvars = Set(data.sysvars);
     }
     // 3. Status 字段
-    if data.status != *active_model.status.as_ref() {
-        active_model.status = Set(data.status);
+    if data.base_state_code != *active_model.base_state_code.as_ref() {
+        active_model.base_state_code = Set(data.base_state_code);
     }
     // 4. UpdateAt 字段 (假设您总希望更新时间)
     if data.update_at != *active_model.update_at.as_ref() {
@@ -212,8 +212,8 @@ pub async fn insert_model_shutter_entity(
                 Expr::value(data.sysvars), // 将 String 值包裹在 Expr::value 中
             )
             .col_expr(
-                ModelShutterColumn::Status,
-                Expr::value(data.status), // 将 String 值包裹在 Expr::value 中
+                ModelShutterColumn::BaseStateCode,
+                Expr::value(data.base_state_code), // 将 String 值包裹在 Expr::value 中
             )
             .filter(ModelShutterColumn::Id.eq(record.id)) // 使用 ID 更新更安全
             .exec(db)
@@ -228,7 +228,7 @@ pub async fn insert_model_shutter_entity(
             update_at: Set(data.update_at),
             name: Set(data.name),
             index_num: Set(data.index_num), // 修正为 index
-            status: Set(data.status),
+            base_state_code: Set(data.base_state_code),
             ..Default::default()
         };
         active_model.insert(db).await?;
@@ -250,7 +250,7 @@ pub async fn insert_model_shutter_entity_only(data: FullShutterData) -> Result<(
         // 修正：直接 Set(Option<T>) 类型
         name: Set(data.name),
         index_num: Set(data.index_num),
-        status: Set(data.status),
+        base_state_code: Set(data.base_state_code),
         user_name: Set(data.user_name),
         state_index: Set(data.state_index),
         state_desc: Set(data.state_desc),
@@ -305,14 +305,17 @@ pub async fn update_model_shutter_entity_by_id_only(
     id: String,
     objects: String,
     sysvars: String,
-    status: String,
+    base_state_code: String,
 ) -> Result<u64, DbErr> {
     let db = get_shutter_db().await?;
 
     let result = ModelShutterEntity::update_many()
         .col_expr(ModelShutterColumn::Objects, Expr::value(objects))
         .col_expr(ModelShutterColumn::Sysvars, Expr::value(sysvars))
-        .col_expr(ModelShutterColumn::Status, Expr::value(status))
+        .col_expr(
+            ModelShutterColumn::BaseStateCode,
+            Expr::value(base_state_code),
+        )
         .filter(ModelShutterColumn::Id.eq(id))
         .exec(db)
         .await?;

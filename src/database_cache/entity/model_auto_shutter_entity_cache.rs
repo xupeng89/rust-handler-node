@@ -26,7 +26,7 @@ pub struct Model {
     pub model_id: String,
 
     #[sea_orm(default = "")]
-    pub status: String,
+    pub base_state_code: String,
 
     #[sea_orm(column_name = "user_name")]
     pub user_name: Option<String>,

@@ -51,7 +51,7 @@ pub struct AutoShutterData {
     pub objects: String,
     pub sysvars: String,
     pub sim_time: String,
-    pub status: String,
+    pub base_state_code: String,
 }
 
 // [Output DTO - Full Model] 包含所有数据库字段，用于 read/sync 的数据传输
@@ -64,7 +64,7 @@ pub struct FullCacheData {
     pub sysvars: String,
     pub update_at: String,
     pub sim_time: String,
-    pub status: String,
+    pub base_state_code: String,
     pub user_name: Option<String>,
     pub state_index: Option<i32>,
     pub state_desc: Option<String>,
@@ -80,7 +80,7 @@ impl From<AutoShutterCacheModel> for FullCacheData {
             sysvars: ele.sysvars,
             update_at: naive_dt_utc_to_millis(ele.update_at),
             sim_time: ele.sim_time,
-            status: ele.status,
+            base_state_code: ele.base_state_code,
             user_name: ele.user_name,
             state_index: ele.state_index,
             state_desc: ele.state_desc,
@@ -96,7 +96,7 @@ pub struct AutoShutterListItem {
     pub id: i32,
     pub update_at: String,
     pub sim_time: String,
-    pub status: String,
+    pub base_state_code: String,
 }
 
 // 读取完整数据
@@ -108,7 +108,7 @@ impl From<AutoShutterCacheModel> for AutoShutterListItem {
                 .format("%Y-%m-%d %H:%M:%S.%3f")
                 .to_string(),
             sim_time: ele.sim_time,
-            status: ele.status,
+            base_state_code: ele.base_state_code,
         }
     }
 }
@@ -153,7 +153,7 @@ pub async fn update_model_auto_shutter_entity_cache(
                     active.sysvars = Set(data.sysvars);
                     active.update_at = Set(Utc::now().naive_utc());
                     active.sim_time = Set(data.sim_time);
-                    active.status = Set(data.status);
+                    active.base_state_code = Set(data.base_state_code);
 
                     active.update(txn).await?; // 执行更新
                     Ok(updated_id) // 事务成功，返回捕获的 ID
@@ -187,7 +187,7 @@ pub async fn read_one_model_auto_shutter_entity_cache(
         sysvars: Set(data.sysvars),
         update_at: Set(Utc::now().naive_utc()),
         sim_time: Set(data.sim_time),
-        status: Set(data.status),
+        base_state_code: Set(data.base_state_code),
         ..Default::default()
     };
     // 插入缓存表
@@ -211,7 +211,7 @@ pub async fn read_model_auto_shutter_entity_cache(data: Vec<FullCacheData>) -> R
             sysvars: Set(d.sysvars),
             update_at: Set(millis_to_naive_dt_utc(d.update_at)),
             sim_time: Set(d.sim_time),
-            status: Set(d.status),
+            base_state_code: Set(d.base_state_code),
             ..Default::default()
         })
         .collect();
