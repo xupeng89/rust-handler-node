@@ -1,9 +1,9 @@
+use chrono::NaiveDateTime;
 use sea_orm::entity::prelude::*;
 use serde::{Deserialize, Serialize};
-
-/// ConfFunctionPic 实体定义
+/// 模型默认配置表
 #[derive(Clone, Debug, PartialEq, Eq, DeriveEntityModel, Serialize, Deserialize)]
-#[sea_orm(table_name = "conf_function_pic")] // 对应 @Entity({ name: "conf_function_pic" })
+#[sea_orm(table_name = "conf_model")] // 对应 @Entity({ name: "conf_model" })
 pub struct Model {
     /**
      * 主键
@@ -24,8 +24,36 @@ pub struct Model {
 
     #[sea_orm(column_name = "standard_temperature")]
     pub standard_temperature: i32,
-    #[sea_orm(column_name = "model_name")]
-    pub model_name: String,
+
+    #[sea_orm(column_name = "standard_temperature_unit")]
+    pub standard_temperature_unit: String,
+
+    #[sea_orm(column_name = "standard_pressure")]
+    pub standard_pressure: i32,
+
+    #[sea_orm(column_name = "standard_pressure_unit")]
+    pub standard_pressure_unit: String,
+
+    #[sea_orm(column_name = "grid_state")]
+    pub grid_state: String,
+
+    #[sea_orm(column_name = "grid_color")]
+    pub grid_color: String,
+
+    #[sea_orm(column_name = "grid_size")]
+    pub grid_size: String,
+
+    #[sea_orm(column_name = "create_at")]
+    pub create_at: NaiveDateTime,
+
+    #[sea_orm(column_name = "update_at")]
+    pub update_at: NaiveDateTime,
+
+    #[sea_orm(column_name = "status")]
+    pub status: i8,
+
+    #[sea_orm(column_name = "language")]
+    pub language: String,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

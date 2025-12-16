@@ -38,7 +38,8 @@ export interface CurveModel {
 }
 
 export interface DatasetItem {
-  label: string
+  id: string
+  name: string
   value: string
 }
 
@@ -83,6 +84,19 @@ export interface FullShutterModel {
   stateIndex?: number
   stateDesc?: string
   status: string
+}
+
+export interface FunctionPicDto {
+  id: number
+  name: string
+  picture: string
+  code: string
+}
+
+export interface NewFunctionPicDto {
+  name: string
+  picture: string
+  code: string
 }
 
 export interface PositionData {
@@ -136,6 +150,13 @@ export declare namespace confConfig {
   export function getConfConfigOneMessageApi(): Promise<ConfigDto>
   /** 批量更新或插入点位信息 */
   export function updateOrInsertConfConfigApi(data: ConfigDto): Promise<void>
+}
+
+export declare namespace confFunctionPic {
+  /** 根据 type_num 列表查询点位信息 (返回 JSON 字符串) */
+  export function getConfFunctionPicOneMessageApi(code: string): Promise<FunctionPicDto>
+  /** 批量更新或插入点位信息 */
+  export function updateOrInsertConfFunctionPicApi(datas: Array<NewFunctionPicDto>): Promise<void>
 }
 
 export declare namespace initDB {

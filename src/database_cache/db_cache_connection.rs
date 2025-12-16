@@ -41,3 +41,11 @@ pub async fn get_cache_db(
 ) -> Result<&'static migration_orm::DatabaseConnection, migration_orm::DbErr> {
     ensure_cache_db().await
 }
+
+// // 关闭数据库连接
+// pub async fn close_cache_db() -> Result<(), migration_orm::DbErr> {
+//     if let Some(db) = DB.take() {
+//         db.close().await;
+//     }
+//     Ok(())
+// }

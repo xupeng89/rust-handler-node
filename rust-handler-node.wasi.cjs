@@ -111,6 +111,7 @@ module.exports = __napiModule.exports
 module.exports.autoShutter = __napiModule.exports.autoShutter
 module.exports.autoShutterCache = __napiModule.exports.autoShutterCache
 module.exports.confConfig = __napiModule.exports.confConfig
+module.exports.confFunctionPic = __napiModule.exports.confFunctionPic
 module.exports.initDB = __napiModule.exports.initDB
 module.exports.pointInfor = __napiModule.exports.pointInfor
 module.exports.shutterHandle = __napiModule.exports.shutterHandle
