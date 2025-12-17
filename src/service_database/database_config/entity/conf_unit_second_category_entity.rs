@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 
 /// 配置数据库单位集表组合
 #[derive(Clone, Debug, PartialEq, Eq, DeriveEntityModel, Serialize, Deserialize)]
-#[sea_orm(table_name = "conf_unit_set_entity")] // 对应 @Entity({ name: "conf_pf_model_params" })
+#[sea_orm(table_name = "conf_unit_second_category_entity")] // 对应 @Entity({ name: "conf_pf_model_params" })
 pub struct Model {
     /**
      * 主键
@@ -15,17 +15,13 @@ pub struct Model {
     #[sea_orm(column_name = "en_name")]
     pub en_name: String,
 
-    #[sea_orm(column_name = "zh_name")]
+    #[sea_orm(column_name = "cn_name")]
     pub name: String,
 
     #[sea_orm(column_name = "code")]
     pub code: String,
-
-    #[sea_orm(column_name = "status", default_value = 1)]
-    pub status: u8,
-
-    #[sea_orm(column_name = "is_default", default_value = 0)]
-    pub is_default: u8,
+    #[sea_orm(column_name = "category_first_code")]
+    pub category_first_code: String,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

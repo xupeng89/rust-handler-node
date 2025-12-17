@@ -75,6 +75,55 @@ enum ConfSystemVariableEntity {
     Value, // value（f64 类型）
 }
 
+// 新增：配置数据库单位集表组合 conf_unit_set_entity
+#[derive(Iden)]
+enum ConfUnitSetEntity {
+    Table,     // 表名：conf_unit_set_entity
+    Id,        // 主键（i32 自增）
+    EnName,    // en_name
+    Name,      // zh_name（实体中字段名为 name，对应列名 zh_name）
+    Code,      // code
+    Status,    // status
+    IsDefault, // is_default
+}
+
+#[derive(Iden)]
+enum ConfUnitItemEntity {
+    Table, // 表名：conf_unit_set_entity
+    Id,    // 主键（i32 自增）
+    Code,  // code
+    Value,
+    SetId,
+}
+
+#[derive(Iden)]
+enum ConfUnitFirstCategoryEntity {
+    Table,  // 表名：conf_unit_set_entity
+    Id,     // 主键（i32 自增）
+    EnName, // en_name
+    Name,   // zh_name（实体中字段名为 name，对应列名 zh_name）
+    Code,   // code
+}
+#[derive(Iden)]
+enum ConfUnitSecondCategoryEntity {
+    Table,             // 表名：conf_unit_set_entity
+    Id,                // 主键（i32 自增）
+    EnName,            // en_name
+    Name,              // zh_name（实体中字段名为 name，对应列名 zh_name）
+    Code,              // code
+    CategoryFirstCode, // category_first_code
+}
+
+#[derive(Iden)]
+enum ConfUnitItemCategoryEntity {
+    Table,              // 表名：conf_unit_set_entity
+    Id,                 // 主键（i32 自增）
+    EnName,             // en_name
+    Name,               // zh_name（实体中字段名为 name，对应列名 zh_name）
+    Code,               // code
+    CategorySecondCode, // category_second_code
+}
+
 #[async_trait::async_trait]
 impl MigrationTrait for Migration {
     async fn up(&self, manager: &SchemaManager) -> Result<(), DbErr> {
@@ -415,7 +464,229 @@ impl MigrationTrait for Migration {
                     .to_owned(),
             )
             .await?;
+        // 7. 创建 conf_unit_set_entity 表（新增：配置数据库单位集表组合）
+        manager
+            .create_table(
+                Table::create()
+                    .table(ConfUnitSetEntity::Table)
+                    .if_not_exists()
+                    // 主键 id（i32 自增）
+                    .col(
+                        ColumnDef::new(ConfUnitSetEntity::Id)
+                            .integer()
+                            .not_null()
+                            .auto_increment()
+                            .primary_key()
+                            .comment("主键"),
+                    )
+                    // en_name 字段
+                    .col(
+                        ColumnDef::new(ConfUnitSetEntity::EnName)
+                            .string_len(255)
+                            .not_null()
+                            .comment("英文名称"),
+                    )
+                    // zh_name 字段（实体中字段名为 name，对应列名 zh_name）
+                    .col(
+                        ColumnDef::new(ConfUnitSetEntity::Name)
+                            .string_len(255)
+                            .not_null()
+                            .comment("中文名称"),
+                    )
+                    // code 字段
+                    .col(
+                        ColumnDef::new(ConfUnitSetEntity::Code)
+                            .string_len(255)
+                            .not_null()
+                            .comment("单位集编码"),
+                    )
+                    // status 字段（默认值 1）
+                    .col(
+                        ColumnDef::new(ConfUnitSetEntity::Status)
+                            .tiny_integer() // u8 对应
+                            .not_null()
+                            .default(1)
+                            .comment("状态（1-启用，0-禁用）"),
+                    )
+                    // is_default 字段（默认值 0）
+                    .col(
+                        ColumnDef::new(ConfUnitSetEntity::IsDefault)
+                            .tiny_integer() // u8 对应
+                            .not_null()
+                            .default(0)
+                            .comment("是否默认（1-是，0-否）"),
+                    )
+                    // 可选：给 code 字段添加唯一索引
+                    .index(
+                        Index::create()
+                            .name("idx_conf_unit_set_entity_code")
+                            .col(ConfUnitSetEntity::Code)
+                            .unique(),
+                    )
+                    .to_owned(),
+            )
+            .await?;
 
+        manager
+            .create_table(
+                Table::create()
+                    .table(ConfUnitItemEntity::Table)
+                    .if_not_exists()
+                    // 主键 id（i32 自增）
+                    .col(
+                        ColumnDef::new(ConfUnitItemEntity::Id)
+                            .integer()
+                            .not_null()
+                            .auto_increment()
+                            .primary_key()
+                            .comment("主键"),
+                    )
+                    .col(
+                        ColumnDef::new(ConfUnitItemEntity::Code)
+                            .string_len(255)
+                            .not_null()
+                            .comment("单位集编码"),
+                    )
+                    // status 字段（默认值 1）
+                    .col(
+                        ColumnDef::new(ConfUnitItemEntity::Value)
+                            .double() // u8 对应
+                            .not_null()
+                            .default(1)
+                            .comment("状态（1-启用，0-禁用）"),
+                    )
+                    // is_default 字段（默认值 0）
+                    .col(
+                        ColumnDef::new(ConfUnitItemEntity::SetId)
+                            .integer() // u8 对应
+                            .not_null()
+                            .default(0)
+                            .comment("是否默认（1-是，0-否）"),
+                    )
+                    .to_owned(),
+            )
+            .await?;
+
+        manager
+            .create_table(
+                Table::create()
+                    .table(ConfUnitFirstCategoryEntity::Table)
+                    .if_not_exists()
+                    // 主键 id（i32 自增）
+                    .col(
+                        ColumnDef::new(ConfUnitFirstCategoryEntity::Id)
+                            .integer()
+                            .not_null()
+                            .auto_increment()
+                            .primary_key()
+                            .comment("主键"),
+                    )
+                    .col(
+                        ColumnDef::new(ConfUnitFirstCategoryEntity::Code)
+                            .string_len(255)
+                            .not_null()
+                            .comment("单位集编码"),
+                    )
+                    // status 字段（默认值 1）
+                    .col(
+                        ColumnDef::new(ConfUnitFirstCategoryEntity::Name)
+                            .string_len(255)
+                            .not_null()
+                            .comment("中文名称"),
+                    )
+                    .col(
+                        ColumnDef::new(ConfUnitFirstCategoryEntity::EnName)
+                            .string_len(255)
+                            .not_null()
+                            .comment("英文名称"),
+                    )
+                    .to_owned(),
+            )
+            .await?;
+        manager
+            .create_table(
+                Table::create()
+                    .table(ConfUnitSecondCategoryEntity::Table)
+                    .if_not_exists()
+                    // 主键 id（i32 自增）
+                    .col(
+                        ColumnDef::new(ConfUnitSecondCategoryEntity::Id)
+                            .integer()
+                            .not_null()
+                            .auto_increment()
+                            .primary_key()
+                            .comment("主键"),
+                    )
+                    .col(
+                        ColumnDef::new(ConfUnitSecondCategoryEntity::Code)
+                            .string_len(255)
+                            .not_null()
+                            .comment("单位集编码"),
+                    )
+                    // status 字段（默认值 1）
+                    .col(
+                        ColumnDef::new(ConfUnitSecondCategoryEntity::Name)
+                            .string_len(255)
+                            .not_null()
+                            .comment("中文名称"),
+                    )
+                    .col(
+                        ColumnDef::new(ConfUnitSecondCategoryEntity::EnName)
+                            .string_len(255)
+                            .not_null()
+                            .comment("英文名称"),
+                    )
+                    .col(
+                        ColumnDef::new(ConfUnitSecondCategoryEntity::CategoryFirstCode)
+                            .string_len(255)
+                            .not_null()
+                            .comment("所属一级分类编码"),
+                    )
+                    .to_owned(),
+            )
+            .await?;
+        manager
+            .create_table(
+                Table::create()
+                    .table(ConfUnitItemCategoryEntity::Table)
+                    .if_not_exists()
+                    // 主键 id（i32 自增）
+                    .col(
+                        ColumnDef::new(ConfUnitItemCategoryEntity::Id)
+                            .integer()
+                            .not_null()
+                            .auto_increment()
+                            .primary_key()
+                            .comment("主键"),
+                    )
+                    .col(
+                        ColumnDef::new(ConfUnitItemCategoryEntity::Code)
+                            .string_len(255)
+                            .not_null()
+                            .comment("单位集编码"),
+                    )
+                    // status 字段（默认值 1）
+                    .col(
+                        ColumnDef::new(ConfUnitItemCategoryEntity::Name)
+                            .string_len(255)
+                            .not_null()
+                            .comment("中文名称"),
+                    )
+                    .col(
+                        ColumnDef::new(ConfUnitItemCategoryEntity::EnName)
+                            .string_len(255)
+                            .not_null()
+                            .comment("英文名称"),
+                    )
+                    .col(
+                        ColumnDef::new(ConfUnitItemCategoryEntity::CategorySecondCode)
+                            .string_len(255)
+                            .not_null()
+                            .comment("所属二级分类编码"),
+                    )
+                    .to_owned(),
+            )
+            .await?;
         Ok(())
     }
 
@@ -449,6 +720,34 @@ impl MigrationTrait for Migration {
             .drop_table(
                 Table::drop()
                     .table(ConfSystemVariableEntity::Table)
+                    .to_owned(),
+            )
+            .await?;
+        manager
+            .drop_table(Table::drop().table(ConfUnitSetEntity::Table).to_owned())
+            .await?;
+        manager
+            .drop_table(Table::drop().table(ConfUnitItemEntity::Table).to_owned())
+            .await?;
+
+        manager
+            .drop_table(
+                Table::drop()
+                    .table(ConfUnitItemCategoryEntity::Table)
+                    .to_owned(),
+            )
+            .await?;
+        manager
+            .drop_table(
+                Table::drop()
+                    .table(ConfUnitSecondCategoryEntity::Table)
+                    .to_owned(),
+            )
+            .await?;
+        manager
+            .drop_table(
+                Table::drop()
+                    .table(ConfUnitFirstCategoryEntity::Table)
                     .to_owned(),
             )
             .await?;

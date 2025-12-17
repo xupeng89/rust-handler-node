@@ -4,3 +4,8 @@ pub mod conf_graphic_custom_entity;
 pub mod conf_model_entity;
 pub mod conf_pf_model_params_entity;
 pub mod conf_system_variable_entity;
+pub mod conf_unit_first_category_entity;
+pub mod conf_unit_item_category_entity;
+pub mod conf_unit_item_entity;
+pub mod conf_unit_second_category_entity;
+pub mod conf_unit_set_entity;
