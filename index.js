@@ -572,11 +572,11 @@ if (!nativeBinding) {
 }
 
 module.exports = nativeBinding
-module.exports.ConfConfigValueTypeEnum = nativeBinding.ConfConfigValueTypeEnum
 module.exports.autoShutter = nativeBinding.autoShutter
 module.exports.autoShutterCache = nativeBinding.autoShutterCache
 module.exports.confConfig = nativeBinding.confConfig
 module.exports.confFunctionPic = nativeBinding.confFunctionPic
+module.exports.confGraphicCustom = nativeBinding.confGraphicCustom
 module.exports.initDB = nativeBinding.initDB
 module.exports.pointInfor = nativeBinding.pointInfor
 module.exports.shutter = nativeBinding.shutter

@@ -16,7 +16,6 @@ pub async fn add_undo_log(
     let id = add_undo_log_service(op_type, table_name, old_data, new_data, model_id)
         .await
         .map_err(|e| Error::new(Status::GenericFailure, e.to_string()))?;
-
     Ok(id)
 }
 

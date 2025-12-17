@@ -1,16 +1,11 @@
 use crate::service_database::database_cache::db_cache_connection::get_cache_db;
-use chrono::{Duration, NaiveDateTime, TimeZone, Utc};
+use chrono::{Duration, Utc};
 use napi_derive::napi;
 use sea_orm::{
     ActiveModelTrait, ColumnTrait, DbErr, EntityTrait, FromQueryResult, IntoActiveModel, Order,
     PaginatorTrait, QueryFilter, QueryOrder, QuerySelect, Set, TransactionError, TransactionTrait,
 };
 use serde::{Deserialize, Serialize};
-
-// 3. 字符串 → 毫秒 u64
-fn str_to_millis(s: &str) -> i64 {
-    s.parse().unwrap()
-}
 
 // ======================================
 // 引入实体定义
@@ -21,25 +16,8 @@ use crate::service_database::database_cache::entity::model_auto_shutter_entity_c
     Entity as AutoShutterCacheEntity, Model as AutoShutterCacheModel,
 };
 
-// --------------------------
-// NaiveDateTime → 毫秒时间戳
-// --------------------------
-pub fn naive_dt_utc_to_millis(naive_dt: NaiveDateTime) -> String {
-    let dt_utc_plus_8 = Utc
-        .from_local_datetime(&naive_dt)
-        .single()
-        .expect("NaiveDateTime is out of range for the fixed offset");
+use crate::tool_handle::time_tool::{millis_to_naive_dt_utc, naive_dt_utc_to_millis};
 
-    // 3. 计算标准的 UTC 毫秒时间戳
-    dt_utc_plus_8.timestamp_millis().to_string()
-}
-
-// 毫秒时间戳 → NaiveDateTime（UTC）
-pub fn millis_to_naive_dt_utc(millis: String) -> NaiveDateTime {
-    let utc_dt = Utc.timestamp_millis_opt(str_to_millis(&millis)).unwrap();
-    // 3. 提取 NaiveDateTime
-    utc_dt.naive_utc()
-}
 // ======================================
 // DTO 定义 (已调整，新增 FullCacheData 用于数据同步)
 // ======================================

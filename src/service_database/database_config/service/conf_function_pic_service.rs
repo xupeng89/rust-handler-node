@@ -15,7 +15,7 @@ use crate::service_database::database_config::entity::conf_function_pic_entity::
     Model as ConfFunctionPicModel,
 };
 
-#[napi(object)]
+#[napi(object, namespace = "confFunctionPic")]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct FunctionPicDto {
     pub id: i32,
@@ -36,7 +36,7 @@ impl From<ConfFunctionPicModel> for FunctionPicDto {
     }
 }
 
-#[napi(object)]
+#[napi(object, namespace = "confFunctionPic")]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct NewFunctionPicDto {
     pub name: String,

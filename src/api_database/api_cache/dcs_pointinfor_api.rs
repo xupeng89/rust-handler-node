@@ -22,7 +22,6 @@ pub async fn get_position_information_cache_by_types_api(
     let result = get_position_information_cache_by_types(types)
         .await
         .map_err(handle_db_err)?;
-
     Ok(result)
 }
 
@@ -33,7 +32,6 @@ pub async fn get_position_information_cache_all_message_api() -> Result<Vec<Posi
     let result = get_position_information_cache_all_message()
         .await
         .map_err(handle_db_err)?;
-
     Ok(result)
 }
 
@@ -48,7 +46,5 @@ pub async fn update_or_insert_position_information_cache_api(
     update_or_insert_position_information_cache(data)
         .await
         .map_err(handle_db_err)?;
-
-    // 返回 Unit 类型表示成功
     Ok(())
 }

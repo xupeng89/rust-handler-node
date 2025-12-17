@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 
 /// ConfFunctionPic 实体定义
 #[derive(Clone, Debug, PartialEq, Eq, DeriveEntityModel, Serialize, Deserialize)]
-#[sea_orm(table_name = "conf_function_pic")] // 对应 @Entity({ name: "conf_function_pic" })
+#[sea_orm(table_name = "conf_function_pic_entity")] // 对应 @Entity({ name: "conf_function_pic" })
 pub struct Model {
     /**
      * 主键

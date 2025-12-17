@@ -12,7 +12,7 @@ use crate::service_database::database_config::entity::conf_config_entity::{
 
 // 针对 NAPI 调用的 DTO (Data Transfer Object)
 // 字段与 Model 一致，但添加 napi(object) 宏
-#[napi(object)]
+#[napi(object, namespace = "confConfig")]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ConfigDto {
     pub id: i32,

@@ -20,7 +20,6 @@ pub async fn get_conf_function_pic_one_message_api(code: String) -> Result<Funct
     let result = select_conf_function_pic_by_code(code)
         .await
         .map_err(handle_db_err)?;
-
     Ok(result)
 }
 
@@ -35,7 +34,5 @@ pub async fn update_or_insert_conf_function_pic_api(
     upsert_and_insert_fixed_conf_pic(datas)
         .await
         .map_err(handle_db_err)?;
-
-    // 返回 Unit 类型表示成功
     Ok(())
 }

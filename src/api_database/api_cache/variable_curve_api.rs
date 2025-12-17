@@ -15,8 +15,6 @@ pub async fn add_variable_curve_log(
     let result = insert_model_variable_curve_entity_cache(datasets, model_id, config_id, sim_time)
         .await
         .map_err(handle_db_err)?;
-
-    // SeaORM insert 返回 InsertResult，其中包含 last_insert_id
     Ok(result.last_insert_id)
 }
 
@@ -30,7 +28,6 @@ pub async fn list_variable_curves_by_time(
     let result = get_model_variable_curve_entity_cache_by_filter_time(model_id, config_id)
         .await
         .map_err(handle_db_err)?;
-
     Ok(result)
 }
 
@@ -45,6 +42,5 @@ pub async fn list_variable_curves_by_filter_count(
         get_model_variable_curve_entity_cache_by_filter_count(model_id, config_id, filter_count)
             .await
             .map_err(handle_db_err)?;
-
     Ok(result)
 }

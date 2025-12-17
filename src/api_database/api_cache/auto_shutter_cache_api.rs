@@ -14,7 +14,6 @@ pub async fn read_auto_shutter_cache_api(data: Vec<FullCacheData>) -> Result<()>
     service::read_model_auto_shutter_entity_cache(data)
         .await
         .map_err(handle_db_err)?;
-
     Ok(())
 }
 
@@ -24,7 +23,6 @@ pub async fn update_auto_shutter_cache_api(data: AutoShutterData, model_id: Stri
     let result = service::update_model_auto_shutter_entity_cache(data, model_id)
         .await
         .map_err(handle_db_err)?;
-
     Ok(result)
 }
 
@@ -34,7 +32,6 @@ pub async fn get_all_shutter_cache_api_model_id(model_id: String) -> Result<Vec<
     let result = service::get_all_model_auto_shutter_entity_cache_model_id(model_id)
         .await
         .map_err(handle_db_err)?;
-
     Ok(result)
 }
 
@@ -63,7 +60,6 @@ pub async fn get_auto_shutter_cache_detail_api(id: i32, model_id: String) -> Res
     let result = service::get_model_auto_shutter_entity_by_id_cache(id, model_id)
         .await
         .map_err(handle_db_err)?;
-
     Ok(result)
 }
 

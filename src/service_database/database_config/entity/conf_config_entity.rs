@@ -2,36 +2,7 @@ use napi_derive::napi;
 use sea_orm::entity::prelude::*;
 use sea_orm::DeriveActiveEnum;
 use serde::{Deserialize, Serialize};
-// #[derive(Debug, Clone, PartialEq, Eq, DeriveActiveEnum, EnumIter, Serialize, Deserialize)]
-// #[sea_orm(
-//     rs_type = "String",       // Rust 侧存储类型（通常为 String）
-//     db_type = "String(StringLen::None)",         // 数据库侧类型（PostgreSQL 用 Enum）
-//     enum_name = "code", // 数据库枚举名（需手动创建或通过迁移生成
-//     rename_all = "camelCase"
-// )]
-// #[napi(string_enum)]
-// pub enum ConfConfigCodeEnum {
-//     #[sea_orm(string_value = "defaultParams")]
-//     DefaultParams,
-//     #[sea_orm(string_value = "controlParams")]
-//     ControlParams,
-//     #[sea_orm(string_value = "rateParams")]
-//     RateParams,
-//     #[sea_orm(string_value = "flashParams")]
-//     FlashParams,
-//     #[sea_orm(string_value = "flowLabelFliterConfig")]
-//     FlowLabelFliterConfig, // 流程图标签过滤配置 -- 流股标签
-//     #[sea_orm(string_value = "flowLabelShowConfig")]
-//     FlowLabelShowConfig, // 流程图标签显示配置 -- 流股标签
-//     #[sea_orm(string_value = "rangeStatus")]
-//     RangeStatus, // 范围状态 -- 流股标签
-//     #[sea_orm(string_value = "modelState")]
-//     ModelState, // 模型状态
-//     #[sea_orm(string_value = "autoShutterParams")]
-//     AutoShutterParams, // 自动快门参数
-//     #[sea_orm(string_value = "oilParams")]
-//     OilParams, // 油参配置
-// }
+
 #[derive(Debug, Clone, PartialEq, Eq, DeriveActiveEnum, EnumIter, Serialize, Deserialize)]
 #[sea_orm(
     rs_type = "String",       // Rust 侧存储类型（通常为 String）
@@ -39,7 +10,7 @@ use serde::{Deserialize, Serialize};
     enum_name = "value_type", // 数据库枚举名（需手动创建或通过迁移生成）
     rename_all = "camelCase"
 )]
-#[napi(string_enum)]
+#[napi(string_enum, namespace = "confConfig")]
 pub enum ConfConfigValueTypeEnum {
     #[sea_orm(string_value = "json")]
     Json, // JSON 类型
@@ -50,7 +21,7 @@ pub enum ConfConfigValueTypeEnum {
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, DeriveEntityModel, Serialize, Deserialize)]
-#[sea_orm(table_name = "conf_config")] // 对应 @Entity({ name: "conf_config" })
+#[sea_orm(table_name = "conf_config_entity")] // 对应 @Entity({ name: "conf_config" })
 pub struct Model {
     // 对应 TypeORM 的 id: number @PrimaryGeneratedColumn
     // SeaORM 使用 auto_increment 来模拟 PrimaryGeneratedColumn
