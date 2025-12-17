@@ -7,29 +7,29 @@ use napi_derive::napi;
 
 // 引入服务层函数和结构体
 // 注意：PointData 必须是 pub 并且实现 Deserialize
-use crate::service_database::database_config::service::conf_config_service::*;
+use crate::service_database::database_config::service::conf_model_service::*;
 
 /// 将 sea_orm::DbErr 转换为 napi::Error，以便在 JS 中抛出异常
 use crate::error_handle::err_handle::handle_db_err;
 
 // 1. 根据类型批量查询
-#[napi(namespace = "confConfig")]
+#[napi(namespace = "confModel")]
 /// 根据 type_num 列表查询点位信息 (返回 JSON 字符串)
-pub async fn get_conf_config_all_message_api() -> Result<Vec<ConfigDto>> {
+pub async fn get_conf_model_all_message_api() -> Result<ConfModelDto> {
     // 调用服务层函数，并处理 DbErr
-    let result = select_all_conf_config().await.map_err(handle_db_err)?;
+    let result = select_conf_model_one().await.map_err(handle_db_err)?;
     Ok(result)
 }
 
 // 2. 批量更新或插入
-#[napi(namespace = "confConfig")]
+#[napi(namespace = "confModel")]
 /// 批量更新或插入点位信息
-pub async fn update_or_insert_conf_config_api(
+pub async fn update_or_insert_conf_model_api(
     // napi-rs 自动将 JS 数组/对象映射到 Vec<PositionData>
-    data: Vec<ConfigDto>,
+    data: ConfModelDto,
 ) -> Result<i32> {
     // 调用服务层函数，并处理 DbErr
-    let result = upsert_and_insert_all_conf_config(data)
+    let result = upsert_and_insert_fixed_conf_model(data)
         .await
         .map_err(handle_db_err)?;
     Ok(result)
