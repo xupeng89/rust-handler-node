@@ -2,8 +2,8 @@ use sea_orm::entity::prelude::*;
 use serde::{Deserialize, Serialize};
 
 /// 系统变量配置表--默认系统配置数据
-#[derive(Clone, Debug, PartialEq, Eq, DeriveEntityModel, Serialize, Deserialize)]
-#[sea_orm(table_name = "conf_system_variable")] // 对应 @Entity({ name: "conf_pf_model_params" })
+#[derive(Clone, Debug, PartialEq, DeriveEntityModel, Serialize, Deserialize)]
+#[sea_orm(table_name = "conf_system_variable_entity")] // 对应 @Entity({ name: "conf_system_variable_entity" })
 pub struct Model {
     /**
      * 主键

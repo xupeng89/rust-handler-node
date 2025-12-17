@@ -65,6 +65,16 @@ enum ConfPfModelParamsEntity {
     Params,     // params（Text 类型）
 }
 
+// 新增：系统变量配置表 conf_system_variable
+#[derive(Iden)]
+enum ConfSystemVariableEntity {
+    Table, // 表名：conf_system_variable
+    Id,    // 主键（i32 自增）
+    Code,  // code
+    Name,  // name
+    Value, // value（f64 类型）
+}
+
 #[async_trait::async_trait]
 impl MigrationTrait for Migration {
     async fn up(&self, manager: &SchemaManager) -> Result<(), DbErr> {
@@ -360,6 +370,52 @@ impl MigrationTrait for Migration {
                     .to_owned(),
             )
             .await?;
+        manager
+            .create_table(
+                Table::create()
+                    .table(ConfSystemVariableEntity::Table)
+                    .if_not_exists()
+                    // 主键 id（i32 自增）
+                    .col(
+                        ColumnDef::new(ConfSystemVariableEntity::Id)
+                            .integer()
+                            .not_null()
+                            .auto_increment()
+                            .primary_key()
+                            .comment("主键"),
+                    )
+                    // code 字段（唯一标识系统变量）
+                    .col(
+                        ColumnDef::new(ConfSystemVariableEntity::Code)
+                            .string_len(255)
+                            .not_null()
+                            .comment("系统变量编码（唯一）"),
+                    )
+                    // name 字段（变量名称）
+                    .col(
+                        ColumnDef::new(ConfSystemVariableEntity::Name)
+                            .string_len(255)
+                            .not_null()
+                            .comment("系统变量名称"),
+                    )
+                    // value 字段（f64 浮点类型）
+                    .col(
+                        ColumnDef::new(ConfSystemVariableEntity::Value)
+                            .double() // 对应 Rust f64 类型
+                            .not_null()
+                            .comment("系统变量值（浮点型）"),
+                    )
+                    // 可选：给 code 字段添加唯一索引（保证编码不重复）
+                    .index(
+                        Index::create()
+                            .name("idx_conf_system_variable_code")
+                            .col(ConfSystemVariableEntity::Code)
+                            .unique(),
+                    )
+                    .to_owned(),
+            )
+            .await?;
+
         Ok(())
     }
 
@@ -389,6 +445,14 @@ impl MigrationTrait for Migration {
                     .to_owned(),
             )
             .await?;
+        manager
+            .drop_table(
+                Table::drop()
+                    .table(ConfSystemVariableEntity::Table)
+                    .to_owned(),
+            )
+            .await?;
+
         Ok(())
     }
 }

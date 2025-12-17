@@ -48,7 +48,7 @@ export declare namespace confConfig {
     valueType: ConfConfigValueTypeEnum
   }
   /** 根据 type_num 列表查询点位信息 (返回 JSON 字符串) */
-  export function getConfConfigOneMessageApi(): Promise<Array<ConfigDto>>
+  export function getConfConfigAllMessageApi(): Promise<Array<ConfigDto>>
   /** 批量更新或插入点位信息 */
   export function updateOrInsertConfConfigApi(data: Array<ConfigDto>): Promise<number>
 }
@@ -90,7 +90,52 @@ export declare namespace confGraphicCustom {
   export function updateOrInsertConfGraphicCustomApi(data: Array<ConfGraphicCustomDto>): Promise<number>
 }
 
+export declare namespace confModel {
+  export interface ConfModelDto {
+    createAt: string
+    updateAt: string
+    standardTemperature: number
+    standardTemperatureUnit: string
+    standardPressure: number
+    standardPressureUnit: string
+    gridSize: string
+    gridColor: string
+    gridState: string
+    language: string
+  }
+  /** 根据 type_num 列表查询点位信息 (返回 JSON 字符串) */
+  export function getConfModelAllMessageApi(): Promise<ConfModelDto>
+  /** 批量更新或插入点位信息 */
+  export function updateOrInsertConfModelApi(data: ConfModelDto): Promise<number>
+}
+
+export declare namespace confPfModelParams {
+  export interface ConfPfModelParamsDto {
+    code: string
+    name: string
+    solverType: string
+    params: string
+  }
+  /** 根据 type_num 列表查询点位信息 (返回 JSON 字符串) */
+  export function getConfPfModelParamsAllMessageApi(): Promise<ConfPfModelParamsDto>
+  /** 批量更新或插入点位信息 */
+  export function updateOrInsertConfPfModelParamsApi(data: ConfPfModelParamsDto): Promise<number>
+}
+
+export declare namespace confSystemVariable {
+  export interface ConfSystemVariableDto {
+    code: string
+    name: string
+    value: number
+  }
+  /** 根据 type_num 列表查询点位信息 (返回 JSON 字符串) */
+  export function getConfSystemVariableOneMessageApi(): Promise<Array<ConfSystemVariableDto>>
+  /** 批量更新或插入点位信息 */
+  export function updateOrInsertConfSystemVariableApi(data: Array<ConfSystemVariableDto>): Promise<number>
+}
+
 export declare namespace initDB {
+  export function closeAllDbs(): Promise<void>
   /** 初始化自动快照数据库 */
   export function initAutoShutterDb(url: string): Promise<void>
   /** 初始化缓存数据库 */
