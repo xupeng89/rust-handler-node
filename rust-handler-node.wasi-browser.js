@@ -56,6 +56,7 @@ const {
   },
 })
 export default __napiModule.exports
+export const ConfConfigValueTypeEnum = __napiModule.exports.ConfConfigValueTypeEnum
 export const autoShutter = __napiModule.exports.autoShutter
 export const autoShutterCache = __napiModule.exports.autoShutterCache
 export const confConfig = __napiModule.exports.confConfig

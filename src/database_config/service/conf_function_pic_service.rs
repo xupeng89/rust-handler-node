@@ -2,7 +2,7 @@ use crate::database_config::db_config_connection::get_config_db;
 use napi_derive::napi;
 
 use sea_orm::{
-    ActiveModelTrait, ColumnTrait, DbErr, EntityTrait, IntoActiveModel, QueryFilter, Set,
+    ActiveModelTrait, ColumnTrait, DbErr, EntityTrait, IntoActiveModel, NotSet, QueryFilter, Set,
 };
 
 use serde::{Deserialize, Serialize};
@@ -62,45 +62,43 @@ pub async fn upsert_and_insert_fixed_conf_pic(
     pic_datas: Vec<NewFunctionPicDto>,
 ) -> Result<i32, DbErr> {
     let db = get_config_db().await.unwrap(); // 获取数据库连接
+
+    if pic_datas.is_empty() {
+        return Ok(0);
+    }
+    // 2. 批量提取所有 code，一次性查询现有记录（减少数据库查询次数）
+    let target_codes: Vec<_> = pic_datas.iter().map(|d| d.code.clone()).collect();
+    let existing_models = ConfFunctionPicEntity::find()
+        .filter(ConfFunctionPicColumn::Code.is_in(target_codes))
+        .all(db)
+        .await?;
+
+    // 3. 构建 code → 模型的映射（O(1) 查找）
+    let existing_code_map: std::collections::HashMap<_, _> = existing_models
+        .into_iter()
+        .map(|m| (m.code.clone(), m))
+        .collect();
+
     let mut success_count: i32 = 0;
 
     for config in pic_datas {
-        // 1. 尝试根据 code 查找现有记录
-        let existing_model = ConfFunctionPicEntity::find()
-            .filter(ConfFunctionPicColumn::Code.eq(&config.code))
-            .one(db)
-            .await?;
-
-        match existing_model {
-            Some(model) => {
-                // --- 📌 更新 (Update) 逻辑：记录存在 ---
-
-                // 转换为 ActiveModel
-                let mut active_model: ConfFunctionPicActiveModel = model.into_active_model();
-
-                // 设置需要更新的字段
-                active_model.name = Set(config.code);
-                active_model.picture = Set(config.picture);
-                // code 字段通常保持不变，但也可以 Set(config.code)
-
-                // 执行更新
-                active_model.update(db).await?;
-            }
-            None => {
-                // --- ➕ 插入 (Insert) 逻辑：记录不存在 ---
-
-                // 构造新的 ActiveModel
-                let active_model = ConfFunctionPicActiveModel {
-                    id: sea_orm::NotSet, // ID 由数据库自动生成
-                    name: Set(config.name),
-                    picture: Set(config.picture),
-                    code: Set(config.code),
-                };
-
-                // 执行插入
-                active_model.insert(db).await?;
-            }
+        if let Some(model) = existing_code_map.get(&config.code) {
+            // 更新逻辑
+            let mut active_model: ConfFunctionPicActiveModel = model.clone().into_active_model();
+            active_model.name = Set(config.name);
+            active_model.picture = Set(config.picture);
+            active_model.update(db).await?;
+        } else {
+            // 插入逻辑
+            let active_model = ConfFunctionPicActiveModel {
+                id: NotSet,
+                name: Set(config.name),
+                picture: Set(config.picture),
+                code: Set(config.code),
+            };
+            active_model.insert(db).await?;
         }
+
         success_count += 1;
     }
 

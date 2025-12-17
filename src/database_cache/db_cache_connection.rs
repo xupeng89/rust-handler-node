@@ -30,7 +30,7 @@ pub async fn ensure_cache_db(
 
         // 运行 migration（最重要：必须传 2 个参数）
         Migrator::up(&db, None).await?;
-
+        eprintln!("✅ [CacheDB] 数据库连接成功");
         Ok::<migration_orm::DatabaseConnection, migration_orm::DbErr>(db)
     })
     .await

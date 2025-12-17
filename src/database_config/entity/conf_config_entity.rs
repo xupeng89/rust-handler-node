@@ -1,5 +1,53 @@
+use napi_derive::napi;
 use sea_orm::entity::prelude::*;
+use sea_orm::DeriveActiveEnum;
 use serde::{Deserialize, Serialize};
+// #[derive(Debug, Clone, PartialEq, Eq, DeriveActiveEnum, EnumIter, Serialize, Deserialize)]
+// #[sea_orm(
+//     rs_type = "String",       // Rust 侧存储类型（通常为 String）
+//     db_type = "String(StringLen::None)",         // 数据库侧类型（PostgreSQL 用 Enum）
+//     enum_name = "code", // 数据库枚举名（需手动创建或通过迁移生成
+//     rename_all = "camelCase"
+// )]
+// #[napi(string_enum)]
+// pub enum ConfConfigCodeEnum {
+//     #[sea_orm(string_value = "defaultParams")]
+//     DefaultParams,
+//     #[sea_orm(string_value = "controlParams")]
+//     ControlParams,
+//     #[sea_orm(string_value = "rateParams")]
+//     RateParams,
+//     #[sea_orm(string_value = "flashParams")]
+//     FlashParams,
+//     #[sea_orm(string_value = "flowLabelFliterConfig")]
+//     FlowLabelFliterConfig, // 流程图标签过滤配置 -- 流股标签
+//     #[sea_orm(string_value = "flowLabelShowConfig")]
+//     FlowLabelShowConfig, // 流程图标签显示配置 -- 流股标签
+//     #[sea_orm(string_value = "rangeStatus")]
+//     RangeStatus, // 范围状态 -- 流股标签
+//     #[sea_orm(string_value = "modelState")]
+//     ModelState, // 模型状态
+//     #[sea_orm(string_value = "autoShutterParams")]
+//     AutoShutterParams, // 自动快门参数
+//     #[sea_orm(string_value = "oilParams")]
+//     OilParams, // 油参配置
+// }
+#[derive(Debug, Clone, PartialEq, Eq, DeriveActiveEnum, EnumIter, Serialize, Deserialize)]
+#[sea_orm(
+    rs_type = "String",       // Rust 侧存储类型（通常为 String）
+    db_type = "String(StringLen::None)",         // 数据库侧类型（PostgreSQL 用 Enum）
+    enum_name = "value_type", // 数据库枚举名（需手动创建或通过迁移生成）
+    rename_all = "camelCase"
+)]
+#[napi(string_enum)]
+pub enum ConfConfigValueTypeEnum {
+    #[sea_orm(string_value = "json")]
+    Json, // JSON 类型
+    #[sea_orm(string_value = "string")]
+    String, // 字符串类型
+    #[sea_orm(string_value = "number")]
+    Number, // 数值类型
+}
 
 #[derive(Clone, Debug, PartialEq, Eq, DeriveEntityModel, Serialize, Deserialize)]
 #[sea_orm(table_name = "conf_config")] // 对应 @Entity({ name: "conf_config" })
@@ -9,58 +57,20 @@ pub struct Model {
     #[sea_orm(primary_key)]
     pub id: i32,
 
-    // 对应 TypeORM 的 propertyParams: string @Column(name: "property_params", type: "text", default: "")
-    #[sea_orm(column_name = "property_params", column_type = "Text", default = "")]
-    pub property_params: String,
+    // 中文描述
+    #[sea_orm(column_name = "name", default = "")]
+    pub name: String,
 
-    // 对应 TypeORM 的 controlParams: string @Column(name: "control_params", type: "text", default: "")
-    #[sea_orm(column_name = "control_params", column_type = "Text", default = "")]
-    pub control_params: String,
+    // 配置编码
+    #[sea_orm(column_name = "code", default = "")]
+    pub code: String,
 
-    // 对应 TypeORM 的 rateParams: string @Column(name: "rate_params", type: "text", default: "")
-    #[sea_orm(column_name = "rate_params", column_type = "Text", default = "")]
-    pub rate_params: String,
+    #[sea_orm(column_name = "value", column_type = "Text", default = "")]
+    pub value: String,
 
-    // 对应 TypeORM 的 flashParams: string @Column(name: "flash_params", type: "text", default = "")
-    #[sea_orm(column_name = "flash_params", column_type = "Text", default = "")]
-    pub flash_params: String,
-
-    // 对应 TypeORM 的 filterLabelParams: string @Column(name: "filter_label_params", type: "text", default: "")
-    #[sea_orm(
-        column_name = "filter_label_params",
-        column_type = "Text",
-        default = ""
-    )]
-    pub filter_label_params: String,
-
-    // 对应 TypeORM 的 modelState: number @Column(name: "model_state", type: "int", default: 0)
-    // TypeORM 的 number 默认为 i32，并设置 default = 0
-    #[sea_orm(column_name = "model_state", default = 0)]
-    pub model_state: i32,
-
-    // 对应 TypeORM 的 showLabelParams: string @Column(name: "show_label_params", type: "text", default: "")
-    #[sea_orm(
-        column_name = "show_label_params",
-        column_type = "Text",
-        default = "{\"globalLabel\":[],\"flowSheetLabel\":[]}"
-    )]
-    pub show_label_params: String,
-
-    // 对应 TypeORM 的 rangeStatus: number @Column(name: "range_status", type: "int", default = 1)
-    #[sea_orm(column_name = "range_status", default = 1)]
-    pub range_status: i32,
-
-    // 对应 TypeORM 的 autoShutterParams: string @Column(name: "auto_shutter_params", type: "text", default: JSON.stringify(...))
-    #[sea_orm(
-        column_name = "auto_shutter_params",
-        column_type = "Text",
-        default = "{\"autoShutter\":1,\"autoTimeInterval\":30,\"autoCount\":60}"
-    )]
-    pub auto_shutter_params: String,
-
-    // 对应 TypeORM 的 oilParams: string @Column(name: "oil_params", type: "text", default: JSON.stringify([]))
-    #[sea_orm(column_name = "oil_params", column_type = "Text", default = "[]")]
-    pub oil_params: String,
+    // 值类型
+    #[sea_orm(column_name = "value_type", default = "")]
+    pub value_type: ConfConfigValueTypeEnum,
 }
 
 impl ActiveModelBehavior for ActiveModel {}

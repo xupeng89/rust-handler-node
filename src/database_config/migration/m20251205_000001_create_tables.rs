@@ -9,16 +9,10 @@ pub struct Migration;
 enum ConfConfigEntity {
     Table,
     Id,
-    PropertyParams,
-    ControlParams,
-    RateParams,
-    FlashParams,
-    FilterLabelParams,
-    ModelState,
-    ShowLabelParams,
-    RangeStatus,
-    AutoShutterParams,
-    OilParams,
+    Name,
+    Code,
+    Value,
+    ValueType,
 }
 
 #[derive(Iden)]
@@ -48,65 +42,25 @@ impl MigrationTrait for Migration {
                             .primary_key(),
                     )
                     // propertyParams: string @Column(name: "property_params", type: "text", default: "")
+                    .col(ColumnDef::new(ConfConfigEntity::Value).text().default(""))
+                    .comment("配置内容")
                     .col(
-                        ColumnDef::new(ConfConfigEntity::PropertyParams)
-                            .text()
-                            .default(""),
+                        ColumnDef::new(ConfConfigEntity::Name)
+                            .string_len(255) // 假设 varchar 长度为 255
+                            .not_null() // 假设 name 不允许为空
+                            .comment("配置名称"),
                     )
-                    // controlParams: string @Column(name: "control_params", type: "text", default: "")
                     .col(
-                        ColumnDef::new(ConfConfigEntity::ControlParams)
-                            .text()
-                            .default(""),
+                        ColumnDef::new(ConfConfigEntity::Code)
+                            .string_len(255) // 假设 varchar 长度为 255
+                            .not_null() // 假设 name 不允许为空
+                            .comment("配置编码"),
                     )
-                    // rateParams: string @Column(name: "rate_params", type: "text", default: "")
                     .col(
-                        ColumnDef::new(ConfConfigEntity::RateParams)
-                            .text()
-                            .default(""),
-                    )
-                    // flashParams: string @Column(name: "flash_params", type: "text", default: "")
-                    .col(
-                        ColumnDef::new(ConfConfigEntity::FlashParams)
-                            .text()
-                            .default(""),
-                    )
-                    // filterLabelParams: string @Column(name: "filter_label_params", type: "text", default: "")
-                    .col(
-                        ColumnDef::new(ConfConfigEntity::FilterLabelParams)
-                            .text()
-                            .default(""),
-                    )
-                    // modelState: number @Column(name: "model_state", type: "int", default: 0)
-                    .col(
-                        ColumnDef::new(ConfConfigEntity::ModelState)
-                            .integer()
-                            .default(0),
-                    )
-                    // showLabelParams: string @Column(name: "show_label_params", type: "text", default: "")
-                    .col(
-                        ColumnDef::new(ConfConfigEntity::ShowLabelParams)
-                            .text()
-                            .default(r#"{"globalLabel":[],"flowSheetLabel":[]}"#),
-                    )
-                    // rangeStatus: number @Column(name: "range_status", type: "int", default: 1)
-                    .col(
-                        ColumnDef::new(ConfConfigEntity::RangeStatus)
-                            .integer()
-                            .default(1),
-                    )
-                    // autoShutterParams: string @Column(name: "auto_shutter_params", type: "text", default: JSON.stringify({...}))
-                    .col(
-                        ColumnDef::new(ConfConfigEntity::AutoShutterParams)
-                            .text()
-                            // 注意：在 Rust 中 default 必须是字面量字符串
-                            .default(r#"{"autoShutter":1,"autoTimeInterval":30,"autoCount":60}"#),
-                    )
-                    // oilParams: string @Column(name: "oil_params", type: "text", default: JSON.stringify([]))
-                    .col(
-                        ColumnDef::new(ConfConfigEntity::OilParams)
-                            .text()
-                            .default("[]"),
+                        ColumnDef::new(ConfConfigEntity::ValueType)
+                            .string_len(255) // 假设 varchar 长度为 255
+                            .not_null() // 假设 name 不允许为空
+                            .comment("配置值类型"),
                     )
                     .to_owned(),
             )

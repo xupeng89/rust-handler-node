@@ -37,8 +37,6 @@ pub async fn initialize_config_db(
         eprintln!("🆕 [ConfigDB] 数据库文件不存在，创建新文件: {:?}", path);
         File::create(path)
             .map_err(|e| migration_orm::DbErr::Custom(format!("无法创建数据库文件: {}", e)))?;
-    } else {
-        eprintln!("📂 [ConfigDB] 检测到现有数据库文件: {:?}", path);
     }
 
     // 构造 SQLite 连接字符串
@@ -50,8 +48,6 @@ pub async fn initialize_config_db(
     DB.get_or_try_init(|| async {
         let final_db_url = DB_URL.get().unwrap().as_str();
 
-        eprintln!("🔌 [ConfigDB] 正在连接数据库...");
-
         let mut opt = migration_orm::ConnectOptions::new(final_db_url.to_owned());
         opt.max_connections(16)
             .min_connections(4)
@@ -62,22 +58,19 @@ pub async fn initialize_config_db(
 
         // 2. 创建连接
         let db = migration_orm::Database::connect(opt).await?;
-        eprintln!("✅ [ConfigDB] 数据库连接成功");
 
         // 3. 运行 Migration (核心步骤)
-        // 如果这里没报错，但表不存在，说明 Migrator 代码有问题
-        eprintln!("🚀 [ConfigDB] 开始执行 Migration...");
+
         Migrator::up(&db, None).await.map_err(|e| {
             eprintln!("❌ [ConfigDB] Migration 失败: {}", e);
             e
         })?;
-        eprintln!("✅ [ConfigDB] Migration 执行完成");
 
         // 4. 设置 WAL 模式
         db.execute_unprepared("PRAGMA journal_mode = WAL;").await?;
         db.execute_unprepared("PRAGMA synchronous = NORMAL;")
             .await?;
-
+        eprintln!("✅ [ConfigDB] 数据库连接成功");
         Ok::<migration_orm::DatabaseConnection, migration_orm::DbErr>(db)
     })
     .await
