@@ -59,3 +59,16 @@ pub async fn init_config_db(url: String) -> Result<()> {
     };
     Ok(())
 }
+
+#[napi(namespace = "initDB")]
+pub async fn close_all_dbs() -> Result<()> {
+    // 关闭config数据库
+    crate::service_database::database_config::db_config_connection::close_config_db().await;
+    // 关闭shutter数据库
+
+    crate::service_database::database_shutter::db_shutter_connection::close_shutter_db().await;
+    // 关闭auto_shutter数据库
+    crate::service_database::database_auto_shutter::db_auto_shutter_connection::close_auto_shutter_db().await;
+
+    Ok(())
+}

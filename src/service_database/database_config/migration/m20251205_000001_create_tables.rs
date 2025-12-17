@@ -55,6 +55,16 @@ enum ConfFunctionPicEntity {
     Code,    // 对应 code: string
 }
 
+#[derive(Iden)]
+enum ConfPfModelParamsEntity {
+    Table,      // 表名：conf_pf_model_params_entity
+    Id,         // 主键（i32 自增）
+    Code,       // code
+    Name,       // name
+    SolverType, // solver_type
+    Params,     // params（Text 类型）
+}
+
 #[async_trait::async_trait]
 impl MigrationTrait for Migration {
     async fn up(&self, manager: &SchemaManager) -> Result<(), DbErr> {
@@ -304,6 +314,52 @@ impl MigrationTrait for Migration {
                     .to_owned(),
             )
             .await?;
+        // 5. 创建 conf_pf_model_params_entity 表（新增：数学求解方法配置表）
+        manager
+            .create_table(
+                Table::create()
+                    .table(ConfPfModelParamsEntity::Table)
+                    .if_not_exists()
+                    // 主键 id（i32 自增）
+                    .col(
+                        ColumnDef::new(ConfPfModelParamsEntity::Id)
+                            .integer()
+                            .not_null()
+                            .auto_increment()
+                            .primary_key()
+                            .comment("主键"),
+                    )
+                    // code 字段
+                    .col(
+                        ColumnDef::new(ConfPfModelParamsEntity::Code)
+                            .string_len(255)
+                            .not_null()
+                            .comment("编码"),
+                    )
+                    // name 字段
+                    .col(
+                        ColumnDef::new(ConfPfModelParamsEntity::Name)
+                            .string_len(255)
+                            .not_null()
+                            .comment("名称"),
+                    )
+                    // solver_type 字段
+                    .col(
+                        ColumnDef::new(ConfPfModelParamsEntity::SolverType)
+                            .string_len(255)
+                            .not_null()
+                            .comment("求解器类型"),
+                    )
+                    // params 字段（Text 类型）
+                    .col(
+                        ColumnDef::new(ConfPfModelParamsEntity::Params)
+                            .text()
+                            .not_null()
+                            .comment("求解参数（JSON/文本）"),
+                    )
+                    .to_owned(),
+            )
+            .await?;
         Ok(())
     }
 
@@ -325,6 +381,13 @@ impl MigrationTrait for Migration {
 
         manager
             .drop_table(Table::drop().table(ConfModelEntity::Table).to_owned())
+            .await?;
+        manager
+            .drop_table(
+                Table::drop()
+                    .table(ConfPfModelParamsEntity::Table)
+                    .to_owned(),
+            )
             .await?;
         Ok(())
     }

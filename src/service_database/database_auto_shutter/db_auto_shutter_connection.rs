@@ -87,3 +87,21 @@ pub async fn get_auto_shutter_db(
         )),
     }
 }
+
+pub async fn close_auto_shutter_db() {
+    // 2. 仅 SQLite 执行 WAL 清理操作
+    if let Some(db) = DB.get() {
+        // WAL 强制落盘
+        if let Err(e) = db
+            .execute_unprepared("PRAGMA wal_checkpoint(TRUNCATE);")
+            .await
+        {
+            eprintln!("⚠️ [AutoShutterDB] WAL checkpoint 失败: {}", e);
+        }
+
+        // 可选：降低同步级别，进入只读 / 退出态
+        let _ = db.execute_unprepared("PRAGMA synchronous = FULL;").await;
+    }
+
+    eprintln!("✅ [AutoShutterDB] WAL 已安全落盘");
+}

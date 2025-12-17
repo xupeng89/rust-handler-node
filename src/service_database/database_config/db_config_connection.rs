@@ -76,7 +76,6 @@ pub async fn initialize_config_db(
     .await
 }
 
-// get_config_db 保持不变...
 pub async fn get_config_db(
 ) -> Result<&'static migration_orm::DatabaseConnection, migration_orm::DbErr> {
     match DB.get() {
@@ -85,4 +84,22 @@ pub async fn get_config_db(
             "ConfigDB Database not initialized.".to_string(),
         )),
     }
+}
+
+pub async fn close_config_db() {
+    // 2. 仅 SQLite 执行 WAL 清理操作
+    if let Some(db) = DB.get() {
+        // WAL 强制落盘
+        if let Err(e) = db
+            .execute_unprepared("PRAGMA wal_checkpoint(TRUNCATE);")
+            .await
+        {
+            eprintln!("⚠️ [ConfigDB] WAL checkpoint 失败: {}", e);
+        }
+
+        // 可选：降低同步级别，进入只读 / 退出态
+        let _ = db.execute_unprepared("PRAGMA synchronous = FULL;").await;
+    }
+
+    eprintln!("✅ [ConfigDB] WAL 已安全落盘");
 }

@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 
 /// 数学求解方法配置表
 #[derive(Clone, Debug, PartialEq, Eq, DeriveEntityModel, Serialize, Deserialize)]
-#[sea_orm(table_name = "conf_pf_model_params")] // 对应 @Entity({ name: "conf_pf_model_params" })
+#[sea_orm(table_name = "conf_pf_model_params_entity")] //
 pub struct Model {
     /**
      * 主键
