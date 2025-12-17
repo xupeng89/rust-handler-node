@@ -1,0 +1,99 @@
+use napi::Result;
+use napi_derive::napi;
+// 导入您之前定义的 DTOs 和数据库操作函数
+/// 将 sea_orm::DbErr 转换为 napi::Error，以便在 JS 中抛出异常
+use crate::error_handle::err_handle::handle_db_err;
+
+use crate::service_database::database_shutter::service::shutter_service::{
+    delete_model_shutter_entity, get_all_model_shutter_entity_detail_list,
+    get_all_model_shutter_entity_list, get_model_shutter_entity_by_id,
+    get_model_shutter_entity_by_id_only, insert_model_shutter_entity,
+    insert_model_shutter_entity_only, update_model_shutter_entity,
+    update_model_shutter_entity_by_id_only, FullShutterData, FullShutterModel, ShutterListItem,
+};
+#[napi(namespace = "shutterHandle")]
+pub async fn get_all_shutter_entity_list(model_id: String) -> Result<Vec<ShutterListItem>> {
+    get_all_model_shutter_entity_list(model_id)
+        .await
+        .map_err(handle_db_err)
+}
+
+#[napi(namespace = "shutterHandle")]
+pub async fn get_all_shutter_entity_detail_list(model_id: String) -> Result<Vec<FullShutterModel>> {
+    get_all_model_shutter_entity_detail_list(model_id)
+        .await
+        .map_err(handle_db_err)
+}
+
+#[napi(namespace = "shutterHandle")]
+pub async fn update_shutter_entity(data: FullShutterData, model_id: String) -> Result<i32> {
+    update_model_shutter_entity(data, model_id)
+        .await
+        .map_err(handle_db_err)
+}
+
+/// 创建/更新快照信息 (insertModelShutterEntity)
+/// 检查 modelId 和 index 是否已存在，若存在则更新，否则插入新记录
+/// 签名: (data: FullCacheData, modelId: string) => Promise<void>
+#[napi(namespace = "shutterHandle")]
+pub async fn insert_shutter_entity(data: FullShutterData, model_id: String) -> Result<i32> {
+    insert_model_shutter_entity(data, model_id)
+        .await
+        .map_err(handle_db_err)
+}
+
+/// 仅创建快照信息 (insertModelShutterEntityOnly)
+/// 签名: (data: FullCacheData) => Promise<void>
+#[napi(namespace = "shutterHandle")]
+pub async fn insert_shutter_entity_only(data: FullShutterData) -> Result<()> {
+    insert_model_shutter_entity_only(data)
+        .await
+        .map_err(handle_db_err)
+}
+
+/// 删除快照信息 (deleteModelShutterEntity)
+/// 签名: (id: string, modelId: string) => Promise<number> (返回 rows_affected)
+#[napi(namespace = "shutterHandle")]
+pub async fn delete_shutter_entity(id: String, model_id: String) -> Result<u32> {
+    delete_model_shutter_entity(id, model_id)
+        .await
+        // u64 转换为 u32，假设 rows_affected 不会超过 u32 范围
+        .map(|rows| rows as u32)
+        .map_err(handle_db_err)
+}
+
+/// 获取一个快照信息 (getModelShutterEntityById)
+/// 签名: (id: string, modelId: string) => Promise<FullCacheData | null>
+#[napi(namespace = "shutterHandle")]
+pub async fn get_shutter_entity_by_id(
+    id: String,
+    model_id: String,
+) -> Result<Option<FullShutterData>> {
+    get_model_shutter_entity_by_id(id, model_id)
+        .await
+        .map_err(handle_db_err)
+}
+
+/// 获取一个快照信息 (getModelShutterEntityByIdOnly)
+/// 签名: (id: string) => Promise<FullCacheData | null>
+#[napi(namespace = "shutterHandle")]
+pub async fn get_shutter_entity_by_id_only(id: String) -> Result<Option<FullShutterData>> {
+    get_model_shutter_entity_by_id_only(id)
+        .await
+        .map_err(handle_db_err)
+}
+
+/// 根据 ID 更新部分信息 (updateModelShutterEntityByIndexOnly)
+/// 签名: (id: string, objects: string, sysvars: string, status: string) => Promise<number> (返回 rows_affected)
+#[napi(namespace = "shutterHandle")]
+pub async fn update_shutter_entity_by_id_only(
+    id: String,
+    objects: String,
+    sysvars: String,
+    status: String,
+) -> Result<u32> {
+    update_model_shutter_entity_by_id_only(id, objects, sysvars, status)
+        .await
+        .map(|rows| rows as u32)
+        .map_err(handle_db_err)
+}

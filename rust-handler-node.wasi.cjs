@@ -115,6 +115,7 @@ module.exports.confConfig = __napiModule.exports.confConfig
 module.exports.confFunctionPic = __napiModule.exports.confFunctionPic
 module.exports.initDB = __napiModule.exports.initDB
 module.exports.pointInfor = __napiModule.exports.pointInfor
+module.exports.shutter = __napiModule.exports.shutter
 module.exports.shutterHandle = __napiModule.exports.shutterHandle
 module.exports.undoRedoHandle = __napiModule.exports.undoRedoHandle
 module.exports.variableCurveHandle = __napiModule.exports.variableCurveHandle

@@ -63,6 +63,7 @@ export const confConfig = __napiModule.exports.confConfig
 export const confFunctionPic = __napiModule.exports.confFunctionPic
 export const initDB = __napiModule.exports.initDB
 export const pointInfor = __napiModule.exports.pointInfor
+export const shutter = __napiModule.exports.shutter
 export const shutterHandle = __napiModule.exports.shutterHandle
 export const undoRedoHandle = __napiModule.exports.undoRedoHandle
 export const variableCurveHandle = __napiModule.exports.variableCurveHandle

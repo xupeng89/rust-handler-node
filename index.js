@@ -579,6 +579,7 @@ module.exports.confConfig = nativeBinding.confConfig
 module.exports.confFunctionPic = nativeBinding.confFunctionPic
 module.exports.initDB = nativeBinding.initDB
 module.exports.pointInfor = nativeBinding.pointInfor
+module.exports.shutter = nativeBinding.shutter
 module.exports.shutterHandle = nativeBinding.shutterHandle
 module.exports.undoRedoHandle = nativeBinding.undoRedoHandle
 module.exports.variableCurveHandle = nativeBinding.variableCurveHandle
