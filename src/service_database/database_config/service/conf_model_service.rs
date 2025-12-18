@@ -4,25 +4,29 @@ use chrono::Utc;
 use napi_derive::napi;
 
 use crate::tool_handle::time_tool::naive_dt_utc_to_millis;
-use sea_orm::{ActiveModelTrait, DbErr, EntityTrait, IntoActiveModel, NotSet, Set};
+use sea_orm::{
+    ActiveModelTrait, ColumnTrait, DbErr, EntityTrait, IntoActiveModel, QueryFilter, Set,
+};
 
 use serde::{Deserialize, Serialize};
 // ======================================
 // 假设 ConfFunctionPic 的实体定义在这里
 use crate::service_database::database_config::entity::conf_model_entity::{
-    ActiveModel as ConfModelActiveModel, Entity as ConfModelEntity, Model as ConfModelModel,
+    ActiveModel as ConfModelActiveModel, Column as ConfModelColumn, Entity as ConfModelEntity,
+    Model as ConfModelModel,
 };
 
 #[napi(object, namespace = "confModel")]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ConfModelDto {
+    pub id: String,
     pub create_at: String,
     pub update_at: String,
     pub standard_temperature: f64,
     pub standard_temperature_unit: String,
     pub standard_pressure: f64,
     pub standard_pressure_unit: String,
-    pub grid_size: String,
+    pub grid_size: u8,
     pub grid_color: String,
     pub grid_state: String,
     pub language: String,
@@ -32,6 +36,7 @@ pub struct ConfModelDto {
 impl From<ConfModelModel> for ConfModelDto {
     fn from(model: ConfModelModel) -> Self {
         ConfModelDto {
+            id: model.id,
             create_at: naive_dt_utc_to_millis(model.create_at),
             update_at: naive_dt_utc_to_millis(model.update_at),
             standard_temperature: model.standard_temperature,
@@ -58,7 +63,10 @@ pub async fn select_conf_model_one() -> Result<ConfModelDto, DbErr> {
 }
 pub async fn upsert_and_insert_fixed_conf_model(data: ConfModelDto) -> Result<i32, DbErr> {
     let db = get_config_db().await.unwrap(); // 获取数据库连接
-    let model_one = ConfModelEntity::find().one(db).await?;
+    let model_one = ConfModelEntity::find()
+        .filter(ConfModelColumn::Id.eq(&data.id))
+        .one(db)
+        .await?;
 
     if let Some(model) = model_one {
         // 更新逻辑
@@ -76,7 +84,7 @@ pub async fn upsert_and_insert_fixed_conf_model(data: ConfModelDto) -> Result<i3
     } else {
         // 插入逻辑
         let active_model = ConfModelActiveModel {
-            id: NotSet,
+            id: Set(data.id),
             standard_temperature: Set(data.standard_temperature),
             standard_temperature_unit: Set(data.standard_temperature_unit),
             standard_pressure: Set(data.standard_pressure),

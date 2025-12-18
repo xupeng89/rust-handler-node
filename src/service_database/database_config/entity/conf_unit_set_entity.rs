@@ -15,7 +15,7 @@ pub struct Model {
     #[sea_orm(column_name = "en_name")]
     pub en_name: String,
 
-    #[sea_orm(column_name = "zh_name")]
+    #[sea_orm(column_name = "name")]
     pub name: String,
 
     #[sea_orm(column_name = "code")]

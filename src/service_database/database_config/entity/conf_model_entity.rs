@@ -31,7 +31,7 @@ pub struct Model {
     pub grid_color: String,
 
     #[sea_orm(column_name = "grid_size")]
-    pub grid_size: String,
+    pub grid_size: u8,
 
     #[sea_orm(column_name = "create_at")]
     pub create_at: NaiveDateTime,

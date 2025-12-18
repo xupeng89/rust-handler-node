@@ -345,7 +345,7 @@ impl MigrationTrait for Migration {
                     // 网格尺寸
                     .col(
                         ColumnDef::new(ConfModelEntity::GridSize)
-                            .string_len(50)
+                            .tiny_integer()
                             .not_null()
                             .comment("网格尺寸"),
                     )
