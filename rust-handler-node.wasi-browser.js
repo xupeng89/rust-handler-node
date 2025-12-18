@@ -64,6 +64,7 @@ export const confGraphicCustom = __napiModule.exports.confGraphicCustom
 export const confModel = __napiModule.exports.confModel
 export const confPfModelParams = __napiModule.exports.confPfModelParams
 export const confSystemVariable = __napiModule.exports.confSystemVariable
+export const confUnit = __napiModule.exports.confUnit
 export const initDB = __napiModule.exports.initDB
 export const pointInfor = __napiModule.exports.pointInfor
 export const shutter = __napiModule.exports.shutter

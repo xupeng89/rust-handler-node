@@ -580,6 +580,7 @@ module.exports.confGraphicCustom = nativeBinding.confGraphicCustom
 module.exports.confModel = nativeBinding.confModel
 module.exports.confPfModelParams = nativeBinding.confPfModelParams
 module.exports.confSystemVariable = nativeBinding.confSystemVariable
+module.exports.confUnit = nativeBinding.confUnit
 module.exports.initDB = nativeBinding.initDB
 module.exports.pointInfor = nativeBinding.pointInfor
 module.exports.shutter = nativeBinding.shutter

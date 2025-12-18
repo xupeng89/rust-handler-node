@@ -15,6 +15,7 @@ use crate::service_database::database_config::entity::conf_system_variable_entit
 #[napi(object, namespace = "confSystemVariable")]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ConfSystemVariableDto {
+    pub id: i32,
     pub code: String,
     pub name: String,
     pub value: f64,
@@ -24,6 +25,7 @@ pub struct ConfSystemVariableDto {
 impl From<ConfSystemVariableModel> for ConfSystemVariableDto {
     fn from(model: ConfSystemVariableModel) -> Self {
         ConfSystemVariableDto {
+            id: model.id,
             code: model.code,
             name: model.name,
             value: model.value,

@@ -21,6 +21,16 @@ pub async fn get_all_unit_set_api() -> Result<Vec<ConfUnitSetDto>> {
     Ok(result)
 }
 
+#[napi(namespace = "confUnit")]
+/// 根据 type_num 列表查询点位信息 (返回 JSON 字符串)
+pub async fn get_one_unit_set_api(code: String) -> Result<ConfUnitSetDto> {
+    // 调用服务层函数，并处理 DbErr
+    let result = select_conf_unit_set_one(code)
+        .await
+        .map_err(handle_db_err)?;
+    Ok(result)
+}
+
 // 2. 批量更新或插入
 #[napi(namespace = "confUnit")]
 /// 批量更新或插入点位信息

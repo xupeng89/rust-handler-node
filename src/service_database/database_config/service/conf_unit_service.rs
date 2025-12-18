@@ -10,7 +10,8 @@ use serde::{Deserialize, Serialize};
 
 // 单位集合
 use crate::service_database::database_config::entity::conf_unit_set_entity::{
-    ActiveModel as ConfUnitSetActiveModel, Entity as ConfUnitSetEntity, Model as ConfUnitSetModel,
+    ActiveModel as ConfUnitSetActiveModel, Column as ConfUnitSetColumn,
+    Entity as ConfUnitSetEntity, Model as ConfUnitSetModel,
 };
 
 #[napi(object, namespace = "confUnit")]
@@ -38,10 +39,26 @@ impl From<ConfUnitSetModel> for ConfUnitSetDto {
     }
 }
 
+pub async fn select_conf_unit_set_one(code: String) -> Result<ConfUnitSetDto, DbErr> {
+    let db = get_config_db().await.unwrap(); // 获取数据库连接
+
+    let models = ConfUnitSetEntity::find()
+        .filter(ConfUnitSetColumn::Code.eq(code))
+        .one(db)
+        .await?;
+
+    let dto: ConfUnitSetDto = models.map(ConfUnitSetDto::from).unwrap();
+
+    Ok(dto)
+}
+
 pub async fn select_conf_unit_set_all() -> Result<Vec<ConfUnitSetDto>, DbErr> {
     let db = get_config_db().await.unwrap(); // 获取数据库连接
 
-    let models = ConfUnitSetEntity::find().all(db).await?;
+    let models = ConfUnitSetEntity::find()
+        .filter(ConfUnitSetColumn::Status.eq(0))
+        .all(db)
+        .await?;
 
     let dto: Vec<ConfUnitSetDto> = models.into_iter().map(ConfUnitSetDto::from).collect();
 

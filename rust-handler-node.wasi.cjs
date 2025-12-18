@@ -116,6 +116,7 @@ module.exports.confGraphicCustom = __napiModule.exports.confGraphicCustom
 module.exports.confModel = __napiModule.exports.confModel
 module.exports.confPfModelParams = __napiModule.exports.confPfModelParams
 module.exports.confSystemVariable = __napiModule.exports.confSystemVariable
+module.exports.confUnit = __napiModule.exports.confUnit
 module.exports.initDB = __napiModule.exports.initDB
 module.exports.pointInfor = __napiModule.exports.pointInfor
 module.exports.shutter = __napiModule.exports.shutter

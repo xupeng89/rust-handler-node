@@ -13,9 +13,9 @@ use crate::error_handle::err_handle::handle_db_err;
 // 1. 根据类型批量查询
 #[napi(namespace = "confPfModelParams")]
 /// 根据 type_num 列表查询点位信息 (返回 JSON 字符串)
-pub async fn get_conf_pf_model_params_all_message_api() -> Result<ConfPfModelParamsDto> {
+pub async fn get_conf_pf_model_params_all_message_api() -> Result<Vec<ConfPfModelParamsDto>> {
     // 调用服务层函数，并处理 DbErr
-    let result = select_conf_pf_model_params_one()
+    let result = select_conf_pf_model_params_all()
         .await
         .map_err(handle_db_err)?;
     Ok(result)
@@ -26,7 +26,7 @@ pub async fn get_conf_pf_model_params_all_message_api() -> Result<ConfPfModelPar
 /// 批量更新或插入点位信息
 pub async fn update_or_insert_conf_pf_model_params_api(
     // napi-rs 自动将 JS 数组/对象映射到 Vec<PositionData>
-    data: ConfPfModelParamsDto,
+    data: Vec<ConfPfModelParamsDto>,
 ) -> Result<i32> {
     // 调用服务层函数，并处理 DbErr
     let result = upsert_and_insert_fixed_conf_pf_model_params(data)
