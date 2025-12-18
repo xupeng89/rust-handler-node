@@ -93,7 +93,7 @@ enum ConfUnitItemEntity {
     Id,    // 主键（i32 自增）
     Code,  // code
     Value,
-    SetId,
+    SetCode,
 }
 
 #[derive(Iden)]
@@ -553,15 +553,14 @@ impl MigrationTrait for Migration {
                             .double() // u8 对应
                             .not_null()
                             .default(1)
-                            .comment("状态（1-启用，0-禁用）"),
+                            .comment("选择的默认单位"),
                     )
-                    // is_default 字段（默认值 0）
                     .col(
-                        ColumnDef::new(ConfUnitItemEntity::SetId)
-                            .integer() // u8 对应
+                        ColumnDef::new(ConfUnitItemEntity::SetCode)
+                            .string_len(255)
                             .not_null()
                             .default(0)
-                            .comment("是否默认（1-是，0-否）"),
+                            .comment("关联set的Code"),
                     )
                     .to_owned(),
             )

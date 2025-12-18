@@ -48,9 +48,11 @@ pub async fn updata_and_insert_conf_unit_set_api(
 // 1. 根据类型批量查询
 #[napi(namespace = "confUnit")]
 /// 根据 type_num 列表查询点位信息 (返回 JSON 字符串)
-pub async fn get_all_unit_item_api() -> Result<Vec<ConfUnitItemDto>> {
+pub async fn get_all_unit_item_api(code: String) -> Result<Vec<ConfUnitItemDto>> {
     // 调用服务层函数，并处理 DbErr
-    let result = select_conf_unit_item_all().await.map_err(handle_db_err)?;
+    let result = select_conf_unit_item_all(code)
+        .await
+        .map_err(handle_db_err)?;
     Ok(result)
 }
 
@@ -94,11 +96,9 @@ pub async fn updata_and_insert_conf_unit_first_category_api(
 
 #[napi(namespace = "confUnit")]
 /// 根据 type_num 列表查询点位信息 (返回 JSON 字符串)
-pub async fn get_all_unit_second_category_api(
-    first_code: String,
-) -> Result<Vec<ConfUnitSecondCategoryDto>> {
+pub async fn get_all_unit_second_category_api() -> Result<Vec<ConfUnitSecondCategoryDto>> {
     // 调用服务层函数，并处理 DbErr
-    let result = select_conf_unit_second_category_all(first_code)
+    let result = select_conf_unit_second_category_all()
         .await
         .map_err(handle_db_err)?;
     Ok(result)
@@ -120,11 +120,9 @@ pub async fn updata_and_insert_conf_unit_second_category_api(
 
 #[napi(namespace = "confUnit")]
 /// 根据 type_num 列表查询点位信息 (返回 JSON 字符串)
-pub async fn get_all_unit_item_category_api(
-    second_code: String,
-) -> Result<Vec<ConfUnitItemCategoryDto>> {
+pub async fn get_all_unit_item_category_api() -> Result<Vec<ConfUnitItemCategoryDto>> {
     // 调用服务层函数，并处理 DbErr
-    let result = select_conf_unit_item_category_all(second_code)
+    let result = select_conf_unit_item_category_all()
         .await
         .map_err(handle_db_err)?;
     Ok(result)

@@ -18,8 +18,8 @@ pub struct Model {
     #[sea_orm(column_name = "value")]
     pub value: String,
 
-    #[sea_orm(column_name = "set_id")]
-    pub set_id: i32,
+    #[sea_orm(column_name = "set_code")]
+    pub set_code: String,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
