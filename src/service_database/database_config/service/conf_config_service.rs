@@ -73,9 +73,9 @@ pub async fn upsert_and_insert_all_conf_config(
             let active_model = ConfConfigActiveModel {
                 id: NotSet,
                 name: Set(config.name),
+                code: Set(config.code),
                 value: Set(config.value),
                 value_type: Set(config.value_type),
-                code: Set(config.code),
             };
             active_model.insert(db).await?;
         }
