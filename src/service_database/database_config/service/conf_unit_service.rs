@@ -67,10 +67,8 @@ pub async fn select_conf_unit_set_all() -> Result<Vec<ConfUnitSetDto>, DbErr> {
 pub async fn upsert_and_insert_conf_unit_set(data_list: Vec<ConfUnitSetDto>) -> Result<i32, DbErr> {
     let db = get_config_db().await.unwrap(); // 获取数据库连接
     let existing_models = ConfUnitSetEntity::find().all(db).await?;
-    let existing_code_map: std::collections::HashMap<_, _> = existing_models
-        .into_iter()
-        .map(|m| (m.id.clone(), m))
-        .collect();
+    let existing_code_map: std::collections::HashMap<_, _> =
+        existing_models.into_iter().map(|m| (m.id, m)).collect();
     let mut success_count: i32 = 0;
     // id,本身数据库有数据的进行更新，没有的进行插入
     for config in data_list {
@@ -142,10 +140,8 @@ pub async fn upsert_and_insert_conf_unit_item(
 ) -> Result<i32, DbErr> {
     let db = get_config_db().await.unwrap(); // 获取数据库连接
     let existing_models = ConfUnitItemEntity::find().all(db).await?;
-    let existing_code_map: std::collections::HashMap<_, _> = existing_models
-        .into_iter()
-        .map(|m| (m.id.clone(), m))
-        .collect();
+    let existing_code_map: std::collections::HashMap<_, _> =
+        existing_models.into_iter().map(|m| (m.id, m)).collect();
     let mut success_count: i32 = 0;
     // 根据id,本身数据库有数据的进行更新，没有的进行插入
     for config in data_list {
