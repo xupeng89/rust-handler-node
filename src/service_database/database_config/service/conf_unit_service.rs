@@ -139,11 +139,13 @@ pub async fn select_conf_unit_item_all(set_code: String) -> Result<Vec<ConfUnitI
 }
 
 pub async fn select_conf_unit_item_all_by_codes(
+    set_code: String,
     codes: Vec<String>,
 ) -> Result<Vec<ConfUnitItemDto>, DbErr> {
     let db = get_config_db().await.unwrap(); // 获取数据库连接
 
     let models = ConfUnitItemEntity::find()
+        .filter(ConfUnitItemColumn::SetCode.eq(set_code))
         .filter(ConfUnitItemColumn::Code.is_in(codes))
         .all(db)
         .await?;

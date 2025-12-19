@@ -58,9 +58,12 @@ pub async fn get_all_unit_item_api(set_code: String) -> Result<Vec<ConfUnitItemD
 
 #[napi(namespace = "confUnit")]
 /// 根据 type_num 列表查询点位信息 (返回 JSON 字符串)
-pub async fn get_all_unit_item_by_codes_api(codes: Vec<String>) -> Result<Vec<ConfUnitItemDto>> {
+pub async fn get_all_unit_item_by_codes_api(
+    set_code: String,
+    codes: Vec<String>,
+) -> Result<Vec<ConfUnitItemDto>> {
     // 调用服务层函数，并处理 DbErr
-    let result = select_conf_unit_item_all_by_codes(codes)
+    let result = select_conf_unit_item_all_by_codes(set_code, codes)
         .await
         .map_err(handle_db_err)?;
     Ok(result)
