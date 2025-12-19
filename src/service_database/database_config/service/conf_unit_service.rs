@@ -125,11 +125,26 @@ impl From<ConfUnitItemModel> for ConfUnitItemDto {
     }
 }
 
-pub async fn select_conf_unit_item_all(code: String) -> Result<Vec<ConfUnitItemDto>, DbErr> {
+pub async fn select_conf_unit_item_all(set_code: String) -> Result<Vec<ConfUnitItemDto>, DbErr> {
     let db = get_config_db().await.unwrap(); // 获取数据库连接
 
     let models = ConfUnitItemEntity::find()
-        .filter(ConfUnitItemColumn::SetCode.eq(code))
+        .filter(ConfUnitItemColumn::SetCode.eq(set_code))
+        .all(db)
+        .await?;
+
+    let dto: Vec<ConfUnitItemDto> = models.into_iter().map(ConfUnitItemDto::from).collect();
+
+    Ok(dto)
+}
+
+pub async fn select_conf_unit_item_all_by_codes(
+    codes: Vec<String>,
+) -> Result<Vec<ConfUnitItemDto>, DbErr> {
+    let db = get_config_db().await.unwrap(); // 获取数据库连接
+
+    let models = ConfUnitItemEntity::find()
+        .filter(ConfUnitItemColumn::Code.is_in(codes))
         .all(db)
         .await?;
 
