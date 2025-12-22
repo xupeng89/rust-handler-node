@@ -1,0 +1,9 @@
+pub mod physical_binary_nrtl_entity;
+pub mod physical_binary_nrtl_rk_entity;
+pub mod physical_binary_pr_entity;
+pub mod physical_binary_psrk_entity;
+pub mod physical_binary_rk_entity;
+pub mod physical_binary_srk_entity;
+pub mod physical_binary_uniquac_entity;
+pub mod physical_binary_wilsion_entity;
+pub mod physical_cal_base_property_entity;

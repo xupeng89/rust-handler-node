@@ -2,7 +2,10 @@ use sea_orm::entity::prelude::*;
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, PartialEq, Eq, DeriveEntityModel, Serialize, Deserialize)]
-#[sea_orm(table_name = "model_auto_shutter_entity")]
+#[sea_orm(
+    table_name = "model_auto_shutter_entity",
+    comment = "自动快照持久化保持表"
+)]
 pub struct Model {
     #[sea_orm(primary_key)]
     pub id: i32,
