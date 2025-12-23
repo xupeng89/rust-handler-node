@@ -572,6 +572,7 @@ if (!nativeBinding) {
 }
 
 module.exports = nativeBinding
+module.exports.BinaryFuncCode = nativeBinding.BinaryFuncCode
 module.exports.autoShutter = nativeBinding.autoShutter
 module.exports.autoShutterCache = nativeBinding.autoShutterCache
 module.exports.confConfig = nativeBinding.confConfig
@@ -581,9 +582,11 @@ module.exports.confModel = nativeBinding.confModel
 module.exports.confPfModelParams = nativeBinding.confPfModelParams
 module.exports.confSystemVariable = nativeBinding.confSystemVariable
 module.exports.confUnit = nativeBinding.confUnit
+module.exports.heryDetail = nativeBinding.heryDetail
 module.exports.initDB = nativeBinding.initDB
+module.exports.physicalCalc = nativeBinding.physicalCalc
 module.exports.pointInfor = nativeBinding.pointInfor
-module.exports.shutter = nativeBinding.shutter
+module.exports.resultOption = nativeBinding.resultOption
 module.exports.shutterHandle = nativeBinding.shutterHandle
 module.exports.undoRedoHandle = nativeBinding.undoRedoHandle
 module.exports.variableCurveHandle = nativeBinding.variableCurveHandle

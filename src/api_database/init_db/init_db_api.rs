@@ -67,7 +67,7 @@ pub async fn close_all_dbs() -> Result<()> {
     crate::service_database::database_config::db_config_connection::close_config_db().await;
 
     // 关闭物性数据库
-    // crate::service_database::database_physical_property::db_physical_property_connection::close_physical_property_db().await;
+    crate::service_database::database_physical_property::db_physical_property_connection::close_physical_property_db().await;
 
     // 关闭shutter数据库
     crate::service_database::database_shutter::db_shutter_connection::close_shutter_db().await;

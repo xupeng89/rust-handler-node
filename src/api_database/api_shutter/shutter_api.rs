@@ -33,8 +33,6 @@ pub async fn update_shutter_entity(data: FullShutterData, model_id: String) -> R
 }
 
 /// 创建/更新快照信息 (insertModelShutterEntity)
-/// 检查 modelId 和 index 是否已存在，若存在则更新，否则插入新记录
-/// 签名: (data: FullCacheData, modelId: string) => Promise<void>
 #[napi(namespace = "shutterHandle")]
 pub async fn insert_shutter_entity(data: FullShutterData, model_id: String) -> Result<i32> {
     insert_model_shutter_entity(data, model_id)
@@ -42,8 +40,6 @@ pub async fn insert_shutter_entity(data: FullShutterData, model_id: String) -> R
         .map_err(handle_db_err)
 }
 
-/// 仅创建快照信息 (insertModelShutterEntityOnly)
-/// 签名: (data: FullCacheData) => Promise<void>
 #[napi(namespace = "shutterHandle")]
 pub async fn insert_shutter_entity_only(data: FullShutterData) -> Result<()> {
     insert_model_shutter_entity_only(data)
@@ -62,8 +58,6 @@ pub async fn delete_shutter_entity(id: String, model_id: String) -> Result<u32> 
         .map_err(handle_db_err)
 }
 
-/// 获取一个快照信息 (getModelShutterEntityById)
-/// 签名: (id: string, modelId: string) => Promise<FullCacheData | null>
 #[napi(namespace = "shutterHandle")]
 pub async fn get_shutter_entity_by_id(
     id: String,
@@ -74,8 +68,6 @@ pub async fn get_shutter_entity_by_id(
         .map_err(handle_db_err)
 }
 
-/// 获取一个快照信息 (getModelShutterEntityByIdOnly)
-/// 签名: (id: string) => Promise<FullCacheData | null>
 #[napi(namespace = "shutterHandle")]
 pub async fn get_shutter_entity_by_id_only(id: String) -> Result<Option<FullShutterData>> {
     get_model_shutter_entity_by_id_only(id)

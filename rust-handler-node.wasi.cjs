@@ -108,6 +108,7 @@ const { instance: __napiInstance, module: __wasiModule, napiModule: __napiModule
   },
 })
 module.exports = __napiModule.exports
+module.exports.BinaryFuncCode = __napiModule.exports.BinaryFuncCode
 module.exports.autoShutter = __napiModule.exports.autoShutter
 module.exports.autoShutterCache = __napiModule.exports.autoShutterCache
 module.exports.confConfig = __napiModule.exports.confConfig
@@ -117,9 +118,11 @@ module.exports.confModel = __napiModule.exports.confModel
 module.exports.confPfModelParams = __napiModule.exports.confPfModelParams
 module.exports.confSystemVariable = __napiModule.exports.confSystemVariable
 module.exports.confUnit = __napiModule.exports.confUnit
+module.exports.heryDetail = __napiModule.exports.heryDetail
 module.exports.initDB = __napiModule.exports.initDB
+module.exports.physicalCalc = __napiModule.exports.physicalCalc
 module.exports.pointInfor = __napiModule.exports.pointInfor
-module.exports.shutter = __napiModule.exports.shutter
+module.exports.resultOption = __napiModule.exports.resultOption
 module.exports.shutterHandle = __napiModule.exports.shutterHandle
 module.exports.undoRedoHandle = __napiModule.exports.undoRedoHandle
 module.exports.variableCurveHandle = __napiModule.exports.variableCurveHandle

@@ -13,19 +13,19 @@ pub struct Model {
     pub id: i32,
 
     /// 关联组分iid
-    #[sea_orm(column_name = "compound_i_id")]
+    #[sea_orm(column_name = "component_i_id")] // 已为小写，无需修改（原本就是小写）
     pub component_i_id: i32,
 
     /// 关联组分i的CASNO
-    #[sea_orm(column_name = "compound_i")]
+    #[sea_orm(column_name = "component_i")] // 已为小写，无需修改
     pub component_i: String,
 
     /// 关联组分jid
-    #[sea_orm(column_name = "component_j_id")]
+    #[sea_orm(column_name = "component_j_id")] // 已为小写，无需修改
     pub component_j_id: i32,
 
     /// 关联组分j的casno
-    #[sea_orm(column_name = "compound_j")]
+    #[sea_orm(column_name = "component_j")] // 已为小写，无需修改
     pub component_j: String,
 
     /// 参数

@@ -56,6 +56,7 @@ const {
   },
 })
 export default __napiModule.exports
+export const BinaryFuncCode = __napiModule.exports.BinaryFuncCode
 export const autoShutter = __napiModule.exports.autoShutter
 export const autoShutterCache = __napiModule.exports.autoShutterCache
 export const confConfig = __napiModule.exports.confConfig
@@ -65,9 +66,11 @@ export const confModel = __napiModule.exports.confModel
 export const confPfModelParams = __napiModule.exports.confPfModelParams
 export const confSystemVariable = __napiModule.exports.confSystemVariable
 export const confUnit = __napiModule.exports.confUnit
+export const heryDetail = __napiModule.exports.heryDetail
 export const initDB = __napiModule.exports.initDB
+export const physicalCalc = __napiModule.exports.physicalCalc
 export const pointInfor = __napiModule.exports.pointInfor
-export const shutter = __napiModule.exports.shutter
+export const resultOption = __napiModule.exports.resultOption
 export const shutterHandle = __napiModule.exports.shutterHandle
 export const undoRedoHandle = __napiModule.exports.undoRedoHandle
 export const variableCurveHandle = __napiModule.exports.variableCurveHandle

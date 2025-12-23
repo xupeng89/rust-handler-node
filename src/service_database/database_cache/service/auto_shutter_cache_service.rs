@@ -34,7 +34,7 @@ pub struct AutoShutterData {
 
 // [Output DTO - Full Model] 包含所有数据库字段，用于 read/sync 的数据传输
 #[derive(Clone, Debug, Serialize, Deserialize)]
-#[napi(object, namespace = "shutter")]
+#[napi(object)]
 pub struct FullCacheData {
     pub id: i32,
     pub model_id: String,

@@ -25,14 +25,14 @@ impl MigrationTrait for Migration {
                            )
                            // compound_i_id（关联组分iid）
                            .col(
-                               ColumnDef::new(PpBinaryNrtlRkEntity::CompoundIId)
+                               ColumnDef::new(PpBinaryNrtlRkEntity::ComponentIId)
                                    .integer()
                                    .not_null()
                                    .comment("关联组分iid"),
                            )
                            // compound_i（关联组分i的CASNO）
                            .col(
-                               ColumnDef::new(PpBinaryNrtlRkEntity::CompoundI)
+                               ColumnDef::new(PpBinaryNrtlRkEntity::ComponentI)
                                    .string() // 对应 VARCHAR，不指定长度则为默认长度（可改为 string_len(n) 定长）
                                    .not_null()
                                    .comment("关联组分i的CASNO"),
@@ -46,7 +46,7 @@ impl MigrationTrait for Migration {
                            )
                            // compound_j（关联组分j的casno）
                            .col(
-                               ColumnDef::new(PpBinaryNrtlRkEntity::CompoundJ)
+                               ColumnDef::new(PpBinaryNrtlRkEntity::ComponentJ)
                                    .string()
                                    .not_null()
                                    .comment("关联组分j的casno"),
@@ -167,10 +167,28 @@ impl MigrationTrait for Migration {
                                     .comment("主键"),
                             )
                             .col(
-                                ColumnDef::new(PpBinaryNrtlEntity::CompoundIId)
+                                ColumnDef::new(PpBinaryNrtlEntity::ComponentIId)
                                     .integer()
                                     .not_null()
                                     .comment("关联组分iid"),
+                            )
+                            .col(
+                                ColumnDef::new(PpBinaryNrtlEntity::ComponentJId)
+                                    .integer()
+                                    .not_null()
+                                    .comment("关联组分jid"),
+                            )
+                            .col(
+                                ColumnDef::new(PpBinaryNrtlEntity::ComponentI)
+                                    .string() // 对应 VARCHAR，不指定长度则为默认长度（可改为 string_len(n) 定长）
+                                    .not_null()
+                                    .comment("关联组分i的CASNO"),
+                            )
+                            .col(
+                                ColumnDef::new(PpBinaryNrtlEntity::ComponentJ)
+                                    .string() // 对应 VARCHAR，不指定长度则为默认长度（可改为 string_len(n) 定长）
+                                    .not_null()
+                                    .comment("关联组分j的CASNO"),
                             )
                             // ... 其他无变化的列（compound_i、component_j_id、compound_j 等）
                             // 原大写列改为小写列（核心修改）
@@ -244,7 +262,23 @@ impl MigrationTrait for Migration {
                                     .not_null()
                                     .comment("参数"),
                             )
-                            // ... min_t、max_t 列（无变化）
+
+                            .col(
+                                ColumnDef::new(PpBinaryNrtlEntity::MinT)
+                                    .string()
+                                    .default("0")
+                                    .not_null()
+                                    .comment("参数"),
+                            )
+                            // max_t（参数，默认值"0"）
+                            .col(
+                                ColumnDef::new(PpBinaryNrtlEntity::MaxT)
+                                    .string()
+                                    .default("0")
+                                    .not_null()
+                                    .comment("参数"),
+                            )
+
                             .to_owned(),
                     )
                     .await?;
@@ -266,14 +300,14 @@ impl MigrationTrait for Migration {
                            )
                            // compound_i_id（关联组分iid）
                            .col(
-                               ColumnDef::new(PpBinaryPrEntity::CompoundIId)
+                               ColumnDef::new(PpBinaryPrEntity::ComponentIId)
                                    .integer()
                                    .not_null()
                                    .comment("关联组分iid"),
                            )
                            // compound_i（关联组分i的CASNO）
                            .col(
-                               ColumnDef::new(PpBinaryPrEntity::CompoundI)
+                               ColumnDef::new(PpBinaryPrEntity::ComponentI)
                                    .string() // 可改为 string_len(64) 指定固定长度
                                    .not_null()
                                    .comment("关联组分i的CASNO"),
@@ -287,7 +321,7 @@ impl MigrationTrait for Migration {
                            )
                            // compound_j（关联组分j的casno）
                            .col(
-                               ColumnDef::new(PpBinaryPrEntity::CompoundJ)
+                               ColumnDef::new(PpBinaryPrEntity::ComponentJ)
                                    .string() // 可改为 string_len(64) 指定固定长度
                                    .not_null()
                                    .comment("关联组分j的casno"),
@@ -353,14 +387,14 @@ impl MigrationTrait for Migration {
                            )
                            // compound_i_id（关联组分iid）
                            .col(
-                               ColumnDef::new(PpBinaryPsrkEntity::CompoundIId)
+                               ColumnDef::new(PpBinaryPsrkEntity::ComponentIId)
                                    .integer()
                                    .not_null()
                                    .comment("关联组分iid"),
                            )
                            // compound_i（关联组分i的CASNO）
                            .col(
-                               ColumnDef::new(PpBinaryPsrkEntity::CompoundI)
+                               ColumnDef::new(PpBinaryPsrkEntity::ComponentI)
                                    .string() // 可改为 string_len(64) 指定固定长度
                                    .not_null()
                                    .comment("关联组分i的CASNO"),
@@ -374,7 +408,7 @@ impl MigrationTrait for Migration {
                            )
                            // compound_j（关联组分j的casno）
                            .col(
-                               ColumnDef::new(PpBinaryPsrkEntity::CompoundJ)
+                               ColumnDef::new(PpBinaryPsrkEntity::ComponentJ)
                                    .string() // 可改为 string_len(64) 指定固定长度
                                    .not_null()
                                    .comment("关联组分j的casno"),
@@ -433,14 +467,14 @@ impl MigrationTrait for Migration {
                            )
                            // compound_i_id（关联组分iid）
                            .col(
-                               ColumnDef::new(PpBinaryRkEntity::CompoundIId)
+                               ColumnDef::new(PpBinaryRkEntity::ComponentIId)
                                    .integer()
                                    .not_null()
                                    .comment("关联组分iid"),
                            )
                            // compound_i（关联组分i的CASNO）
                            .col(
-                               ColumnDef::new(PpBinaryRkEntity::CompoundI)
+                               ColumnDef::new(PpBinaryRkEntity::ComponentI)
                                    .string() // 可改为 string_len(64) 指定固定长度
                                    .not_null()
                                    .comment("关联组分i的CASNO"),
@@ -454,7 +488,7 @@ impl MigrationTrait for Migration {
                            )
                            // compound_j（关联组分j的casno）
                            .col(
-                               ColumnDef::new(PpBinaryRkEntity::CompoundJ)
+                               ColumnDef::new(PpBinaryRkEntity::ComponentJ)
                                    .string() // 可改为 string_len(64) 指定固定长度
                                    .not_null()
                                    .comment("关联组分j的casno"),
@@ -520,14 +554,14 @@ impl MigrationTrait for Migration {
                             )
                             // compound_i_id（关联组分iid）
                             .col(
-                                ColumnDef::new(PpBinarySrkEntity::CompoundIId)
+                                ColumnDef::new(PpBinarySrkEntity::ComponentIId)
                                     .integer()
                                     .not_null()
                                     .comment("关联组分iid"),
                             )
                             // compound_i（关联组分i的CASNO）
                             .col(
-                                ColumnDef::new(PpBinarySrkEntity::CompoundI)
+                                ColumnDef::new(PpBinarySrkEntity::ComponentI)
                                     .string() // 可改为 string_len(64) 指定固定长度
                                     .not_null()
                                     .comment("关联组分i的CASNO"),
@@ -541,7 +575,7 @@ impl MigrationTrait for Migration {
                             )
                             // compound_j（关联组分j的casno）
                             .col(
-                                ColumnDef::new(PpBinarySrkEntity::CompoundJ)
+                                ColumnDef::new(PpBinarySrkEntity::ComponentJ)
                                     .string() // 可改为 string_len(64) 指定固定长度
                                     .not_null()
                                     .comment("关联组分j的casno"),
@@ -608,14 +642,14 @@ impl MigrationTrait for Migration {
                             )
                             // compound_i_id（关联组分iid）
                             .col(
-                                ColumnDef::new(PpBinaryUniquacEntity::CompoundIId)
+                                ColumnDef::new(PpBinaryUniquacEntity::ComponentIId)
                                     .integer()
                                     .not_null()
                                     .comment("关联组分iid"),
                             )
                             // compound_i（关联组分i的CASNO）
                             .col(
-                                ColumnDef::new(PpBinaryUniquacEntity::CompoundI)
+                                ColumnDef::new(PpBinaryUniquacEntity::ComponentI)
                                     .string() // 可改为 string_len(64) 指定固定长度
                                     .not_null()
                                     .comment("关联组分i的CASNO"),
@@ -629,7 +663,7 @@ impl MigrationTrait for Migration {
                             )
                             // compound_j（关联组分j的casno）
                             .col(
-                                ColumnDef::new(PpBinaryUniquacEntity::CompoundJ)
+                                ColumnDef::new(PpBinaryUniquacEntity::ComponentJ)
                                     .string() // 可改为 string_len(64) 指定固定长度
                                     .not_null()
                                     .comment("关联组分j的casno"),
@@ -768,14 +802,14 @@ impl MigrationTrait for Migration {
                            )
                            // compound_i_id（关联组分iid）
                            .col(
-                               ColumnDef::new(PpBinaryWilsionEntity::CompoundIId)
+                               ColumnDef::new(PpBinaryWilsionEntity::ComponentIId)
                                    .integer()
                                    .not_null()
                                    .comment("关联组分iid"),
                            )
                            // compound_i（关联组分i的CASNO）
                            .col(
-                               ColumnDef::new(PpBinaryWilsionEntity::CompoundI)
+                               ColumnDef::new(PpBinaryWilsionEntity::ComponentI)
                                    .string() // 可改为 string_len(64) 指定固定长度
                                    .not_null()
                                    .comment("关联组分i的CASNO"),
@@ -789,7 +823,7 @@ impl MigrationTrait for Migration {
                            )
                            // compound_j（关联组分j的casno）
                            .col(
-                               ColumnDef::new(PpBinaryWilsionEntity::CompoundJ)
+                               ColumnDef::new(PpBinaryWilsionEntity::ComponentJ)
                                    .string() // 可改为 string_len(64) 指定固定长度
                                    .not_null()
                                    .comment("关联组分j的casno"),
@@ -971,6 +1005,437 @@ impl MigrationTrait for Migration {
             )
             .await?;
 
+        manager
+            .create_table(
+                Table::create()
+                    .table(PpCalcFunctionPropertyEntity::Table)
+                    .if_not_exists()
+                    .comment("物性方法- 方法表")
+                    // 主键 id
+                    .col(
+                        ColumnDef::new(PpCalcFunctionPropertyEntity::Id)
+                            .integer()
+                            .not_null()
+                            .auto_increment()
+                            .primary_key()
+                            .comment("主键"),
+                    )
+                    // name（名字）
+                    .col(
+                        ColumnDef::new(PpCalcFunctionPropertyEntity::Name)
+                            .string()
+                            .not_null() // TypeORM未指定nullable，默认非空
+                            .comment("名字"),
+                    )
+                    // code（方法代号）
+                    .col(
+                        ColumnDef::new(PpCalcFunctionPropertyEntity::Code)
+                            .string()
+                            .not_null()
+                            .comment("方法代号"),
+                    )
+                    // args_json（参数名称,逗号分隔）
+                    .col(
+                        ColumnDef::new(PpCalcFunctionPropertyEntity::ArgsJson)
+                            .string()
+                            .not_null()
+                            .comment("参数名称,逗号分隔"),
+                    )
+                    // is_show（是否显示, 0: 否, 1: 是，默认值1）
+                    .col(
+                        ColumnDef::new(PpCalcFunctionPropertyEntity::IsShow)
+                            .integer()
+                            .not_null()
+                            .default("1")
+                            .comment("是否显示, 0: 否, 1: 是"),
+                    )
+                    .to_owned(),
+            )
+            .await?;
+
+        manager
+            .create_table(
+                Table::create()
+                    .table(PpCalcRelationPropertyEntity::Table)
+                    .if_not_exists()
+                    .comment("物性-方法-关系表")
+                    // 主键 id
+                    .col(
+                        ColumnDef::new(PpCalcRelationPropertyEntity::Id)
+                            .integer()
+                            .not_null()
+                            .auto_increment()
+                            .primary_key()
+                            .comment("主键"),
+                    )
+                    // base_physical_id（物性连接id）
+                    .col(
+                        ColumnDef::new(PpCalcRelationPropertyEntity::BasePhysicalId)
+                            .integer()
+                            .not_null()
+                            .comment("物性连接id"),
+                    )
+                    // function_id（方法id）
+                    .col(
+                        ColumnDef::new(PpCalcRelationPropertyEntity::FunctionId)
+                            .integer()
+                            .not_null()
+                            .comment("方法id"),
+                    )
+                    // default_function_id（默认方法id）
+                    .col(
+                        ColumnDef::new(PpCalcRelationPropertyEntity::DefaultFunctionId)
+                            .integer()
+                            .not_null()
+                            .comment("默认方法id"),
+                    )
+                    .to_owned(),
+            )
+            .await?;
+        manager
+            .create_table(
+                Table::create()
+                    .table(PpHenryDetailPropertyEntity::Table)
+                    .if_not_exists()
+                    // 主键
+                    .col(
+                        ColumnDef::new(PpHenryDetailPropertyEntity::Id)
+                            .integer()
+                            .not_null()
+                            .auto_increment()
+                            .primary_key()
+                            .comment("主键"),
+                    )
+                    // 关联 ID
+                    .col(
+                        ColumnDef::new(PpHenryDetailPropertyEntity::ComponentIId)
+                            .integer()
+                            .not_null()
+                            .comment("溶质名称ID"),
+                    )
+                    .col(
+                        ColumnDef::new(PpHenryDetailPropertyEntity::ComponentJId)
+                            .integer()
+                            .not_null()
+                            .comment("溶剂名称ID"),
+                    )
+                    // 字符串字段
+                    .col(
+                        ColumnDef::new(PpHenryDetailPropertyEntity::ComponentI)
+                            .string()
+                            .not_null()
+                            .comment("溶质i"),
+                    )
+                    .col(
+                        ColumnDef::new(PpHenryDetailPropertyEntity::ComponentJ)
+                            .string()
+                            .not_null()
+                            .comment("溶剂j"),
+                    )
+                    .col(
+                        ColumnDef::new(PpHenryDetailPropertyEntity::SourceName)
+                            .string()
+                            .not_null()
+                            .default("DTSP")
+                            .comment("来源名称"),
+                    )
+                    // 系数 (Double)
+                    .col(
+                        ColumnDef::new(PpHenryDetailPropertyEntity::Aij)
+                            .double()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(PpHenryDetailPropertyEntity::Bij)
+                            .double()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(PpHenryDetailPropertyEntity::Cij)
+                            .double()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(PpHenryDetailPropertyEntity::Dij)
+                            .double()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(PpHenryDetailPropertyEntity::Eij)
+                            .double()
+                            .not_null(),
+                    )
+                    // 温度范围
+                    .col(
+                        ColumnDef::new(PpHenryDetailPropertyEntity::TLower)
+                            .double()
+                            .not_null()
+                            .comment("温度下限"),
+                    )
+                    .col(
+                        ColumnDef::new(PpHenryDetailPropertyEntity::TUpper)
+                            .double()
+                            .not_null()
+                            .comment("温度上限"),
+                    )
+                    .to_owned(),
+            )
+            .await?;
+
+        manager
+            .create_table(
+                Table::create()
+                    .table(PpComponentInformationEntity::Table)
+                    .if_not_exists()
+                    .col(
+                        ColumnDef::new(PpComponentInformationEntity::Id)
+                            .integer()
+                            .not_null()
+                            .auto_increment()
+                            .primary_key()
+                            .comment("主键"),
+                    )
+                    .col(
+                        ColumnDef::new(PpComponentInformationEntity::Name)
+                            .string()
+                            .not_null()
+                            .comment("中文名"),
+                    )
+                    .col(
+                        ColumnDef::new(PpComponentInformationEntity::Formula)
+                            .string()
+                            .not_null()
+                            .comment("分子式"),
+                    )
+                    .col(
+                        ColumnDef::new(PpComponentInformationEntity::CasNo)
+                            .string()
+                            .not_null()
+                            .comment("cas号"),
+                    )
+                    .col(
+                        ColumnDef::new(PpComponentInformationEntity::Number)
+                            .integer()
+                            .not_null()
+                            .comment("编号"),
+                    )
+                    .col(
+                        ColumnDef::new(PpComponentInformationEntity::InternalName)
+                            .string()
+                            .not_null()
+                            .comment("英文名字"),
+                    )
+                    .to_owned(),
+            )
+            .await?;
+
+        manager
+            .create_table(
+                Table::create()
+                    .table(PpComponentBaseEntity::Table)
+                    .if_not_exists()
+                    .col(
+                        ColumnDef::new(PpComponentBaseEntity::Id)
+                            .integer()
+                            .auto_increment()
+                            .not_null()
+                            .primary_key()
+                            .comment("主键"),
+                    )
+                    .col(
+                        ColumnDef::new(PpComponentBaseEntity::ComponentId)
+                            .integer()
+                            .not_null()
+                            .comment("化合物id"),
+                    )
+                    .col(
+                        ColumnDef::new(PpComponentBaseEntity::Code)
+                            .string()
+                            .not_null()
+                            .comment("性质唯一编码"),
+                    )
+                    .col(
+                        ColumnDef::new(PpComponentBaseEntity::Name)
+                            .string()
+                            .not_null()
+                            .comment("性质中文名称"),
+                    )
+                    .col(
+                        ColumnDef::new(PpComponentBaseEntity::RefId)
+                            .integer()
+                            .not_null()
+                            .comment("引用源id"),
+                    )
+                    .col(
+                        ColumnDef::new(PpComponentBaseEntity::Value)
+                            .float() // 对应 real
+                            .not_null()
+                            .comment("常数值"),
+                    )
+                    .col(
+                        ColumnDef::new(PpComponentBaseEntity::UnitType)
+                            .string()
+                            .not_null()
+                            .comment("单位类型"),
+                    )
+                    .col(
+                        ColumnDef::new(PpComponentBaseEntity::IsDefault)
+                            .integer()
+                            .not_null()
+                            .comment("是否默认"),
+                    )
+                    .col(
+                        ColumnDef::new(PpComponentBaseEntity::IsShow)
+                            .integer()
+                            .not_null()
+                            .comment("是否显示, 0 不显示, 1 显示"),
+                    )
+                    .to_owned(),
+            )
+            .await?;
+        manager
+            .create_table(
+                Table::create()
+                    .table(PpComponentTemperatureEquationEntity::Table)
+                    .if_not_exists()
+                    .col(
+                        ColumnDef::new(PpComponentTemperatureEquationEntity::Id)
+                            .integer()
+                            .not_null()
+                            .primary_key()
+                            .auto_increment()
+                            .comment("主键"),
+                    )
+                    .col(
+                        ColumnDef::new(PpComponentTemperatureEquationEntity::ComponentId)
+                            .integer()
+                            .not_null()
+                            .comment("组件关联ID"),
+                    )
+                    .col(
+                        ColumnDef::new(PpComponentTemperatureEquationEntity::Name)
+                            .string()
+                            .not_null()
+                            .comment("名称"),
+                    )
+                    .col(
+                        ColumnDef::new(PpComponentTemperatureEquationEntity::Unit)
+                            .string()
+                            .not_null()
+                            .comment("单位"),
+                    )
+                    .col(
+                        ColumnDef::new(PpComponentTemperatureEquationEntity::Code)
+                            .string()
+                            .not_null()
+                            .comment("唯一编码"),
+                    )
+                    .col(
+                        ColumnDef::new(PpComponentTemperatureEquationEntity::FunctionCode)
+                            .integer()
+                            .not_null()
+                            .comment("公式编号"),
+                    )
+                    .col(
+                        ColumnDef::new(PpComponentTemperatureEquationEntity::FunctionName)
+                            .string()
+                            .not_null()
+                            .comment("公式名称"),
+                    )
+                    // 方程系数 (f64 -> double)
+                    .col(
+                        ColumnDef::new(PpComponentTemperatureEquationEntity::CoefficientA)
+                            .double()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(PpComponentTemperatureEquationEntity::CoefficientB)
+                            .double()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(PpComponentTemperatureEquationEntity::CoefficientC)
+                            .double()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(PpComponentTemperatureEquationEntity::CoefficientD)
+                            .double()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(PpComponentTemperatureEquationEntity::CoefficientE)
+                            .double()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(PpComponentTemperatureEquationEntity::CoefficientF)
+                            .double()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(PpComponentTemperatureEquationEntity::CoefficientG)
+                            .double()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(PpComponentTemperatureEquationEntity::CoefficientH)
+                            .double()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(PpComponentTemperatureEquationEntity::CoefficientK)
+                            .double()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(PpComponentTemperatureEquationEntity::CoefficientL)
+                            .double()
+                            .not_null(),
+                    )
+                    // 温度区间
+                    .col(
+                        ColumnDef::new(
+                            PpComponentTemperatureEquationEntity::MinApplicableTemperature,
+                        )
+                        .double()
+                        .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(
+                            PpComponentTemperatureEquationEntity::MinApplicableTemperatureUnit,
+                        )
+                        .string()
+                        .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(
+                            PpComponentTemperatureEquationEntity::MaxApplicableTemperature,
+                        )
+                        .double()
+                        .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(
+                            PpComponentTemperatureEquationEntity::MaxApplicableTemperatureUnit,
+                        )
+                        .string()
+                        .not_null(),
+                    )
+                    // 状态标记
+                    .col(
+                        ColumnDef::new(PpComponentTemperatureEquationEntity::IsShow)
+                            .integer()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(PpComponentTemperatureEquationEntity::IsDefault)
+                            .integer()
+                            .not_null(),
+                    )
+                    .to_owned(),
+            )
+            .await?;
         Ok(())
     }
 
@@ -1008,20 +1473,59 @@ impl MigrationTrait for Migration {
                     .to_owned(),
             )
             .await?;
+        manager
+            .drop_table(
+                Table::drop()
+                    .table(PpCalcFunctionPropertyEntity::Table)
+                    .to_owned(),
+            )
+            .await?;
+
+        manager
+            .drop_table(
+                Table::drop()
+                    .table(PpCalcRelationPropertyEntity::Table)
+                    .to_owned(),
+            )
+            .await?;
+        manager
+            .drop_table(
+                Table::drop()
+                    .table(PpHenryDetailPropertyEntity::Table)
+                    .to_owned(),
+            )
+            .await?;
+        manager
+            .drop_table(
+                Table::drop()
+                    .table(PpComponentInformationEntity::Table)
+                    .to_owned(),
+            )
+            .await?;
+        manager
+            .drop_table(Table::drop().table(PpComponentBaseEntity::Table).to_owned())
+            .await?;
+
+        manager
+            .drop_table(
+                Table::drop()
+                    .table(PpComponentTemperatureEquationEntity::Table)
+                    .to_owned(),
+            )
+            .await?;
         Ok(())
     }
 }
 
-/// 表/列名枚举（与实体字段对应，自动转为蛇形命名）
 #[derive(Iden)]
 enum PpBinaryNrtlRkEntity {
     Table,
     // 列名：id
     Id,
-    CompoundIId,
-    CompoundI,
+    ComponentIId,
+    ComponentI,
     ComponentJId,
-    CompoundJ,
+    ComponentJ,
     Aij,
     Aji,
     Bij,
@@ -1040,10 +1544,10 @@ enum PpBinaryNrtlRkEntity {
 enum PpBinaryNrtlEntity {
     Table,
     Id,
-    CompoundIId,
-    CompoundI,
+    ComponentIId,
+    ComponentI,
     ComponentJId,
-    CompoundJ,
+    ComponentJ,
     Aij,
     Aji,
     Bij,
@@ -1063,14 +1567,10 @@ enum PpBinaryPrEntity {
     Table,
     // 列名：id
     Id,
-    // 列名：compound_i_id
-    CompoundIId,
-    // 列名：compound_i
-    CompoundI,
-    // 列名：component_j_id
+    ComponentIId,
+    ComponentI,
     ComponentJId,
-    // 列名：compound_j
-    CompoundJ,
+    ComponentJ,
     // 列名：kaij（自动转为小写）
     Kaij,
     // 列名：kbij（自动转为小写）
@@ -1089,14 +1589,10 @@ enum PpBinaryPsrkEntity {
     Table,
     // 列名：id
     Id,
-    // 列名：compound_i_id
-    CompoundIId,
-    // 列名：compound_i
-    CompoundI,
-    // 列名：component_j_id
+    ComponentIId,
+    ComponentI,
     ComponentJId,
-    // 列名：compound_j
-    CompoundJ,
+    ComponentJ,
     // 列名：tij（自动转为小写）
     Tij,
     // 列名：tji（自动转为小写）
@@ -1113,14 +1609,10 @@ enum PpBinaryRkEntity {
     Table,
     // 列名：id
     Id,
-    // 列名：compound_i_id
-    CompoundIId,
-    // 列名：compound_i
-    CompoundI,
-    // 列名：component_j_id
+    ComponentIId,
+    ComponentI,
     ComponentJId,
-    // 列名：compound_j
-    CompoundJ,
+    ComponentJ,
     // 列名：kaij（自动转为小写）
     Kaij,
     // 列名：kbij（自动转为小写）
@@ -1133,21 +1625,16 @@ enum PpBinaryRkEntity {
     MaxT,
 }
 
-/// 表/列名枚举（自动转为小写列名，无需自定义大写注解）
 #[derive(Iden)]
 enum PpBinarySrkEntity {
     // 表名：pp_binary_srk_entity
     Table,
     // 列名：id
     Id,
-    // 列名：compound_i_id
-    CompoundIId,
-    // 列名：compound_i
-    CompoundI,
-    // 列名：component_j_id
+    ComponentIId,
+    ComponentI,
     ComponentJId,
-    // 列名：compound_j
-    CompoundJ,
+    ComponentJ,
     // 列名：kaij（自动转为小写）
     Kaij,
     // 列名：kbij（自动转为小写）
@@ -1160,21 +1647,16 @@ enum PpBinarySrkEntity {
     MaxT,
 }
 
-/// 表/列名枚举（自动转为小写列名，无需自定义大写注解）
 #[derive(Iden)]
 enum PpBinaryUniquacEntity {
     // 表名：pp_binary_uniquac_entity
     Table,
     // 列名：id
     Id,
-    // 列名：compound_i_id
-    CompoundIId,
-    // 列名：compound_i
-    CompoundI,
-    // 列名：component_j_id
+    ComponentIId,
+    ComponentI,
     ComponentJId,
-    // 列名：compound_j
-    CompoundJ,
+    ComponentJ,
     // 列名：aij（自动转为小写）
     Aij,
     // 列名：aji（自动转为小写）
@@ -1211,14 +1693,10 @@ enum PpBinaryWilsionEntity {
     Table,
     // 列名：id
     Id,
-    // 列名：compound_i_id
-    CompoundIId,
-    // 列名：compound_i
-    CompoundI,
-    // 列名：component_j_id
+    ComponentIId,
+    ComponentI,
     ComponentJId,
-    // 列名：compound_j
-    CompoundJ,
+    ComponentJ,
     // 列名：aij（自动转为小写）
     Aij,
     // 列名：aji（自动转为小写）
@@ -1266,4 +1744,105 @@ enum PpCalcBasePropertyEntity {
     Phase,
     // 列名：mixture
     Mixture,
+}
+
+#[derive(Iden)]
+enum PpCalcFunctionPropertyEntity {
+    // 表名：pp_calc_function
+    Table,
+    // 列名：id
+    Id,
+    // 列名：name
+    Name,
+    // 列名：code
+    Code,
+    // 列名：args_json
+    ArgsJson,
+    // 列名：is_show
+    IsShow,
+}
+
+#[derive(Iden)]
+enum PpCalcRelationPropertyEntity {
+    // 表名：pp_calc_relation
+    Table,
+    // 列名：id
+    Id,
+    // 列名：base_physical_id
+    BasePhysicalId,
+    // 列名：function_id
+    FunctionId,
+    // 列名：default_function_id
+    DefaultFunctionId,
+}
+
+#[derive(DeriveIden)]
+enum PpHenryDetailPropertyEntity {
+    Table,
+    Id,
+    ComponentIId,
+    ComponentI,
+    ComponentJId,
+    ComponentJ,
+    SourceName,
+    Aij,
+    Bij,
+    Cij,
+    Dij,
+    Eij,
+    TLower,
+    TUpper,
+}
+
+#[derive(DeriveIden)]
+enum PpComponentInformationEntity {
+    Table,
+    Id,
+    Name,
+    Formula,
+    CasNo,
+    Number,
+    InternalName,
+}
+
+#[derive(DeriveIden)]
+enum PpComponentBaseEntity {
+    Table,
+    Id,
+    ComponentId,
+    Code,
+    Name,
+    RefId,
+    Value,
+    UnitType,
+    IsDefault,
+    IsShow,
+}
+
+#[derive(DeriveIden)]
+enum PpComponentTemperatureEquationEntity {
+    Table,
+    Id,
+    ComponentId,
+    Name,
+    Unit,
+    Code,
+    FunctionCode,
+    FunctionName,
+    CoefficientA,
+    CoefficientB,
+    CoefficientC,
+    CoefficientD,
+    CoefficientE,
+    CoefficientF,
+    CoefficientG,
+    CoefficientH,
+    CoefficientK,
+    CoefficientL,
+    MinApplicableTemperature,
+    MinApplicableTemperatureUnit,
+    MaxApplicableTemperature,
+    MaxApplicableTemperatureUnit,
+    IsShow,
+    IsDefault,
 }
