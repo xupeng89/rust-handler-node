@@ -49,8 +49,8 @@ impl BinarySyncService {
                 .ok_or_else(|| DbErr::Custom("Missing componentJId".into()))?;
 
             let existing = E::find()
-                .filter(Expr::col(Alias::new(&E::col_i())).eq(i_id))
-                .filter(Expr::col(Alias::new(&E::col_j())).eq(j_id))
+                .filter(Expr::col(Alias::new(E::col_i())).eq(i_id))
+                .filter(Expr::col(Alias::new(E::col_j())).eq(j_id))
                 .one(&txn)
                 .await?;
 

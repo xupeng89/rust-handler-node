@@ -49,44 +49,6 @@ pub async fn get_physical_base_by_compound_id(
         .await
 }
 
-/// 批量插入数据 (基础方法)
-// pub async fn insert_physical_base_batch(
-//     db: &DatabaseTransaction,
-//     datas: Vec<Value>,
-// ) -> Result<(), DbErr> {
-//     let models: Vec<PhysicalBaseActiveModel> = datas
-//         .into_iter()
-//         .map(|item| PhysicalBaseActiveModel {
-//             id: item["id"].as_i64().map(|v| Set(v as i32)).unwrap_or(NotSet),
-//             component_id: Set(item["component_id"].as_i64().unwrap_or(0) as i32),
-//             code: Set(item["code"].as_str().unwrap_or("").to_string()),
-//             name: Set(item["name"].as_str().unwrap_or("").to_string()),
-//             ref_id: Set(item["ref_id"].as_i64().unwrap_or(0) as i32),
-//             value: Set(item["value"].as_f64().unwrap_or(0.0) as f32),
-//             unit_type: Set(item["unit_type"].as_str().unwrap_or("").to_string()),
-//             is_default: Set(item["is_default"].as_i64().unwrap_or(0) as i32),
-//             is_show: Set(item["is_show"].as_i64().unwrap_or(1) as i32),
-//         })
-//         .collect();
-
-//     PhysicalBaseEntity::insert_many(models).exec(db).await?;
-
-//     Ok(())
-// }
-
-/// 分段批量插入 (对应 TS 的 insertPhysicalBaseBatchForEach)
-// pub async fn insert_physical_base_batch_for_each(datas: Vec<Value>) -> Result<(), DbErr> {
-//     let db = get_physical_property_db().await?;
-//     let txn = db.begin().await?;
-
-//     // 每次处理 100 条
-//     for chunk in datas.chunks(100) {
-//         insert_physical_base_batch(&txn, chunk.to_vec()).await?;
-//     }
-
-//     txn.commit().await?;
-//     Ok(())
-// }
 pub async fn init_physical_base_data_fast(init_json_data: Vec<Value>) -> Result<(), DbErr> {
     let db = get_physical_property_db().await?;
     let txn = db.begin().await?;
