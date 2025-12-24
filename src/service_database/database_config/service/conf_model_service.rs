@@ -16,9 +16,9 @@ use crate::service_database::database_config::entity::conf_model_entity::{
     Model as ConfModelModel,
 };
 
-#[napi(object, namespace = "confModel")]
+#[napi(object, namespace = "confModel", js_name = "ConfModelDTO")]
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct ConfModelDto {
+pub struct ConfModelDTO {
     pub id: String,
     pub create_at: String,
     pub update_at: String,
@@ -33,9 +33,9 @@ pub struct ConfModelDto {
 }
 
 // 假设存在 Model 到 DTO 的转换
-impl From<ConfModelModel> for ConfModelDto {
+impl From<ConfModelModel> for ConfModelDTO {
     fn from(model: ConfModelModel) -> Self {
-        ConfModelDto {
+        ConfModelDTO {
             id: model.id,
             create_at: naive_dt_utc_to_millis(model.create_at),
             update_at: naive_dt_utc_to_millis(model.update_at),
@@ -51,17 +51,17 @@ impl From<ConfModelModel> for ConfModelDto {
     }
 }
 
-pub async fn select_conf_model_one() -> Result<ConfModelDto, DbErr> {
+pub async fn select_conf_model_one() -> Result<ConfModelDTO, DbErr> {
     let db = get_config_db().await.unwrap(); // 获取数据库连接
 
     let model = ConfModelEntity::find().one(db).await?;
 
     // 将查询结果 (Option<ConfModelModel>) 转换为 Option<ConfModelDto>
-    let dto: ConfModelDto = model.map(ConfModelDto::from).unwrap();
+    let dto: ConfModelDTO = model.map(ConfModelDTO::from).unwrap();
 
     Ok(dto)
 }
-pub async fn upsert_and_insert_fixed_conf_model(data: ConfModelDto) -> Result<i32, DbErr> {
+pub async fn upsert_and_insert_fixed_conf_model(data: ConfModelDTO) -> Result<i32, DbErr> {
     let db = get_config_db().await.unwrap(); // 获取数据库连接
     let model_one = ConfModelEntity::find()
         .filter(ConfModelColumn::Id.eq(&data.id))

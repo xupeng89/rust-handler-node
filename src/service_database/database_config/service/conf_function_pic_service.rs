@@ -15,9 +15,9 @@ use crate::service_database::database_config::entity::conf_function_pic_entity::
     Model as ConfFunctionPicModel,
 };
 
-#[napi(object, namespace = "confFunctionPic")]
+#[napi(object, namespace = "confFunctionPic", js_name = "FunctionPicDTO")]
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct FunctionPicDto {
+pub struct FunctionPicDTO {
     pub id: i32,
     pub name: String,
     pub picture: String,
@@ -25,9 +25,9 @@ pub struct FunctionPicDto {
 }
 
 // 假设存在 Model 到 DTO 的转换
-impl From<ConfFunctionPicModel> for FunctionPicDto {
+impl From<ConfFunctionPicModel> for FunctionPicDTO {
     fn from(model: ConfFunctionPicModel) -> Self {
-        FunctionPicDto {
+        FunctionPicDTO {
             id: model.id,
             name: model.name,
             picture: model.picture,
@@ -36,15 +36,15 @@ impl From<ConfFunctionPicModel> for FunctionPicDto {
     }
 }
 
-#[napi(object, namespace = "confFunctionPic")]
+#[napi(object, namespace = "confFunctionPic", js_name = "NewFunctionPicDTO")]
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct NewFunctionPicDto {
+pub struct NewFunctionPicDTO {
     pub name: String,
     pub picture: String,
     pub code: String,
 }
 
-pub async fn select_conf_function_pic_by_code(query_code: String) -> Result<FunctionPicDto, DbErr> {
+pub async fn select_conf_function_pic_by_code(query_code: String) -> Result<FunctionPicDTO, DbErr> {
     let db = get_config_db().await.unwrap(); // 获取数据库连接
 
     let model = ConfFunctionPicEntity::find()
@@ -54,12 +54,12 @@ pub async fn select_conf_function_pic_by_code(query_code: String) -> Result<Func
         .await?;
 
     // 将查询结果 (Option<ConfFunctionPicModel>) 转换为 Option<FunctionPicDto>
-    let dto = model.map(FunctionPicDto::from).unwrap();
+    let dto = model.map(FunctionPicDTO::from).unwrap();
 
     Ok(dto)
 }
 pub async fn upsert_and_insert_fixed_conf_pic(
-    pic_datas: Vec<NewFunctionPicDto>,
+    pic_datas: Vec<NewFunctionPicDTO>,
 ) -> Result<i32, DbErr> {
     let db = get_config_db().await.unwrap(); // 获取数据库连接
 

@@ -71,7 +71,7 @@ pub async fn sync_pp_henry_detail_data(data: Vec<Value>) -> Result<(), DbErr> {
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
-#[napi(object, namespace = "heryDetail")]
+#[napi(object, namespace = "heryDetail", js_name = "HenryDetailDTO")]
 pub struct HenryDetailDTO {
     pub id: i32,
     #[napi(js_name = "componentI")]

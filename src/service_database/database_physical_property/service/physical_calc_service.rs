@@ -8,13 +8,13 @@ use crate::service_database::database_physical_property::entity::physical_calc_b
     ActiveModel as BasePropertyActiveModel, Column as BasePropertyColumn};
 
 use crate::sync_physical_calc_data;
-use crate::tool_handle::result_entity::FunctionOptionDto;
+use crate::tool_handle::result_entity::FunctionOptionDTO;
 use napi_derive::napi;
 use sea_orm::{entity::prelude::*, FromQueryResult, JoinType, QuerySelect, Set, TransactionTrait};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 #[derive(Clone, Debug, Deserialize, Serialize)]
-#[napi(object, namespace = "physicalCalc")]
+#[napi(object, namespace = "physicalCalc", js_name = "CalcFunctionDTO")]
 pub struct CalcFunctionDTO {
     pub id: i32,
     pub name: String,
@@ -38,8 +38,8 @@ impl From<FunctionModel> for CalcFunctionDTO {
 
 /// 定一个整体联合查询的返回结果
 #[derive(Debug, Serialize, Deserialize, FromQueryResult)]
-#[napi(object, namespace = "physicalCalc")]
-pub struct CalcAllDetailDto {
+#[napi(object, namespace = "physicalCalc", js_name = "CalcAllDetailDTO")]
+pub struct CalcAllDetailDTO {
     // BaseProperty 表字段 (起别名)
     pub base_property_code: String,
     pub base_property_id: i32,
@@ -93,7 +93,7 @@ pub async fn get_first_pp_calc_function_by_codes(
 }
 
 // 关联查询：根据 BasePhysicalId 获取 Function
-pub async fn get_pp_function_options_by_bp_id(bp_id: i32) -> Result<Vec<FunctionOptionDto>, DbErr> {
+pub async fn get_pp_function_options_by_bp_id(bp_id: i32) -> Result<Vec<FunctionOptionDTO>, DbErr> {
     let db = get_physical_property_db().await?;
     RelationEntity::find()
         .select_only()
@@ -112,14 +112,14 @@ pub async fn get_pp_function_options_by_bp_id(bp_id: i32) -> Result<Vec<Function
         // 关键点：去重，防止关系表中有重复记录导致结果重复
         .distinct()
         // 映射到 DTO
-        .into_model::<FunctionOptionDto>()
+        .into_model::<FunctionOptionDTO>()
         .all(db)
         .await
 }
 
 pub async fn get_fluid_package_all_bp_by_function_id(
     function_id: i32,
-) -> Result<Vec<CalcAllDetailDto>, DbErr> {
+) -> Result<Vec<CalcAllDetailDTO>, DbErr> {
     let db = get_physical_property_db().await?;
 
     RelationEntity::find()
@@ -152,7 +152,7 @@ pub async fn get_fluid_package_all_bp_by_function_id(
         // 过滤
         .filter(RelationColumn::FunctionId.eq(function_id))
         // 映射到 DTO 模型而非 JSON
-        .into_model::<CalcAllDetailDto>()
+        .into_model::<CalcAllDetailDTO>()
         .all(db)
         .await
 }

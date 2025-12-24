@@ -16,7 +16,7 @@ use serde::{Deserialize, Serialize};
 
 // 定义 DTO 供 NAPI 使用 (如果需要)
 #[derive(Clone, Debug, Serialize, Deserialize)]
-#[napi(object, namespace = "physicalComponent")]
+#[napi(object, namespace = "physicalComponent", js_name = "PhysicalBaseDTO")]
 pub struct PhysicalBaseDTO {
     pub id: i32,
     #[napi(js_name = "componentId")]
@@ -95,7 +95,7 @@ pub async fn init_physical_base_data_fast(init_json_data: Vec<Value>) -> Result<
 
             PhysicalBaseActiveModel {
                 id: item["id"].as_i64().map(|v| Set(v as i32)).unwrap_or(NotSet),
-                component_id: Set(item["componentId"].as_i64().unwrap_or(0) as i32),
+                component_id: Set(item["compoundId"].as_i64().unwrap_or(0) as i32),
                 code: Set(item["code"].as_str().unwrap_or("").to_string()),
                 name: Set(item["name"].as_str().unwrap_or("").to_string()),
                 ref_id: Set(item["refId"].as_i64().unwrap_or(0) as i32),

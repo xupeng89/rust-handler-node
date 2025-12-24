@@ -15,7 +15,7 @@ use crate::error_handle::err_handle::handle_db_err;
 // 1. 根据类型批量查询
 #[napi(namespace = "confUnit")]
 /// 根据 type_num 列表查询点位信息 (返回 JSON 字符串)
-pub async fn get_all_unit_set_api() -> Result<Vec<ConfUnitSetDto>> {
+pub async fn get_all_unit_set_api() -> Result<Vec<ConfUnitSetDTO>> {
     // 调用服务层函数，并处理 DbErr
     let result = select_conf_unit_set_all().await.map_err(handle_db_err)?;
     Ok(result)
@@ -23,7 +23,7 @@ pub async fn get_all_unit_set_api() -> Result<Vec<ConfUnitSetDto>> {
 
 #[napi(namespace = "confUnit")]
 /// 根据 type_num 列表查询点位信息 (返回 JSON 字符串)
-pub async fn get_one_unit_set_api(code: String) -> Result<ConfUnitSetDto> {
+pub async fn get_one_unit_set_api(code: String) -> Result<ConfUnitSetDTO> {
     // 调用服务层函数，并处理 DbErr
     let result = select_conf_unit_set_one(code)
         .await
@@ -36,7 +36,7 @@ pub async fn get_one_unit_set_api(code: String) -> Result<ConfUnitSetDto> {
 /// 批量更新或插入点位信息
 pub async fn updata_and_insert_conf_unit_set_api(
     // napi-rs 自动将 JS 数组/对象映射到 Vec<PositionData>
-    data: Vec<ConfUnitSetDto>,
+    data: Vec<ConfUnitSetDTO>,
 ) -> Result<i32> {
     // 调用服务层函数，并处理 DbErr
     let result = upsert_and_insert_conf_unit_set(data)
@@ -48,7 +48,7 @@ pub async fn updata_and_insert_conf_unit_set_api(
 // 1. 根据类型批量查询
 #[napi(namespace = "confUnit")]
 /// 根据 type_num 列表查询点位信息 (返回 JSON 字符串)
-pub async fn get_all_unit_item_api(set_code: String) -> Result<Vec<ConfUnitItemDto>> {
+pub async fn get_all_unit_item_api(set_code: String) -> Result<Vec<ConfUnitItemDTO>> {
     // 调用服务层函数，并处理 DbErr
     let result = select_conf_unit_item_all(set_code)
         .await
@@ -61,7 +61,7 @@ pub async fn get_all_unit_item_api(set_code: String) -> Result<Vec<ConfUnitItemD
 pub async fn get_all_unit_item_by_codes_api(
     set_code: String,
     codes: Vec<String>,
-) -> Result<Vec<ConfUnitItemDto>> {
+) -> Result<Vec<ConfUnitItemDTO>> {
     // 调用服务层函数，并处理 DbErr
     let result = select_conf_unit_item_all_by_codes(set_code, codes)
         .await
@@ -74,7 +74,7 @@ pub async fn get_all_unit_item_by_codes_api(
 /// 批量更新或插入点位信息
 pub async fn updata_and_insert_conf_unit_item_api(
     // napi-rs 自动将 JS 数组/对象映射到 Vec<PositionData>
-    data: Vec<ConfUnitItemDto>,
+    data: Vec<ConfUnitItemDTO>,
 ) -> Result<i32> {
     // 调用服务层函数，并处理 DbErr
     let result = upsert_and_insert_conf_unit_item(data)
@@ -85,7 +85,7 @@ pub async fn updata_and_insert_conf_unit_item_api(
 
 #[napi(namespace = "confUnit")]
 /// 根据 type_num 列表查询点位信息 (返回 JSON 字符串)
-pub async fn get_all_unit_first_category_api() -> Result<Vec<ConfUnitFirstCategoryDto>> {
+pub async fn get_all_unit_first_category_api() -> Result<Vec<ConfUnitFirstCategoryDTO>> {
     // 调用服务层函数，并处理 DbErr
     let result = select_conf_unit_first_category_all()
         .await
@@ -98,7 +98,7 @@ pub async fn get_all_unit_first_category_api() -> Result<Vec<ConfUnitFirstCatego
 /// 批量更新或插入点位信息
 pub async fn updata_and_insert_conf_unit_first_category_api(
     // napi-rs 自动将 JS 数组/对象映射到 Vec<PositionData>
-    data: Vec<ConfUnitFirstCategoryDto>,
+    data: Vec<ConfUnitFirstCategoryDTO>,
 ) -> Result<i32> {
     // 调用服务层函数，并处理 DbErr
     let result = upsert_and_insert_conf_unit_first_category(data)
@@ -109,7 +109,7 @@ pub async fn updata_and_insert_conf_unit_first_category_api(
 
 #[napi(namespace = "confUnit")]
 /// 根据 type_num 列表查询点位信息 (返回 JSON 字符串)
-pub async fn get_all_unit_second_category_api() -> Result<Vec<ConfUnitSecondCategoryDto>> {
+pub async fn get_all_unit_second_category_api() -> Result<Vec<ConfUnitSecondCategoryDTO>> {
     // 调用服务层函数，并处理 DbErr
     let result = select_conf_unit_second_category_all()
         .await
@@ -122,7 +122,7 @@ pub async fn get_all_unit_second_category_api() -> Result<Vec<ConfUnitSecondCate
 /// 批量更新或插入点位信息
 pub async fn updata_and_insert_conf_unit_second_category_api(
     // napi-rs 自动将 JS 数组/对象映射到 Vec<PositionData>
-    data: Vec<ConfUnitSecondCategoryDto>,
+    data: Vec<ConfUnitSecondCategoryDTO>,
 ) -> Result<i32> {
     // 调用服务层函数，并处理 DbErr
     let result = upsert_and_insert_conf_unit_second_category(data)
@@ -133,7 +133,7 @@ pub async fn updata_and_insert_conf_unit_second_category_api(
 
 #[napi(namespace = "confUnit")]
 /// 根据 type_num 列表查询点位信息 (返回 JSON 字符串)
-pub async fn get_all_unit_item_category_api() -> Result<Vec<ConfUnitItemCategoryDto>> {
+pub async fn get_all_unit_item_category_api() -> Result<Vec<ConfUnitItemCategoryDTO>> {
     // 调用服务层函数，并处理 DbErr
     let result = select_conf_unit_item_category_all()
         .await
@@ -146,7 +146,7 @@ pub async fn get_all_unit_item_category_api() -> Result<Vec<ConfUnitItemCategory
 /// 批量更新或插入点位信息
 pub async fn updata_and_insert_conf_unit_item_category_api(
     // napi-rs 自动将 JS 数组/对象映射到 Vec<PositionData>
-    data: Vec<ConfUnitItemCategoryDto>,
+    data: Vec<ConfUnitItemCategoryDTO>,
 ) -> Result<i32> {
     // 调用服务层函数，并处理 DbErr
     let result = upsert_and_insert_conf_unit_item_category(data)

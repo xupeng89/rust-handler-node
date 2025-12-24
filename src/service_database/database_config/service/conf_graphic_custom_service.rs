@@ -11,9 +11,13 @@ use crate::service_database::database_config::entity::conf_graphic_custom_entity
 };
 // 针对 NAPI 调用的 DTO (Data Transfer Object)
 // 字段与 Model 一致，但添加 napi(object) 宏
-#[napi(object, namespace = "confGraphicCustom")]
+#[napi(
+    object,
+    namespace = "confGraphicCustom",
+    js_name = "ConfGraphicCustomDTO"
+)]
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct ConfGraphicCustomDto {
+pub struct ConfGraphicCustomDTO {
     pub id: i32,
     pub name: String,
     pub code: String,
@@ -27,9 +31,9 @@ pub struct ConfGraphicCustomDto {
 }
 
 // 辅助函数：将 Model 转换为 ConfigDto
-impl From<ConfGraphicCustomModel> for ConfGraphicCustomDto {
+impl From<ConfGraphicCustomModel> for ConfGraphicCustomDTO {
     fn from(model: ConfGraphicCustomModel) -> Self {
-        ConfGraphicCustomDto {
+        ConfGraphicCustomDTO {
             id: model.id,
             name: model.name,
             code: model.code,
@@ -44,7 +48,7 @@ impl From<ConfGraphicCustomModel> for ConfGraphicCustomDto {
     }
 }
 
-pub async fn select_all_conf_graphic_custom() -> Result<Vec<ConfGraphicCustomDto>, DbErr> {
+pub async fn select_all_conf_graphic_custom() -> Result<Vec<ConfGraphicCustomDTO>, DbErr> {
     let db = get_config_db().await.unwrap();
 
     // 直接查询 ID 为 1 的记录
@@ -53,13 +57,13 @@ pub async fn select_all_conf_graphic_custom() -> Result<Vec<ConfGraphicCustomDto
     // 将结果转换为 ConfigDto
     let dto = model
         .into_iter()
-        .map(ConfGraphicCustomDto::from)
+        .map(ConfGraphicCustomDTO::from)
         .collect::<Vec<_>>();
 
     Ok(dto)
 }
 pub async fn upsert_and_insert_all_conf_graphic_custom(
-    config_data_list: Vec<ConfGraphicCustomDto>,
+    config_data_list: Vec<ConfGraphicCustomDTO>,
 ) -> Result<i32, DbErr> {
     let db = get_config_db().await.unwrap();
 

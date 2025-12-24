@@ -15,7 +15,7 @@ use crate::error_handle::err_handle::handle_db_err;
 // 1. 根据类型批量查询
 #[napi(namespace = "confFunctionPic")]
 /// 根据 type_num 列表查询点位信息 (返回 JSON 字符串)
-pub async fn get_conf_function_pic_one_message_api(code: String) -> Result<FunctionPicDto> {
+pub async fn get_conf_function_pic_one_message_api(code: String) -> Result<FunctionPicDTO> {
     // 调用服务层函数，并处理 DbErr
     let result = select_conf_function_pic_by_code(code)
         .await
@@ -28,7 +28,7 @@ pub async fn get_conf_function_pic_one_message_api(code: String) -> Result<Funct
 /// 批量更新或插入点位信息
 pub async fn update_or_insert_conf_function_pic_api(
     // napi-rs 自动将 JS 数组/对象映射到 Vec<PositionData>
-    datas: Vec<NewFunctionPicDto>,
+    datas: Vec<NewFunctionPicDTO>,
 ) -> Result<()> {
     // 调用服务层函数，并处理 DbErr
     upsert_and_insert_fixed_conf_pic(datas)

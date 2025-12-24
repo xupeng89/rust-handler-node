@@ -24,6 +24,12 @@ export interface FullCacheData {
   stateDesc?: string
 }
 
+/** 页面使用的label, value 返回 */
+export interface FunctionOptionDTO {
+  label: string
+  value: string
+}
+
 export declare namespace autoShutter {
   export function syncCacheToLocalApi(): Promise<void>
   export function syncLocalToCacheApi(): Promise<void>
@@ -64,7 +70,7 @@ export declare namespace confConfig {
     String = 'String',
     Number = 'Number'
   }
-  export interface ConfigDto {
+  export interface ConfigDTO {
     id: number
     name: string
     code: string
@@ -72,31 +78,31 @@ export declare namespace confConfig {
     valueType: ConfConfigValueTypeEnum
   }
   /** 根据 type_num 列表查询点位信息 (返回 JSON 字符串) */
-  export function getConfConfigAllMessageApi(): Promise<Array<ConfigDto>>
+  export function getConfConfigAllMessageApi(): Promise<Array<ConfigDTO>>
   /** 批量更新或插入点位信息 */
-  export function updateOrInsertConfConfigApi(data: Array<ConfigDto>): Promise<number>
+  export function updateOrInsertConfConfigApi(data: Array<ConfigDTO>): Promise<number>
 }
 
 export declare namespace confFunctionPic {
-  export interface FunctionPicDto {
+  export interface FunctionPicDTO {
     id: number
     name: string
     picture: string
     code: string
   }
   /** 根据 type_num 列表查询点位信息 (返回 JSON 字符串) */
-  export function getConfFunctionPicOneMessageApi(code: string): Promise<FunctionPicDto>
-  export interface NewFunctionPicDto {
+  export function getConfFunctionPicOneMessageApi(code: string): Promise<FunctionPicDTO>
+  export interface NewFunctionPicDTO {
     name: string
     picture: string
     code: string
   }
   /** 批量更新或插入点位信息 */
-  export function updateOrInsertConfFunctionPicApi(datas: Array<NewFunctionPicDto>): Promise<void>
+  export function updateOrInsertConfFunctionPicApi(datas: Array<NewFunctionPicDTO>): Promise<void>
 }
 
 export declare namespace confGraphicCustom {
-  export interface ConfGraphicCustomDto {
+  export interface ConfGraphicCustomDTO {
     id: number
     name: string
     code: string
@@ -109,13 +115,13 @@ export declare namespace confGraphicCustom {
     dndType: string
   }
   /** 根据 type_num 列表查询点位信息 (返回 JSON 字符串) */
-  export function getConfGraphicCustomOneMessageApi(): Promise<Array<ConfGraphicCustomDto>>
+  export function getConfGraphicCustomOneMessageApi(): Promise<Array<ConfGraphicCustomDTO>>
   /** 批量更新或插入点位信息 */
-  export function updateOrInsertConfGraphicCustomApi(data: Array<ConfGraphicCustomDto>): Promise<number>
+  export function updateOrInsertConfGraphicCustomApi(data: Array<ConfGraphicCustomDTO>): Promise<number>
 }
 
 export declare namespace confModel {
-  export interface ConfModelDto {
+  export interface ConfModelDTO {
     id: string
     createAt: string
     updateAt: string
@@ -129,9 +135,9 @@ export declare namespace confModel {
     language: string
   }
   /** 根据 type_num 列表查询点位信息 (返回 JSON 字符串) */
-  export function getConfModelAllMessageApi(): Promise<ConfModelDto>
+  export function getConfModelAllMessageApi(): Promise<ConfModelDTO>
   /** 批量更新或插入点位信息 */
-  export function updateOrInsertConfModelApi(data: ConfModelDto): Promise<number>
+  export function updateOrInsertConfModelApi(data: ConfModelDTO): Promise<number>
 }
 
 export declare namespace confPfModelParams {
@@ -162,30 +168,30 @@ export declare namespace confSystemVariable {
 }
 
 export declare namespace confUnit {
-  export interface ConfUnitFirstCategoryDto {
+  export interface ConfUnitFirstCategoryDTO {
     code: string
     name: string
     enName: string
   }
-  export interface ConfUnitItemCategoryDto {
+  export interface ConfUnitItemCategoryDTO {
     code: string
     name: string
     enName: string
     categorySecondCode: string
   }
-  export interface ConfUnitItemDto {
+  export interface ConfUnitItemDTO {
     id: number
     code: string
     value: string
     setCode: string
   }
-  export interface ConfUnitSecondCategoryDto {
+  export interface ConfUnitSecondCategoryDTO {
     code: string
     name: string
     enName: string
     categoryFirstCode: string
   }
-  export interface ConfUnitSetDto {
+  export interface ConfUnitSetDTO {
     id: number
     code: string
     name: string
@@ -194,33 +200,33 @@ export declare namespace confUnit {
     isDefault: number
   }
   /** 根据 type_num 列表查询点位信息 (返回 JSON 字符串) */
-  export function getAllUnitFirstCategoryApi(): Promise<Array<ConfUnitFirstCategoryDto>>
+  export function getAllUnitFirstCategoryApi(): Promise<Array<ConfUnitFirstCategoryDTO>>
   /** 根据 type_num 列表查询点位信息 (返回 JSON 字符串) */
-  export function getAllUnitItemApi(setCode: string): Promise<Array<ConfUnitItemDto>>
+  export function getAllUnitItemApi(setCode: string): Promise<Array<ConfUnitItemDTO>>
   /** 根据 type_num 列表查询点位信息 (返回 JSON 字符串) */
-  export function getAllUnitItemByCodesApi(setCode: string, codes: Array<string>): Promise<Array<ConfUnitItemDto>>
+  export function getAllUnitItemByCodesApi(setCode: string, codes: Array<string>): Promise<Array<ConfUnitItemDTO>>
   /** 根据 type_num 列表查询点位信息 (返回 JSON 字符串) */
-  export function getAllUnitItemCategoryApi(): Promise<Array<ConfUnitItemCategoryDto>>
+  export function getAllUnitItemCategoryApi(): Promise<Array<ConfUnitItemCategoryDTO>>
   /** 根据 type_num 列表查询点位信息 (返回 JSON 字符串) */
-  export function getAllUnitSecondCategoryApi(): Promise<Array<ConfUnitSecondCategoryDto>>
+  export function getAllUnitSecondCategoryApi(): Promise<Array<ConfUnitSecondCategoryDTO>>
   /** 根据 type_num 列表查询点位信息 (返回 JSON 字符串) */
-  export function getAllUnitSetApi(): Promise<Array<ConfUnitSetDto>>
+  export function getAllUnitSetApi(): Promise<Array<ConfUnitSetDTO>>
   /** 根据 type_num 列表查询点位信息 (返回 JSON 字符串) */
-  export function getOneUnitSetApi(code: string): Promise<ConfUnitSetDto>
+  export function getOneUnitSetApi(code: string): Promise<ConfUnitSetDTO>
   /** 批量更新或插入点位信息 */
-  export function updataAndInsertConfUnitFirstCategoryApi(data: Array<ConfUnitFirstCategoryDto>): Promise<number>
+  export function updataAndInsertConfUnitFirstCategoryApi(data: Array<ConfUnitFirstCategoryDTO>): Promise<number>
   /** 批量更新或插入点位信息 */
-  export function updataAndInsertConfUnitItemApi(data: Array<ConfUnitItemDto>): Promise<number>
+  export function updataAndInsertConfUnitItemApi(data: Array<ConfUnitItemDTO>): Promise<number>
   /** 批量更新或插入点位信息 */
-  export function updataAndInsertConfUnitItemCategoryApi(data: Array<ConfUnitItemCategoryDto>): Promise<number>
+  export function updataAndInsertConfUnitItemCategoryApi(data: Array<ConfUnitItemCategoryDTO>): Promise<number>
   /** 批量更新或插入点位信息 */
-  export function updataAndInsertConfUnitSecondCategoryApi(data: Array<ConfUnitSecondCategoryDto>): Promise<number>
+  export function updataAndInsertConfUnitSecondCategoryApi(data: Array<ConfUnitSecondCategoryDTO>): Promise<number>
   /** 批量更新或插入点位信息 */
-  export function updataAndInsertConfUnitSetApi(data: Array<ConfUnitSetDto>): Promise<number>
+  export function updataAndInsertConfUnitSetApi(data: Array<ConfUnitSetDTO>): Promise<number>
 }
 
 export declare namespace heryDetail {
-  export interface HenryDetailDto {
+  export interface HenryDetailDTO {
     id: number
     componentI: string
     componentJ: string
@@ -235,6 +241,10 @@ export declare namespace heryDetail {
     componentIId: number
     componentJId: number
   }
+  /** 根据溶质(I)列表和溶剂(J)列表查询亨利常数记录 */
+  export function queryPpComponentHenryDetailDataByIOrJApi(idsI: Array<string>, idsJ: Array<string>): Promise<Array<HenryDetailDTO>>
+  /** 同步亨利详细数据 (包含差集删除、更新和插入) */
+  export function syncPpHenryDetailDataApi(data: Array<any>): Promise<void>
 }
 
 export declare namespace initDB {
@@ -246,13 +256,22 @@ export declare namespace initDB {
   export function initCacheDb(): Promise<void>
   /** 初始化自动快照数据库 */
   export function initConfigDb(url: string): Promise<void>
+  /** 初始化自动快照数据库 */
+  export function initPhysicalDb(url: string): Promise<void>
   /** 初始化快照数据库 */
   export function initShutterDb(url: string): Promise<void>
 }
 
+export declare namespace physicalBinarySync {
+  /** 批量查询接口 */
+  export function queryBinaryDataApi(funcCode: string, ids: Array<string>): Promise<Array<any>>
+  /** 批量同步接口 */
+  export function syncBinaryDataApi(funcCode: string, data: Array<any>): Promise<void>
+}
+
 export declare namespace physicalCalc {
   /** 定一个整体联合查询的返回结果 */
-  export interface CalcAllDetailDto {
+  export interface CalcAllDetailDTO {
     basePropertyCode: string
     basePropertyId: number
     basePropertyName: string
@@ -261,11 +280,93 @@ export declare namespace physicalCalc {
     basePropertyMixture: number
     calcFunctionCode: string
   }
-  export interface CalcFunctionDto {
+  export interface CalcFunctionDTO {
     id: number
     name: string
     code: string
     argsJson: string
+    isShow: number
+  }
+  /** 根据 ID 列表批量查询方法 */
+  export function getAllPpCalcFunctionByIdsApi(ids: Array<number>): Promise<Array<CalcFunctionDTO>>
+  /** 根据 Code 列表批量查询方法 */
+  export function getFirstPpCalcFunctionByCodesApi(codes: Array<string>): Promise<Array<CalcFunctionDTO>>
+  /** 根据方法 ID 获取流体包详细关联信息 */
+  export function getFluidPackageAllBpByFunctionIdApi(functionId: number): Promise<Array<CalcAllDetailDTO>>
+  /** 获取所有方法列表 */
+  export function getPpCalcFunctionListApi(): Promise<Array<CalcFunctionDTO>>
+  /** 根据 BasePhysicalId 获取 Function 选项 (用于下拉框) */
+  export function getPpFunctionOptionsByBpIdApi(bpId: number): Promise<Array<FunctionOptionDTO>>
+  /**
+   * 批量初始化/同步物性计算相关消息数据
+   * data_type: "basePhysical" | "function" | "relation"
+   */
+  export function initPpCalcAllMsgDataApi(dataType: string, data: Array<any>): Promise<void>
+}
+
+export declare namespace physicalComponent {
+  /** 获取库中所有的组分信息列表 */
+  export function getAllPhysicalInformationListApi(): Promise<Array<PhysicalInformationDTO>>
+  /** 根据组分 ID (compound_id) 读取相关记录 */
+  export function getPhysicalBaseByCompoundIdApi(compoundId: number): Promise<Array<PhysicalBaseDTO>>
+  /** 根据 ID 列表批量获取组分基础物理性质 */
+  export function getPhysicalBaseByIdsApi(ids: Array<number>): Promise<Array<PhysicalBaseDTO>>
+  /** 根据 casNo 列表批量获取组分详细信息 */
+  export function getPhysicalInformationListByCasNoListApi(casNoList: Array<string>): Promise<Array<PhysicalInformationDTO>>
+  /** 根据 casNo 获取单条组分详细信息 */
+  export function getPhysicalInformationOneByCasNoApi(casNo: string): Promise<PhysicalInformationDTO>
+  /** 根据组分 ID (compound_id) 获取其所有的温度关联方程 */
+  export function getPhysicalTemperatureEquationByCompoundIdApi(compoundId: number): Promise<Array<TemperatureEquationDTO>>
+  /** 根据 ID 列表获取组分温度关联方程记录 */
+  export function getPhysicalTemperatureEquationByIdsApi(ids: Array<number>): Promise<Array<TemperatureEquationDTO>>
+  /** 快速初始化组分基础性质数据 (全量删除并重新分段插入) */
+  export function initPhysicalBaseDataFastApi(initJsonData: Array<any>): Promise<void>
+  /** 快速初始化组分信息数据 (全量清空并分段插入) */
+  export function initPhysicalInformationDataFastApi(initJsonData: Array<any>): Promise<void>
+  /** 快速初始化温度关联方程数据 (全量物理删除并分段插入) */
+  export function initPhysicalTemperatureEquationDataFastApi(initJsonData: Array<any>): Promise<void>
+  export interface PhysicalBaseDTO {
+    id: number
+    componentId: number
+    code: string
+    name: string
+    refId: number
+    value: number
+    unitType: string
+    isDefault: number
+    isShow: number
+  }
+  export interface PhysicalInformationDTO {
+    id: number
+    name: string
+    formula: string
+    casNo: string
+    number: number
+    internalName: string
+  }
+  export interface TemperatureEquationDTO {
+    id: number
+    componentId: number
+    code: string
+    name: string
+    unit: string
+    functionCode: number
+    functionName: string
+    coefficientA: number
+    coefficientB: number
+    coefficientC: number
+    coefficientD: number
+    coefficientE: number
+    coefficientF: number
+    coefficientG: number
+    coefficientH: number
+    coefficientK: number
+    coefficientL: number
+    minApplicableTemperature: number
+    minApplicableTemperatureUnit: string
+    maxApplicableTemperature: number
+    maxApplicableTemperatureUnit: string
+    isDefault: number
     isShow: number
   }
 }
@@ -283,14 +384,6 @@ export declare namespace pointInfor {
   }
   /** 批量更新或插入点位信息 */
   export function updateOrInsertPositionInformationCacheApi(data: Array<PositionData>): Promise<void>
-}
-
-export declare namespace resultOption {
-  /** 页面使用的label, value 返回 */
-  export interface FunctionOptionDto {
-    label: string
-    value: string
-  }
 }
 
 export declare namespace shutterHandle {

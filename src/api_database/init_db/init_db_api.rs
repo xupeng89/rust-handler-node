@@ -60,6 +60,21 @@ pub async fn init_config_db(url: String) -> Result<()> {
     Ok(())
 }
 
+#[napi(namespace = "initDB")]
+/// 初始化自动快照数据库
+pub async fn init_physical_db(url: String) -> Result<()> {
+    // 初始化cache数据库
+    match crate::service_database::database_physical_property::db_physical_property_connection::initialize_physical_property_db(url)
+        .await
+    {
+        Ok(_) => {}
+        Err(e) => {
+            eprintln!("init_physical_db error: {}", e);
+        }
+    };
+    Ok(())
+}
+
 /// 关闭数据库使用
 #[napi(namespace = "initDB")]
 pub async fn close_all_dbs() -> Result<()> {

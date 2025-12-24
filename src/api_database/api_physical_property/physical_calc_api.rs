@@ -6,7 +6,7 @@ use serde_json::Value;
 use crate::service_database::database_physical_property::service::physical_calc_service::*;
 // 引入错误处理
 use crate::error_handle::err_handle::handle_db_err;
-
+use crate::tool_handle::result_entity::FunctionOptionDTO;
 #[napi(namespace = "physicalCalc")]
 /// 获取所有方法列表
 pub async fn get_pp_calc_function_list_api() -> Result<Vec<CalcFunctionDTO>> {
@@ -33,9 +33,7 @@ pub async fn get_first_pp_calc_function_by_codes_api(
 
 #[napi(namespace = "physicalCalc")]
 /// 根据 BasePhysicalId 获取 Function 选项 (用于下拉框)
-pub async fn get_pp_function_options_by_bp_id_api(
-    bp_id: i32,
-) -> Result<Vec<crate::tool_handle::result_entity::FunctionOptionDto>> {
+pub async fn get_pp_function_options_by_bp_id_api(bp_id: i32) -> Result<Vec<FunctionOptionDTO>> {
     get_pp_function_options_by_bp_id(bp_id)
         .await
         .map_err(handle_db_err)
@@ -45,7 +43,7 @@ pub async fn get_pp_function_options_by_bp_id_api(
 /// 根据方法 ID 获取流体包详细关联信息
 pub async fn get_fluid_package_all_bp_by_function_id_api(
     function_id: i32,
-) -> Result<Vec<CalcAllDetailDto>> {
+) -> Result<Vec<CalcAllDetailDTO>> {
     get_fluid_package_all_bp_by_function_id(function_id)
         .await
         .map_err(handle_db_err)

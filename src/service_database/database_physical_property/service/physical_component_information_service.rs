@@ -12,7 +12,11 @@ use sea_orm::{
 use serde_json::Value;
 // 定义 DTO 供 NAPI 使用 (如果需要)
 #[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
-#[napi(object, namespace = "physicalComponent")]
+#[napi(
+    object,
+    namespace = "physicalComponent",
+    js_name = "PhysicalInformationDTO"
+)]
 pub struct PhysicalInformationDTO {
     pub id: i32,
     pub name: String,

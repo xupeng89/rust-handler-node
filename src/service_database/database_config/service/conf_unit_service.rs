@@ -14,9 +14,9 @@ use crate::service_database::database_config::entity::conf_unit_set_entity::{
     Entity as ConfUnitSetEntity, Model as ConfUnitSetModel,
 };
 
-#[napi(object, namespace = "confUnit")]
+#[napi(object, namespace = "confUnit", js_name = "ConfUnitSetDTO")]
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct ConfUnitSetDto {
+pub struct ConfUnitSetDTO {
     pub id: i32,
     pub code: String,
     pub name: String,
@@ -26,9 +26,9 @@ pub struct ConfUnitSetDto {
 }
 
 // 假设存在 Model 到 DTO 的转换
-impl From<ConfUnitSetModel> for ConfUnitSetDto {
+impl From<ConfUnitSetModel> for ConfUnitSetDTO {
     fn from(model: ConfUnitSetModel) -> Self {
-        ConfUnitSetDto {
+        ConfUnitSetDTO {
             id: model.id,
             code: model.code,
             name: model.name,
@@ -39,7 +39,7 @@ impl From<ConfUnitSetModel> for ConfUnitSetDto {
     }
 }
 
-pub async fn select_conf_unit_set_one(code: String) -> Result<ConfUnitSetDto, DbErr> {
+pub async fn select_conf_unit_set_one(code: String) -> Result<ConfUnitSetDTO, DbErr> {
     let db = get_config_db().await.unwrap(); // 获取数据库连接
 
     let models = ConfUnitSetEntity::find()
@@ -47,12 +47,12 @@ pub async fn select_conf_unit_set_one(code: String) -> Result<ConfUnitSetDto, Db
         .one(db)
         .await?;
 
-    let dto: ConfUnitSetDto = models.map(ConfUnitSetDto::from).unwrap();
+    let dto: ConfUnitSetDTO = models.map(ConfUnitSetDTO::from).unwrap();
 
     Ok(dto)
 }
 
-pub async fn select_conf_unit_set_all() -> Result<Vec<ConfUnitSetDto>, DbErr> {
+pub async fn select_conf_unit_set_all() -> Result<Vec<ConfUnitSetDTO>, DbErr> {
     let db = get_config_db().await.unwrap(); // 获取数据库连接
 
     let models = ConfUnitSetEntity::find()
@@ -60,11 +60,11 @@ pub async fn select_conf_unit_set_all() -> Result<Vec<ConfUnitSetDto>, DbErr> {
         .all(db)
         .await?;
 
-    let dto: Vec<ConfUnitSetDto> = models.into_iter().map(ConfUnitSetDto::from).collect();
+    let dto: Vec<ConfUnitSetDTO> = models.into_iter().map(ConfUnitSetDTO::from).collect();
 
     Ok(dto)
 }
-pub async fn upsert_and_insert_conf_unit_set(data_list: Vec<ConfUnitSetDto>) -> Result<i32, DbErr> {
+pub async fn upsert_and_insert_conf_unit_set(data_list: Vec<ConfUnitSetDTO>) -> Result<i32, DbErr> {
     let db = get_config_db().await.unwrap(); // 获取数据库连接
     let existing_models = ConfUnitSetEntity::find().all(db).await?;
     let existing_code_map: std::collections::HashMap<_, _> =
@@ -104,9 +104,9 @@ use crate::service_database::database_config::entity::conf_unit_item_entity::{
     Entity as ConfUnitItemEntity, Model as ConfUnitItemModel,
 };
 
-#[napi(object, namespace = "confUnit")]
+#[napi(object, namespace = "confUnit", js_name = "ConfUnitItemDTO")]
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct ConfUnitItemDto {
+pub struct ConfUnitItemDTO {
     pub id: i32,
     pub code: String,
     pub value: String,
@@ -114,9 +114,9 @@ pub struct ConfUnitItemDto {
 }
 
 // 假设存在 Model 到 DTO 的转换
-impl From<ConfUnitItemModel> for ConfUnitItemDto {
+impl From<ConfUnitItemModel> for ConfUnitItemDTO {
     fn from(model: ConfUnitItemModel) -> Self {
-        ConfUnitItemDto {
+        ConfUnitItemDTO {
             id: model.id,
             code: model.code,
             value: model.value,
@@ -125,7 +125,7 @@ impl From<ConfUnitItemModel> for ConfUnitItemDto {
     }
 }
 
-pub async fn select_conf_unit_item_all(set_code: String) -> Result<Vec<ConfUnitItemDto>, DbErr> {
+pub async fn select_conf_unit_item_all(set_code: String) -> Result<Vec<ConfUnitItemDTO>, DbErr> {
     let db = get_config_db().await.unwrap(); // 获取数据库连接
 
     let models = ConfUnitItemEntity::find()
@@ -133,7 +133,7 @@ pub async fn select_conf_unit_item_all(set_code: String) -> Result<Vec<ConfUnitI
         .all(db)
         .await?;
 
-    let dto: Vec<ConfUnitItemDto> = models.into_iter().map(ConfUnitItemDto::from).collect();
+    let dto: Vec<ConfUnitItemDTO> = models.into_iter().map(ConfUnitItemDTO::from).collect();
 
     Ok(dto)
 }
@@ -141,7 +141,7 @@ pub async fn select_conf_unit_item_all(set_code: String) -> Result<Vec<ConfUnitI
 pub async fn select_conf_unit_item_all_by_codes(
     set_code: String,
     codes: Vec<String>,
-) -> Result<Vec<ConfUnitItemDto>, DbErr> {
+) -> Result<Vec<ConfUnitItemDTO>, DbErr> {
     let db = get_config_db().await.unwrap(); // 获取数据库连接
 
     let models = ConfUnitItemEntity::find()
@@ -150,13 +150,13 @@ pub async fn select_conf_unit_item_all_by_codes(
         .all(db)
         .await?;
 
-    let dto: Vec<ConfUnitItemDto> = models.into_iter().map(ConfUnitItemDto::from).collect();
+    let dto: Vec<ConfUnitItemDTO> = models.into_iter().map(ConfUnitItemDTO::from).collect();
 
     Ok(dto)
 }
 
 pub async fn upsert_and_insert_conf_unit_item(
-    data_list: Vec<ConfUnitItemDto>,
+    data_list: Vec<ConfUnitItemDTO>,
 ) -> Result<i32, DbErr> {
     let db = get_config_db().await.unwrap(); // 获取数据库连接
     let existing_models = ConfUnitItemEntity::find().all(db).await?;
@@ -194,18 +194,18 @@ use crate::service_database::database_config::entity::conf_unit_first_category_e
     Model as ConfUnitFirstCategoryModel,
 };
 
-#[napi(object, namespace = "confUnit")]
+#[napi(object, namespace = "confUnit", js_name = "ConfUnitFirstCategoryDTO")]
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct ConfUnitFirstCategoryDto {
+pub struct ConfUnitFirstCategoryDTO {
     pub code: String,
     pub name: String,
     pub en_name: String,
 }
 
 // 假设存在 Model 到 DTO 的转换
-impl From<ConfUnitFirstCategoryModel> for ConfUnitFirstCategoryDto {
+impl From<ConfUnitFirstCategoryModel> for ConfUnitFirstCategoryDTO {
     fn from(model: ConfUnitFirstCategoryModel) -> Self {
-        ConfUnitFirstCategoryDto {
+        ConfUnitFirstCategoryDTO {
             code: model.code,
             name: model.name,
             en_name: model.en_name,
@@ -213,21 +213,21 @@ impl From<ConfUnitFirstCategoryModel> for ConfUnitFirstCategoryDto {
     }
 }
 
-pub async fn select_conf_unit_first_category_all() -> Result<Vec<ConfUnitFirstCategoryDto>, DbErr> {
+pub async fn select_conf_unit_first_category_all() -> Result<Vec<ConfUnitFirstCategoryDTO>, DbErr> {
     let db = get_config_db().await.unwrap(); // 获取数据库连接
 
     let models = ConfUnitFirstCategoryEntity::find().all(db).await?;
 
-    let dto: Vec<ConfUnitFirstCategoryDto> = models
+    let dto: Vec<ConfUnitFirstCategoryDTO> = models
         .into_iter()
-        .map(ConfUnitFirstCategoryDto::from)
+        .map(ConfUnitFirstCategoryDTO::from)
         .collect();
 
     Ok(dto)
 }
 
 pub async fn upsert_and_insert_conf_unit_first_category(
-    data_list: Vec<ConfUnitFirstCategoryDto>,
+    data_list: Vec<ConfUnitFirstCategoryDTO>,
 ) -> Result<i32, DbErr> {
     let db = get_config_db().await.unwrap(); // 获取数据库连接
     let existing_models = ConfUnitFirstCategoryEntity::find().all(db).await?;
@@ -267,9 +267,9 @@ use crate::service_database::database_config::entity::conf_unit_second_category_
     Model as ConfUnitSecondCategoryModel,
 };
 
-#[napi(object, namespace = "confUnit")]
+#[napi(object, namespace = "confUnit", js_name = "ConfUnitSecondCategoryDTO")]
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct ConfUnitSecondCategoryDto {
+pub struct ConfUnitSecondCategoryDTO {
     pub code: String,
     pub name: String,
     pub en_name: String,
@@ -277,9 +277,9 @@ pub struct ConfUnitSecondCategoryDto {
 }
 
 // 假设存在 Model 到 DTO 的转换
-impl From<ConfUnitSecondCategoryModel> for ConfUnitSecondCategoryDto {
+impl From<ConfUnitSecondCategoryModel> for ConfUnitSecondCategoryDTO {
     fn from(model: ConfUnitSecondCategoryModel) -> Self {
-        ConfUnitSecondCategoryDto {
+        ConfUnitSecondCategoryDTO {
             code: model.code,
             name: model.name,
             en_name: model.en_name,
@@ -288,7 +288,7 @@ impl From<ConfUnitSecondCategoryModel> for ConfUnitSecondCategoryDto {
     }
 }
 
-pub async fn select_conf_unit_second_category_all() -> Result<Vec<ConfUnitSecondCategoryDto>, DbErr>
+pub async fn select_conf_unit_second_category_all() -> Result<Vec<ConfUnitSecondCategoryDTO>, DbErr>
 {
     let db = get_config_db().await.unwrap(); // 获取数据库连接
 
@@ -296,16 +296,16 @@ pub async fn select_conf_unit_second_category_all() -> Result<Vec<ConfUnitSecond
         // .filter(ConfUnitSecondCategoryColumn::CategoryFirstCode.eq(first_code))
         .all(db)
         .await?;
-    let dto: Vec<ConfUnitSecondCategoryDto> = models
+    let dto: Vec<ConfUnitSecondCategoryDTO> = models
         .into_iter()
-        .map(ConfUnitSecondCategoryDto::from)
+        .map(ConfUnitSecondCategoryDTO::from)
         .collect();
 
     Ok(dto)
 }
 
 pub async fn upsert_and_insert_conf_unit_second_category(
-    data_list: Vec<ConfUnitSecondCategoryDto>,
+    data_list: Vec<ConfUnitSecondCategoryDTO>,
 ) -> Result<i32, DbErr> {
     let db = get_config_db().await.unwrap(); // 获取数据库连接
     let existing_models = ConfUnitSecondCategoryEntity::find().all(db).await?;
@@ -346,9 +346,9 @@ use crate::service_database::database_config::entity::conf_unit_item_category_en
     Model as ConfUnitItemCategoryModel,
 };
 
-#[napi(object, namespace = "confUnit")]
+#[napi(object, namespace = "confUnit", js_name = "ConfUnitItemCategoryDTO")]
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct ConfUnitItemCategoryDto {
+pub struct ConfUnitItemCategoryDTO {
     pub code: String,
     pub name: String,
     pub en_name: String,
@@ -356,9 +356,9 @@ pub struct ConfUnitItemCategoryDto {
 }
 
 // 假设存在 Model 到 DTO 的转换
-impl From<ConfUnitItemCategoryModel> for ConfUnitItemCategoryDto {
+impl From<ConfUnitItemCategoryModel> for ConfUnitItemCategoryDTO {
     fn from(model: ConfUnitItemCategoryModel) -> Self {
-        ConfUnitItemCategoryDto {
+        ConfUnitItemCategoryDTO {
             code: model.code,
             name: model.name,
             en_name: model.en_name,
@@ -367,23 +367,23 @@ impl From<ConfUnitItemCategoryModel> for ConfUnitItemCategoryDto {
     }
 }
 
-pub async fn select_conf_unit_item_category_all() -> Result<Vec<ConfUnitItemCategoryDto>, DbErr> {
+pub async fn select_conf_unit_item_category_all() -> Result<Vec<ConfUnitItemCategoryDTO>, DbErr> {
     let db = get_config_db().await.unwrap(); // 获取数据库连接
 
     let models = ConfUnitItemCategoryEntity::find()
         // .filter(ConfUnitItemCategoryColumn::CategorySecondCode.eq(second_code))
         .all(db)
         .await?;
-    let dto: Vec<ConfUnitItemCategoryDto> = models
+    let dto: Vec<ConfUnitItemCategoryDTO> = models
         .into_iter()
-        .map(ConfUnitItemCategoryDto::from)
+        .map(ConfUnitItemCategoryDTO::from)
         .collect();
 
     Ok(dto)
 }
 
 pub async fn upsert_and_insert_conf_unit_item_category(
-    data_list: Vec<ConfUnitItemCategoryDto>,
+    data_list: Vec<ConfUnitItemCategoryDTO>,
 ) -> Result<i32, DbErr> {
     let db = get_config_db().await.unwrap(); // 获取数据库连接
     let existing_models = ConfUnitItemCategoryEntity::find().all(db).await?;

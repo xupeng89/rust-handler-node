@@ -12,7 +12,11 @@ use crate::service_database::database_config::entity::conf_system_variable_entit
     Model as ConfSystemVariableModel,
 };
 
-#[napi(object, namespace = "confSystemVariable")]
+#[napi(
+    object,
+    namespace = "confSystemVariable",
+    js_name = "ConfSystemVariableDto"
+)]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ConfSystemVariableDto {
     pub id: i32,

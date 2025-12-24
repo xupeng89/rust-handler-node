@@ -12,7 +12,11 @@ use crate::service_database::database_config::entity::conf_pf_model_params_entit
     Model as ConfPfModelParamsModel,
 };
 
-#[napi(object, namespace = "confPfModelParams")]
+#[napi(
+    object,
+    namespace = "confPfModelParams",
+    js_name = "ConfPfModelParamsDto"
+)]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ConfPfModelParamsDto {
     pub id: i32,

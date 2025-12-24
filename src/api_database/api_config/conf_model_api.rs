@@ -15,7 +15,7 @@ use crate::error_handle::err_handle::handle_db_err;
 // 1. 根据类型批量查询
 #[napi(namespace = "confModel")]
 /// 根据 type_num 列表查询点位信息 (返回 JSON 字符串)
-pub async fn get_conf_model_all_message_api() -> Result<ConfModelDto> {
+pub async fn get_conf_model_all_message_api() -> Result<ConfModelDTO> {
     // 调用服务层函数，并处理 DbErr
     let result = select_conf_model_one().await.map_err(handle_db_err)?;
     Ok(result)
@@ -26,7 +26,7 @@ pub async fn get_conf_model_all_message_api() -> Result<ConfModelDto> {
 /// 批量更新或插入点位信息
 pub async fn update_or_insert_conf_model_api(
     // napi-rs 自动将 JS 数组/对象映射到 Vec<PositionData>
-    data: ConfModelDto,
+    data: ConfModelDTO,
 ) -> Result<i32> {
     // 调用服务层函数，并处理 DbErr
     let result = upsert_and_insert_fixed_conf_model(data)

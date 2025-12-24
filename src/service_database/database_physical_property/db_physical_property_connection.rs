@@ -55,26 +55,41 @@ pub async fn initialize_physical_property_db(
         let final_db_url = DB_URL.get().unwrap().as_str();
 
         let mut opt = migration_orm::ConnectOptions::new(final_db_url.to_owned());
-        opt.max_connections(16)
-            .min_connections(4)
-            .connect_timeout(Duration::from_secs(10))
-            .acquire_timeout(Duration::from_secs(5))
-            .idle_timeout(Duration::from_secs(60))
-            .sqlx_logging(true); // 开发调试时建议开启
 
-        // 2. 创建连接
+        // ---------------------------------------------------------
+        // 关键修复点：针对 SQLite 锁问题的优化
+        // ---------------------------------------------------------
+        opt.max_connections(1) // 强烈建议设为 1。SQLite 实际上是串行写入的，多连接只会增加报错概率。
+            .min_connections(1)
+            .connect_timeout(Duration::from_secs(10))
+            // 增加等待时间：当数据库被锁定时，sqlx 会在报错前尝试等待的时长
+            .acquire_timeout(Duration::from_secs(30))
+            .idle_timeout(Duration::from_secs(60))
+            // 启用繁忙超时（非常重要）：这是 SQLite 层面的排队机制
+            .max_lifetime(Duration::from_secs(1800))
+            .sqlx_logging(true);
+
         let db = migration_orm::Database::connect(opt).await?;
-        // 3. 运行 Migration (核心步骤)
+
+        // ---------------------------------------------------------
+        // 关键修复点：设置极高的 Busy Timeout
+        // ---------------------------------------------------------
+        // 告诉 SQLite：如果表被锁了，请原地等待 5000 毫秒再报错，而不是立刻报错。
+        db.execute_unprepared("PRAGMA foreign_keys = ON;").await?;
+        db.execute_unprepared("PRAGMA busy_timeout = 5000;").await?;
+
+        // 运行 Migration
         Migrator::up(&db, None).await.map_err(|e| {
             eprintln!("❌ [PhysicalPropertyDB] Migration 失败: {}", e);
             e
         })?;
 
-        // 4. 设置 WAL 模式
+        // 设置 WAL 模式
         db.execute_unprepared("PRAGMA journal_mode = WAL;").await?;
         db.execute_unprepared("PRAGMA synchronous = NORMAL;")
             .await?;
-        eprintln!("✅ [PhysicalPropertyDB] 数据库连接成功");
+
+        eprintln!("✅ [PhysicalPropertyDB] 数据库连接成功 (WAL 模式 + BusyTimeout 5s)");
         Ok::<migration_orm::DatabaseConnection, migration_orm::DbErr>(db)
     })
     .await

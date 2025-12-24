@@ -12,9 +12,9 @@ use crate::service_database::database_config::entity::conf_config_entity::{
 
 // 针对 NAPI 调用的 DTO (Data Transfer Object)
 // 字段与 Model 一致，但添加 napi(object) 宏
-#[napi(object, namespace = "confConfig")]
+#[napi(object, namespace = "confConfig", js_name = "ConfigDTO")]
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct ConfigDto {
+pub struct ConfigDTO {
     pub id: i32,
     pub name: String,
     pub code: String,
@@ -23,9 +23,9 @@ pub struct ConfigDto {
 }
 
 // 辅助函数：将 Model 转换为 ConfigDto
-impl From<ConfConfigModel> for ConfigDto {
+impl From<ConfConfigModel> for ConfigDTO {
     fn from(model: ConfConfigModel) -> Self {
-        ConfigDto {
+        ConfigDTO {
             id: model.id,
             name: model.name,
             code: model.code,
@@ -35,19 +35,19 @@ impl From<ConfConfigModel> for ConfigDto {
     }
 }
 
-pub async fn select_all_conf_config() -> Result<Vec<ConfigDto>, DbErr> {
+pub async fn select_all_conf_config() -> Result<Vec<ConfigDTO>, DbErr> {
     let db = get_config_db().await.unwrap();
 
     // 直接查询 ID 为 1 的记录
     let model = ConfConfigEntity::find().all(db).await?;
 
     // 将结果转换为 ConfigDto
-    let dto = model.into_iter().map(ConfigDto::from).collect::<Vec<_>>();
+    let dto = model.into_iter().map(ConfigDTO::from).collect::<Vec<_>>();
 
     Ok(dto)
 }
 pub async fn upsert_and_insert_all_conf_config(
-    config_data_list: Vec<ConfigDto>,
+    config_data_list: Vec<ConfigDTO>,
 ) -> Result<i32, DbErr> {
     let db = get_config_db().await.unwrap();
 
