@@ -15,7 +15,7 @@ pub struct Model {
 
     pub ref_id: i32,
 
-    pub value: f32,
+    pub value: f64,
 
     pub unit_type: String,
 

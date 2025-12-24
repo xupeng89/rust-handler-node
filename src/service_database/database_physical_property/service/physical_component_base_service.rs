@@ -3,6 +3,7 @@ use crate::service_database::database_physical_property::entity::physical_compon
     ActiveModel as PhysicalBaseActiveModel, Column as PhysicalBaseColumn,
     Entity as PhysicalBaseEntity, Model as PhysicalBaseModel,
 };
+
 use napi_derive::napi;
 use sea_orm::Statement;
 use sea_orm::{
@@ -10,9 +11,12 @@ use sea_orm::{
     TransactionTrait,
 };
 use serde_json::Value;
+
+use serde::{Deserialize, Serialize};
+
 // 定义 DTO 供 NAPI 使用 (如果需要)
-#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
-#[napi(object)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
+#[napi(object, namespace = "physicalComponent")]
 pub struct PhysicalBaseDTO {
     pub id: i32,
     #[napi(js_name = "componentId")]
@@ -29,24 +33,47 @@ pub struct PhysicalBaseDTO {
     #[napi(js_name = "isShow")]
     pub is_show: i32,
 }
+
+// 类型转换
+impl From<PhysicalBaseModel> for PhysicalBaseDTO {
+    fn from(ele: PhysicalBaseModel) -> Self {
+        PhysicalBaseDTO {
+            id: ele.id,
+            name: ele.name,
+            code: ele.code,
+            component_id: ele.component_id,
+            ref_id: ele.ref_id,
+            value: ele.value,
+            unit_type: ele.unit_type,
+            is_default: ele.is_default,
+            is_show: ele.is_show,
+        }
+    }
+}
+
 /// 根据 IDs 获取所有的记录
-pub async fn get_physical_base_by_ids(ids: Vec<i32>) -> Result<Vec<PhysicalBaseModel>, DbErr> {
+pub async fn get_physical_base_by_ids(ids: Vec<i32>) -> Result<Vec<PhysicalBaseDTO>, DbErr> {
     let db = get_physical_property_db().await?;
-    PhysicalBaseEntity::find()
+    let base_list: Vec<PhysicalBaseModel> = PhysicalBaseEntity::find()
         .filter(PhysicalBaseColumn::Id.is_in(ids))
         .all(db)
-        .await
+        .await?;
+    let result = base_list.into_iter().map(PhysicalBaseDTO::from).collect();
+
+    Ok(result)
 }
 
 /// 根据 compoundId 读取记录
 pub async fn get_physical_base_by_compound_id(
     compound_id: i32,
-) -> Result<Vec<PhysicalBaseModel>, DbErr> {
+) -> Result<Vec<PhysicalBaseDTO>, DbErr> {
     let db = get_physical_property_db().await?;
-    PhysicalBaseEntity::find()
+    let base_list = PhysicalBaseEntity::find()
         .filter(PhysicalBaseColumn::ComponentId.eq(compound_id))
         .all(db)
-        .await
+        .await?;
+    let result = base_list.into_iter().map(PhysicalBaseDTO::from).collect();
+    Ok(result)
 }
 
 pub async fn init_physical_base_data_fast(init_json_data: Vec<Value>) -> Result<(), DbErr> {
@@ -72,7 +99,7 @@ pub async fn init_physical_base_data_fast(init_json_data: Vec<Value>) -> Result<
                 code: Set(item["code"].as_str().unwrap_or("").to_string()),
                 name: Set(item["name"].as_str().unwrap_or("").to_string()),
                 ref_id: Set(item["refId"].as_i64().unwrap_or(0) as i32),
-                value: Set(item["value"].as_f64().unwrap_or(0.0) as f32),
+                value: Set(item["value"].as_f64().unwrap_or(0.0)),
                 unit_type: Set(item["unitType"].as_str().unwrap_or("").to_string()),
                 is_default: Set(item["isDefault"].as_i64().unwrap_or(0) as i32),
                 is_show: Set(item["isShow"].as_i64().unwrap_or(1) as i32),
@@ -113,7 +140,7 @@ pub async fn init_physical_base_data_fast(init_json_data: Vec<Value>) -> Result<
         txn.execute_raw(statement).await?; // 传递引用 &statement
     } else {
         // Handle the case for unsupported database backends
-        eprintln!("Warning: Unsupported database backend for resetting auto-increment.");
+        eprintln!("Warning: Unsupported database backend for resetting auto-increment.  ->pp_component_base_entity");
     }
 
     txn.commit().await?;
