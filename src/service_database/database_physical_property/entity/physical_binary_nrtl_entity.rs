@@ -1,6 +1,7 @@
+use crate::impl_binary_syncable;
+use crate::service_database::interface_trait::{HasId, SyncableBinaryEntity};
 use sea_orm::entity::prelude::*;
 use serde::{Deserialize, Serialize};
-
 /// 二元交互参数信息表， 该信息表主要用于存储二元交互参数数据，具体表结构是由二元交互参数方法表去定义 -nrtl
 #[derive(Clone, Debug, PartialEq, Eq, DeriveEntityModel, Serialize, Deserialize)]
 #[sea_orm(
@@ -81,3 +82,5 @@ pub struct Model {
 pub enum Relation {}
 
 impl ActiveModelBehavior for ActiveModel {}
+
+impl_binary_syncable!(Model, Entity);

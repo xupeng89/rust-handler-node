@@ -1,4 +1,7 @@
-use crate::service_database::database_physical_property::db_physical_property_connection::get_physical_property_db;
+use crate::service_database::{
+    database_physical_property::db_physical_property_connection::get_physical_property_db,
+    interface_trait::{HasId, SyncableBinaryEntity},
+};
 use sea_orm::{
     entity::prelude::*,
     sea_query::{Alias, Expr},
@@ -25,11 +28,10 @@ impl BinarySyncService {
         incoming_data: Vec<Value>,
     ) -> Result<(), DbErr>
     where
-        E: EntityTrait,
-        AM: ActiveModelTrait<Entity = E> + ActiveModelBehavior + Send,
+        E: SyncableBinaryEntity,
+        AM: ActiveModelTrait<Entity = E> + ActiveModelBehavior + Send + TryIntoModel<E::Model>,
         // 关键修复：添加了 TryIntoModel 约束，以便从 ActiveModel 转回 Model
-        AM: TryIntoModel<E::Model>,
-        E::Model: IntoActiveModel<AM> + Serialize + for<'de> Deserialize<'de> + Sync,
+        E::Model: IntoActiveModel<AM> + HasId + Serialize + for<'de> Deserialize<'de> + Sync,
     {
         let txn = db.begin().await?;
         let mut processed_ids = Vec::new();
@@ -47,35 +49,24 @@ impl BinarySyncService {
                 .ok_or_else(|| DbErr::Custom("Missing componentJId".into()))?;
 
             let existing = E::find()
-                .filter(Expr::col(Alias::new("component_i_id")).eq(i_id))
-                .filter(Expr::col(Alias::new("component_j_id")).eq(j_id))
+                .filter(Expr::col(Alias::new(&E::col_i())).eq(i_id))
+                .filter(Expr::col(Alias::new(&E::col_j())).eq(j_id))
                 .one(&txn)
                 .await?;
 
             if let Some(model) = existing {
-                // 1. 记录已有 ID (利用序列化避开 PrimaryKey::Id 类型无法匹配的问题)
-                let model_val =
-                    serde_json::to_value(&model).map_err(|e| DbErr::Custom(e.to_string()))?;
-                if let Some(id) = model_val["id"].as_i64() {
-                    processed_ids.push(id as i32);
-                }
+                processed_ids.push(model.get_id());
 
-                // 2. 更新
                 let mut am = model.into_active_model();
                 am.set_from_json(item_json)?;
                 am.update(&txn).await?;
             } else {
-                // 3. 插入
                 let mut am = AM::default();
                 am.set_from_json(item_json)?;
                 let inserted_model = am.insert(&txn).await?;
 
-                // 记录新插入生成的 ID
-                let inserted_val = serde_json::to_value(&inserted_model)
-                    .map_err(|e| DbErr::Custom(e.to_string()))?;
-                if let Some(id) = inserted_val["id"].as_i64() {
-                    processed_ids.push(id as i32);
-                }
+                // 【优化】插入后也直接获取 ID
+                processed_ids.push(inserted_model.get_id());
             }
         }
 
@@ -132,25 +123,23 @@ impl BinarySyncService {
 pub async fn dispatch_sync_request(func_code: &str, data: Vec<Value>) -> Result<(), DbErr> {
     let db = get_physical_property_db().await?;
     match func_code {
-        "PR" => BinarySyncService::generic_sync::<pr::Entity, pr::ActiveModel>(&db, data).await,
-        "RK" => BinarySyncService::generic_sync::<rk::Entity, rk::ActiveModel>(&db, data).await,
-        "SRK" => BinarySyncService::generic_sync::<srk::Entity, srk::ActiveModel>(&db, data).await,
+        "PR" => BinarySyncService::generic_sync::<pr::Entity, pr::ActiveModel>(db, data).await,
+        "RK" => BinarySyncService::generic_sync::<rk::Entity, rk::ActiveModel>(db, data).await,
+        "SRK" => BinarySyncService::generic_sync::<srk::Entity, srk::ActiveModel>(db, data).await,
         "NRTL" => {
-            BinarySyncService::generic_sync::<nrtl::Entity, nrtl::ActiveModel>(&db, data).await
+            BinarySyncService::generic_sync::<nrtl::Entity, nrtl::ActiveModel>(db, data).await
         }
         "NRTL-RK" => {
-            BinarySyncService::generic_sync::<nrtl_rk::Entity, nrtl_rk::ActiveModel>(&db, data)
-                .await
+            BinarySyncService::generic_sync::<nrtl_rk::Entity, nrtl_rk::ActiveModel>(db, data).await
         }
         "PSRK" => {
-            BinarySyncService::generic_sync::<psrk::Entity, psrk::ActiveModel>(&db, data).await
+            BinarySyncService::generic_sync::<psrk::Entity, psrk::ActiveModel>(db, data).await
         }
         "UNIQUAC" => {
-            BinarySyncService::generic_sync::<uniquac::Entity, uniquac::ActiveModel>(&db, data)
-                .await
+            BinarySyncService::generic_sync::<uniquac::Entity, uniquac::ActiveModel>(db, data).await
         }
         "WILSON" => {
-            BinarySyncService::generic_sync::<wilson::Entity, wilson::ActiveModel>(&db, data).await
+            BinarySyncService::generic_sync::<wilson::Entity, wilson::ActiveModel>(db, data).await
         }
         _ => Err(DbErr::Custom(format!("不支持的方程编码: {}", func_code))),
     }
@@ -163,14 +152,14 @@ pub async fn dispatch_query_request(
 ) -> Result<Vec<Value>, DbErr> {
     let db = get_physical_property_db().await?;
     match func_code {
-        "PR" => BinarySyncService::generic_query::<pr::Entity>(&db, ids).await,
-        "RK" => BinarySyncService::generic_query::<rk::Entity>(&db, ids).await,
-        "SRK" => BinarySyncService::generic_query::<srk::Entity>(&db, ids).await,
-        "NRTL" => BinarySyncService::generic_query::<nrtl::Entity>(&db, ids).await,
-        "NRTL-RK" => BinarySyncService::generic_query::<nrtl_rk::Entity>(&db, ids).await,
-        "PSRK" => BinarySyncService::generic_query::<psrk::Entity>(&db, ids).await,
-        "UNIQUAC" => BinarySyncService::generic_query::<uniquac::Entity>(&db, ids).await,
-        "WILSON" => BinarySyncService::generic_query::<wilson::Entity>(&db, ids).await,
+        "PR" => BinarySyncService::generic_query::<pr::Entity>(db, ids).await,
+        "RK" => BinarySyncService::generic_query::<rk::Entity>(db, ids).await,
+        "SRK" => BinarySyncService::generic_query::<srk::Entity>(db, ids).await,
+        "NRTL" => BinarySyncService::generic_query::<nrtl::Entity>(db, ids).await,
+        "NRTL-RK" => BinarySyncService::generic_query::<nrtl_rk::Entity>(db, ids).await,
+        "PSRK" => BinarySyncService::generic_query::<psrk::Entity>(db, ids).await,
+        "UNIQUAC" => BinarySyncService::generic_query::<uniquac::Entity>(db, ids).await,
+        "WILSON" => BinarySyncService::generic_query::<wilson::Entity>(db, ids).await,
         _ => Ok(vec![]),
     }
 }

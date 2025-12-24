@@ -5,8 +5,9 @@ use crate::service_database::database_physical_property::entity::physical_calc_f
 use crate::service_database::database_physical_property::entity::physical_calc_relation_property_entity::{Entity as RelationEntity,
     ActiveModel as RelationActiveModel, Column as RelationColumn};
 use crate::service_database::database_physical_property::entity::physical_calc_base_property_entity::{Entity as BasePropertyEntity,
-    ActiveModel as BasePropertyActionModel, Column as BasePropertyColumn};
+    ActiveModel as BasePropertyActiveModel, Column as BasePropertyColumn};
 
+use crate::sync_physical_calc_data;
 use crate::tool_handle::result_entity::FunctionOptionDto;
 use napi_derive::napi;
 use sea_orm::{entity::prelude::*, FromQueryResult, JoinType, QuerySelect, Set, TransactionTrait};
@@ -170,88 +171,62 @@ pub async fn init_pp_calc_all_msg_data(data_type: &str, data: Vec<Value>) -> Res
     // 2. 处理同步逻辑
     match data_type {
         "basePhysical" => {
-            // --- A. 删除不在传入列表中的数据 (以传入为准) ---
-            BasePropertyEntity::delete_many()
-                .filter(BasePropertyColumn::Id.is_not_in(incoming_ids.clone()))
-                .exec(&txn)
-                .await?;
-
-            // --- B. 插入或更新传入的数据 ---
-            for item in data {
-                if let Some(id) = item["id"].as_i64().map(|v| v as i32) {
-                    let existing = BasePropertyEntity::find_by_id(id).one(&txn).await?;
-                    let mut am: BasePropertyActionModel = Default::default();
-                    am.id = Set(id);
+            sync_physical_calc_data!(
+                &txn,
+                incoming_ids,
+                data,
+                BasePropertyEntity,
+                BasePropertyActiveModel,
+                item,
+                am,
+                {
                     am.name = Set(item["name"].as_str().unwrap_or("").to_string());
                     am.code = Set(item["code"].as_str().unwrap_or("").to_string());
                     am.key = Set(item["key"].as_str().unwrap_or("").to_string());
                     am.type_str = Set(item["type"].as_str().unwrap_or("").to_string());
                     am.phase = Set(item["phase"].as_str().unwrap_or("").to_string());
                     am.mixture = Set(item["mixture"].as_i64().unwrap_or(0) as i32);
-
-                    if existing.is_some() {
-                        am.update(&txn).await?;
-                    } else {
-                        am.insert(&txn).await?;
-                    }
                 }
-            }
+            );
         }
         "function" => {
-            FunctionEntity::delete_many()
-                .filter(FunctionColumn::Id.is_not_in(incoming_ids.clone()))
-                .exec(&txn)
-                .await?;
-
-            for item in data {
-                if let Some(id) = item["id"].as_i64().map(|v| v as i32) {
-                    let existing = FunctionEntity::find_by_id(id).one(&txn).await?;
-
+            sync_physical_calc_data!(
+                &txn,
+                incoming_ids,
+                data,
+                FunctionEntity,
+                FunctionActiveModel,
+                item,
+                am,
+                {
                     let args_json_str = if item["argsJson"].is_string() {
                         item["argsJson"].as_str().unwrap().to_string()
                     } else {
                         item["argsJson"].to_string()
                     };
-
-                    let mut am: FunctionActiveModel = Default::default();
-                    am.id = Set(id);
                     am.name = Set(item["name"].as_str().unwrap_or("").to_string());
                     am.code = Set(item["code"].as_str().unwrap_or("").to_string());
                     am.args_json = Set(args_json_str);
                     am.is_show = Set(item["isShow"].as_i64().unwrap_or(1) as i32);
-
-                    if existing.is_some() {
-                        am.update(&txn).await?;
-                    } else {
-                        am.insert(&txn).await?;
-                    }
                 }
-            }
+            );
         }
         "relation" => {
-            RelationEntity::delete_many()
-                .filter(RelationColumn::Id.is_not_in(incoming_ids.clone()))
-                .exec(&txn)
-                .await?;
-
-            for item in data {
-                if let Some(id) = item["id"].as_i64().map(|v| v as i32) {
-                    let existing = RelationEntity::find_by_id(id).one(&txn).await?;
-
-                    let mut am: RelationActiveModel = Default::default();
-                    am.id = Set(id);
+            sync_physical_calc_data!(
+                &txn,
+                incoming_ids,
+                data,
+                RelationEntity,
+                RelationActiveModel,
+                item,
+                am,
+                {
                     am.base_physical_id = Set(item["basePhysicalId"].as_i64().unwrap_or(0) as i32);
                     am.function_id = Set(item["functionId"].as_i64().unwrap_or(0) as i32);
                     am.default_function_id =
                         Set(item["defaultFunctionId"].as_i64().unwrap_or(0) as i32);
-
-                    if existing.is_some() {
-                        am.update(&txn).await?;
-                    } else {
-                        am.insert(&txn).await?;
-                    }
                 }
-            }
+            );
         }
         _ => return Err(DbErr::Custom("Unknown data type".to_string())),
     }

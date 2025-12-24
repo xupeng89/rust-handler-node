@@ -121,7 +121,6 @@ impl From<HenryModel> for HenryDetailDTO {
     }
 }
 /// 2. 根据组分 I 列表和 J 列表查询多条信息 (IN 查询)
-/// 对应 TS: queryPPCompoundHenryDetailDataByIorJ
 pub async fn query_pp_component_henry_detail_data_by_i_or_j(
     ids_i: Vec<String>,
     ids_j: Vec<String>,

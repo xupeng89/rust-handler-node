@@ -53,3 +53,6 @@ pub struct Model {
 pub enum Relation {}
 
 impl ActiveModelBehavior for ActiveModel {}
+use crate::impl_binary_syncable;
+use crate::service_database::interface_trait::{HasId, SyncableBinaryEntity};
+impl_binary_syncable!(Model, Entity);
