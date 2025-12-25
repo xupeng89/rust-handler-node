@@ -120,6 +120,7 @@ module.exports.confSystemVariable = __napiModule.exports.confSystemVariable
 module.exports.confUnit = __napiModule.exports.confUnit
 module.exports.heryDetail = __napiModule.exports.heryDetail
 module.exports.initDB = __napiModule.exports.initDB
+module.exports.modelHandle = __napiModule.exports.modelHandle
 module.exports.physicalBinarySync = __napiModule.exports.physicalBinarySync
 module.exports.physicalCalc = __napiModule.exports.physicalCalc
 module.exports.physicalComponent = __napiModule.exports.physicalComponent

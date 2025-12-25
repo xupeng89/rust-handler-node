@@ -161,6 +161,36 @@ macro_rules! setup_db_instance {
                 }
                 eprintln!("✅ [{}] WAL 已安全落盘", $log_prefix);
             }
+
+            // ==========================================
+            // 新增：备份数据库函数
+            // ==========================================
+            pub async fn [<backup_ $name _db>](target_path: String) -> Result<(), sea_orm_migration::sea_orm::DbErr> {
+                use sea_orm_migration::sea_orm::ConnectionTrait;
+
+                // 1. 获取当前连接
+                let db = [<get_ $name _db>]().await?;
+
+                // 2. 确保目标目录存在
+                let path = std::path::Path::new(&target_path);
+                if let Some(parent) = path.parent() {
+                    if !parent.exists() {
+                        std::fs::create_dir_all(parent).map_err(|e| sea_orm_migration::sea_orm::DbErr::Custom(format!("无法创建备份目录: {}", e)))?;
+                    }
+                }
+
+                // 3. 执行 VACUUM INTO
+                // 注意：如果目标文件已存在，VACUUM INTO 会报错，所以我们先尝试删除旧备份（可选）
+                if path.exists() {
+                    let _ = std::fs::remove_file(path);
+                }
+
+                let sql = format!("VACUUM INTO '{}'", target_path);
+                db.execute_unprepared(&sql).await?;
+
+                eprintln!("✅ [{}] 数据库已备份至: {}", $log_prefix, target_path);
+                Ok(())
+            }
         }
     };
 }

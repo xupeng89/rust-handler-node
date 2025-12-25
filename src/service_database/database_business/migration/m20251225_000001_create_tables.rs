@@ -1,0 +1,103 @@
+use sea_orm_migration::prelude::*;
+
+#[derive(DeriveMigrationName)]
+pub struct Migration;
+
+#[async_trait::async_trait]
+impl MigrationTrait for Migration {
+    async fn up(&self, manager: &SchemaManager) -> Result<(), DbErr> {
+        manager
+            .create_table(
+                Table::create()
+                    .table(ModelModel::Table)
+                    .if_not_exists()
+                    .col(
+                        ColumnDef::new(ModelModel::Id)
+                            .string()
+                            .not_null()
+                            .primary_key(),
+                    )
+                    .col(
+                        ColumnDef::new(ModelModel::ModelNo)
+                            .string()
+                            .default("")
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(ModelModel::Developer)
+                            .string()
+                            .default("")
+                            .not_null(),
+                    )
+                    .col(ColumnDef::new(ModelModel::ModelName).string().not_null())
+                    .col(
+                        ColumnDef::new(ModelModel::StandardTemperature)
+                            .double()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(ModelModel::StandardTemperatureUnit)
+                            .string()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(ModelModel::StandardPressure)
+                            .double()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(ModelModel::StandardPressureUnit)
+                            .string()
+                            .not_null(),
+                    )
+                    .col(ColumnDef::new(ModelModel::GridState).string().not_null())
+                    .col(ColumnDef::new(ModelModel::GridColor).string().not_null())
+                    .col(ColumnDef::new(ModelModel::GridSize).integer().not_null())
+                    .col(
+                        ColumnDef::new(ModelModel::CreateAt)
+                            .date_time()
+                            .default(Expr::current_timestamp()),
+                    )
+                    .col(
+                        ColumnDef::new(ModelModel::UpdateAt)
+                            .date_time()
+                            .default(Expr::current_timestamp()),
+                    )
+                    .col(ColumnDef::new(ModelModel::Status).integer().not_null())
+                    .col(
+                        ColumnDef::new(ModelModel::DefaultModelId)
+                            .string()
+                            .not_null(),
+                    )
+                    .to_owned(),
+            )
+            .await?;
+        Ok(())
+    }
+
+    async fn down(&self, manager: &SchemaManager) -> Result<(), DbErr> {
+        manager
+            .drop_table(Table::drop().table(ModelModel::Table).to_owned())
+            .await
+    }
+}
+
+#[derive(Iden)]
+enum ModelModel {
+    Table,
+    Id,
+    ModelNo,
+    Developer,
+    ModelName,
+    StandardTemperature,
+    StandardTemperatureUnit,
+    StandardPressure,
+    StandardPressureUnit,
+    GridState,
+    GridColor,
+    GridSize,
+    CreateAt,
+    UpdateAt,
+    Status,
+    DefaultModelId,
+}

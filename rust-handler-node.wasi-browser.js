@@ -68,6 +68,7 @@ export const confSystemVariable = __napiModule.exports.confSystemVariable
 export const confUnit = __napiModule.exports.confUnit
 export const heryDetail = __napiModule.exports.heryDetail
 export const initDB = __napiModule.exports.initDB
+export const modelHandle = __napiModule.exports.modelHandle
 export const physicalBinarySync = __napiModule.exports.physicalBinarySync
 export const physicalCalc = __napiModule.exports.physicalCalc
 export const physicalComponent = __napiModule.exports.physicalComponent
