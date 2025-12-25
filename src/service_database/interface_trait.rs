@@ -89,3 +89,78 @@ macro_rules! sync_physical_calc_data {
             }
         }};
 }
+// 创建一个数据库创建的宏
+#[macro_export]
+macro_rules! setup_db_instance {
+    ($name:ident, $upper_name:ident, $log_prefix:expr, $migrator_path:path) => {
+        paste::paste! {
+            // 1. 定义该数据库专用的全局单例
+            pub static [<$upper_name>]: tokio::sync::OnceCell<sea_orm_migration::sea_orm::DatabaseConnection> = tokio::sync::OnceCell::const_new();
+
+            static [<DB_URL_ $upper_name>]: tokio::sync::OnceCell<String> = tokio::sync::OnceCell::const_new();
+
+            pub async fn [<initialize_ $name _db>](
+                file_path: String,
+            ) -> Result<&'static sea_orm_migration::sea_orm::DatabaseConnection, sea_orm_migration::sea_orm::DbErr> {
+                // 【核心修复】引入 Trait，这样 $migrator_path::up 才能被找到
+                use sea_orm_migration::MigratorTrait;
+                use sea_orm_migration::sea_orm::ConnectionTrait;
+
+                let path = std::path::Path::new(&file_path);
+
+                if let Some(parent) = path.parent() {
+                    if !parent.exists() {
+                        std::fs::create_dir_all(parent)
+                            .map_err(|e| sea_orm_migration::sea_orm::DbErr::Custom(format!("无法创建目录: {}", e)))?;
+                    }
+                }
+
+                if !path.exists() {
+                    std::fs::File::create(path)
+                        .map_err(|e| sea_orm_migration::sea_orm::DbErr::Custom(format!("无法创建文件: {}", e)))?;
+                }
+
+                let db_url = format!("sqlite://{}?mode=rwc", file_path);
+                let _ = [<DB_URL_ $upper_name>].set(db_url);
+
+                [<$upper_name>].get_or_try_init(|| async {
+                    let final_url = [<DB_URL_ $upper_name>].get().unwrap();
+                    let mut opt = sea_orm_migration::sea_orm::ConnectOptions::new(final_url.to_owned());
+                    opt.max_connections(1)
+                        .min_connections(1)
+                        .connect_timeout(std::time::Duration::from_secs(10))
+                        .sqlx_logging(true);
+
+                    let db = sea_orm_migration::sea_orm::Database::connect(opt).await?;
+
+                    // 现在这里不会报错了
+                    $migrator_path::up(&db, None).await.map_err(|e| {
+                        eprintln!("❌ [{}] Migration 失败: {}", $log_prefix, e);
+                        e
+                    })?;
+
+                    db.execute_unprepared("PRAGMA journal_mode = WAL;").await?;
+                    db.execute_unprepared("PRAGMA synchronous = NORMAL;").await?;
+
+                    eprintln!("✅ [{}] 数据库连接成功", $log_prefix);
+                    Ok(db)
+                })
+                .await
+            }
+
+            pub async fn [<get_ $name _db>]() -> Result<&'static sea_orm_migration::sea_orm::DatabaseConnection, sea_orm_migration::sea_orm::DbErr> {
+                [<$upper_name>].get().ok_or_else(|| {
+                    sea_orm_migration::sea_orm::DbErr::Custom(format!("{} 尚未初始化", $log_prefix))
+                })
+            }
+
+            pub async fn [<close_ $name _db>]() {
+                use sea_orm_migration::sea_orm::ConnectionTrait;
+                if let Some(db) = [<$upper_name>].get() {
+                    let _ = db.execute_unprepared("PRAGMA wal_checkpoint(TRUNCATE);").await;
+                }
+                eprintln!("✅ [{}] WAL 已安全落盘", $log_prefix);
+            }
+        }
+    };
+}
