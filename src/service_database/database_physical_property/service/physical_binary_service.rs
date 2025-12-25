@@ -1,5 +1,6 @@
 use crate::service_database::{
     database_physical_property::db_physical_property_connection::get_physical_property_db,
+    interface_trait::SyncableBinaryActiveModel,
     interface_trait::{HasId, SyncableBinaryEntity},
 };
 use sea_orm::{
@@ -23,15 +24,21 @@ impl BinarySyncService {
     // ======================================
     // 1. 通用同步逻辑 (Insert/Update/Delete)
     // ======================================
-    pub async fn generic_sync<E, AM>(
+    pub async fn generic_sync<E, AM, F>(
         db: &DatabaseConnection,
         incoming_data: Vec<Value>,
+        map_fn: F,
     ) -> Result<(), DbErr>
     where
         E: SyncableBinaryEntity,
-        AM: ActiveModelTrait<Entity = E> + ActiveModelBehavior + Send + TryIntoModel<E::Model>,
+        AM: ActiveModelTrait<Entity = E>
+            + ActiveModelBehavior
+            + SyncableBinaryActiveModel
+            + Send
+            + TryIntoModel<E::Model>,
         // 关键修复：添加了 TryIntoModel 约束，以便从 ActiveModel 转回 Model
         E::Model: IntoActiveModel<AM> + HasId + Serialize + for<'de> Deserialize<'de> + Sync,
+        F: Fn(&mut AM, &Value),
     {
         let txn = db.begin().await?;
         let mut processed_ids = Vec::new();
@@ -58,11 +65,15 @@ impl BinarySyncService {
                 processed_ids.push(model.get_id());
 
                 let mut am = model.into_active_model();
-                am.set_from_json(item_json)?;
+                SyncableBinaryActiveModel::sync_set_from_json(&mut am, item_json.clone())?;
+                map_fn(&mut am, &item_json);
                 am.update(&txn).await?;
             } else {
                 let mut am = AM::default();
-                am.set_from_json(item_json)?;
+
+                // am.sync_set_from_json(item_json)?;
+                SyncableBinaryActiveModel::sync_set_from_json(&mut am, item_json.clone())?;
+                map_fn(&mut am, &item_json);
                 let inserted_model = am.insert(&txn).await?;
 
                 // 【优化】插入后也直接获取 ID
@@ -123,23 +134,282 @@ impl BinarySyncService {
 pub async fn dispatch_sync_request(func_code: &str, data: Vec<Value>) -> Result<(), DbErr> {
     let db = get_physical_property_db().await?;
     match func_code {
-        "PR" => BinarySyncService::generic_sync::<pr::Entity, pr::ActiveModel>(db, data).await,
-        "RK" => BinarySyncService::generic_sync::<rk::Entity, rk::ActiveModel>(db, data).await,
-        "SRK" => BinarySyncService::generic_sync::<srk::Entity, srk::ActiveModel>(db, data).await,
-        "NRTL" => {
-            BinarySyncService::generic_sync::<nrtl::Entity, nrtl::ActiveModel>(db, data).await
+        "PR" => {
+            BinarySyncService::generic_sync::<pr::Entity, pr::ActiveModel, _>(
+                db,
+                data,
+                |am, json| {
+                    // 这里写 PR 特有的映射
+                    if let Some(v) = json["KAIJ"].as_str() {
+                        am.kaij = sea_orm::ActiveValue::Set(v.to_string());
+                    }
+                    if let Some(v) = json["KBIJ"].as_str() {
+                        am.kbij = sea_orm::ActiveValue::Set(v.to_string());
+                    }
+                    if let Some(v) = json["KCIJ"].as_str() {
+                        am.kcij = sea_orm::ActiveValue::Set(v.to_string());
+                    }
+                    if let Some(v) = json["minT"].as_str() {
+                        am.min_t = sea_orm::ActiveValue::Set(v.to_string());
+                    }
+                    if let Some(v) = json["maxT"].as_str() {
+                        am.max_t = sea_orm::ActiveValue::Set(v.to_string());
+                    }
+                },
+            )
+            .await
         }
-        "NRTL-RK" => {
-            BinarySyncService::generic_sync::<nrtl_rk::Entity, nrtl_rk::ActiveModel>(db, data).await
+        "RK" => {
+            BinarySyncService::generic_sync::<rk::Entity, rk::ActiveModel, _>(
+                db,
+                data,
+                |am, json| {
+                    // 这里写 PR 特有的映射
+                    if let Some(v) = json["KAIJ"].as_str() {
+                        am.kaij = sea_orm::ActiveValue::Set(v.to_string());
+                    }
+                    if let Some(v) = json["KBIJ"].as_str() {
+                        am.kbij = sea_orm::ActiveValue::Set(v.to_string());
+                    }
+                    if let Some(v) = json["KCIJ"].as_str() {
+                        am.kcij = sea_orm::ActiveValue::Set(v.to_string());
+                    }
+                    if let Some(v) = json["minT"].as_str() {
+                        am.min_t = sea_orm::ActiveValue::Set(v.to_string());
+                    }
+                    if let Some(v) = json["maxT"].as_str() {
+                        am.max_t = sea_orm::ActiveValue::Set(v.to_string());
+                    }
+                },
+            )
+            .await
+        }
+        "SRK" => {
+            BinarySyncService::generic_sync::<srk::Entity, srk::ActiveModel, _>(
+                db,
+                data,
+                |am, json| {
+                    // 这里写 PR 特有的映射
+                    if let Some(v) = json["KAIJ"].as_str() {
+                        am.kaij = sea_orm::ActiveValue::Set(v.to_string());
+                    }
+                    if let Some(v) = json["KBIJ"].as_str() {
+                        am.kbij = sea_orm::ActiveValue::Set(v.to_string());
+                    }
+                    if let Some(v) = json["KCIJ"].as_str() {
+                        am.kcij = sea_orm::ActiveValue::Set(v.to_string());
+                    }
+                    if let Some(v) = json["minT"].as_str() {
+                        am.min_t = sea_orm::ActiveValue::Set(v.to_string());
+                    }
+                    if let Some(v) = json["maxT"].as_str() {
+                        am.max_t = sea_orm::ActiveValue::Set(v.to_string());
+                    }
+                },
+            )
+            .await
+        }
+        "NRTL" => {
+            BinarySyncService::generic_sync::<nrtl::Entity, nrtl::ActiveModel, _>(
+                db,
+                data,
+                |am, json| {
+                    if let Some(v) = json["AIJ"].as_str() {
+                        am.aij = sea_orm::ActiveValue::Set(v.to_string());
+                    }
+                    if let Some(v) = json["AJI"].as_str() {
+                        am.aji = sea_orm::ActiveValue::Set(v.to_string());
+                    }
+                    if let Some(v) = json["BIJ"].as_str() {
+                        am.bij = sea_orm::ActiveValue::Set(v.to_string());
+                    }
+                    if let Some(v) = json["BJI"].as_str() {
+                        am.bji = sea_orm::ActiveValue::Set(v.to_string());
+                    }
+                    if let Some(v) = json["CIJ"].as_str() {
+                        am.cij = sea_orm::ActiveValue::Set(v.to_string());
+                    }
+                    if let Some(v) = json["DIJ"].as_str() {
+                        am.dij = sea_orm::ActiveValue::Set(v.to_string());
+                    }
+                    if let Some(v) = json["EIJ"].as_str() {
+                        am.eij = sea_orm::ActiveValue::Set(v.to_string());
+                    }
+                    if let Some(v) = json["EJI"].as_str() {
+                        am.eji = sea_orm::ActiveValue::Set(v.to_string());
+                    }
+                    if let Some(v) = json["FIJ"].as_str() {
+                        am.fij = sea_orm::ActiveValue::Set(v.to_string());
+                    }
+                    if let Some(v) = json["FJI"].as_str() {
+                        am.fji = sea_orm::ActiveValue::Set(v.to_string());
+                    }
+                    if let Some(v) = json["minT"].as_str() {
+                        am.min_t = sea_orm::ActiveValue::Set(v.to_string());
+                    }
+                    if let Some(v) = json["maxT"].as_str() {
+                        am.max_t = sea_orm::ActiveValue::Set(v.to_string());
+                    }
+                },
+            )
+            .await
+        }
+        "NRTLRK" => {
+            BinarySyncService::generic_sync::<nrtl_rk::Entity, nrtl_rk::ActiveModel, _>(
+                db,
+                data,
+                |am, json| {
+                    if let Some(v) = json["AIJ"].as_str() {
+                        am.aij = sea_orm::ActiveValue::Set(v.to_string());
+                    }
+                    if let Some(v) = json["AJI"].as_str() {
+                        am.aji = sea_orm::ActiveValue::Set(v.to_string());
+                    }
+                    if let Some(v) = json["BIJ"].as_str() {
+                        am.bij = sea_orm::ActiveValue::Set(v.to_string());
+                    }
+                    if let Some(v) = json["BJI"].as_str() {
+                        am.bji = sea_orm::ActiveValue::Set(v.to_string());
+                    }
+                    if let Some(v) = json["CIJ"].as_str() {
+                        am.cij = sea_orm::ActiveValue::Set(v.to_string());
+                    }
+                    if let Some(v) = json["DIJ"].as_str() {
+                        am.dij = sea_orm::ActiveValue::Set(v.to_string());
+                    }
+                    if let Some(v) = json["EIJ"].as_str() {
+                        am.eij = sea_orm::ActiveValue::Set(v.to_string());
+                    }
+                    if let Some(v) = json["EJI"].as_str() {
+                        am.eji = sea_orm::ActiveValue::Set(v.to_string());
+                    }
+                    if let Some(v) = json["FIJ"].as_str() {
+                        am.fij = sea_orm::ActiveValue::Set(v.to_string());
+                    }
+                    if let Some(v) = json["FJI"].as_str() {
+                        am.fji = sea_orm::ActiveValue::Set(v.to_string());
+                    }
+                    if let Some(v) = json["minT"].as_str() {
+                        am.min_t = sea_orm::ActiveValue::Set(v.to_string());
+                    }
+                    if let Some(v) = json["maxT"].as_str() {
+                        am.max_t = sea_orm::ActiveValue::Set(v.to_string());
+                    }
+                },
+            )
+            .await
         }
         "PSRK" => {
-            BinarySyncService::generic_sync::<psrk::Entity, psrk::ActiveModel>(db, data).await
+            BinarySyncService::generic_sync::<psrk::Entity, psrk::ActiveModel, _>(
+                db,
+                data,
+                |am, json| {
+                    // 这里写 PR 特有的映射
+                    if let Some(v) = json["TIJ"].as_str() {
+                        am.tij = sea_orm::ActiveValue::Set(v.to_string());
+                    }
+                    if let Some(v) = json["TJI"].as_str() {
+                        am.tji = sea_orm::ActiveValue::Set(v.to_string());
+                    }
+                    if let Some(v) = json["VIJ"].as_str() {
+                        am.vij = sea_orm::ActiveValue::Set(v.to_string());
+                    }
+                    if let Some(v) = json["VJI"].as_str() {
+                        am.vji = sea_orm::ActiveValue::Set(v.to_string());
+                    }
+                },
+            )
+            .await
         }
         "UNIQUAC" => {
-            BinarySyncService::generic_sync::<uniquac::Entity, uniquac::ActiveModel>(db, data).await
+            BinarySyncService::generic_sync::<uniquac::Entity, uniquac::ActiveModel, _>(
+                db,
+                data,
+                |am, json| {
+                    if let Some(v) = json["AIJ"].as_str() {
+                        am.aij = sea_orm::ActiveValue::Set(v.to_string());
+                    }
+                    if let Some(v) = json["AJI"].as_str() {
+                        am.aji = sea_orm::ActiveValue::Set(v.to_string());
+                    }
+                    if let Some(v) = json["BIJ"].as_str() {
+                        am.bij = sea_orm::ActiveValue::Set(v.to_string());
+                    }
+                    if let Some(v) = json["BJI"].as_str() {
+                        am.bji = sea_orm::ActiveValue::Set(v.to_string());
+                    }
+                    if let Some(v) = json["CIJ"].as_str() {
+                        am.cij = sea_orm::ActiveValue::Set(v.to_string());
+                    }
+                    if let Some(v) = json["DIJ"].as_str() {
+                        am.dij = sea_orm::ActiveValue::Set(v.to_string());
+                    }
+                    if let Some(v) = json["EIJ"].as_str() {
+                        am.eij = sea_orm::ActiveValue::Set(v.to_string());
+                    }
+                    if let Some(v) = json["EJI"].as_str() {
+                        am.eji = sea_orm::ActiveValue::Set(v.to_string());
+                    }
+                    if let Some(v) = json["FIJ"].as_str() {
+                        am.fij = sea_orm::ActiveValue::Set(v.to_string());
+                    }
+                    if let Some(v) = json["FJI"].as_str() {
+                        am.fji = sea_orm::ActiveValue::Set(v.to_string());
+                    }
+                    if let Some(v) = json["minT"].as_str() {
+                        am.min_t = sea_orm::ActiveValue::Set(v.to_string());
+                    }
+                    if let Some(v) = json["maxT"].as_str() {
+                        am.max_t = sea_orm::ActiveValue::Set(v.to_string());
+                    }
+                },
+            )
+            .await
         }
         "WILSON" => {
-            BinarySyncService::generic_sync::<wilson::Entity, wilson::ActiveModel>(db, data).await
+            BinarySyncService::generic_sync::<wilson::Entity, wilson::ActiveModel, _>(
+                db,
+                data,
+                |am, json| {
+                    if let Some(v) = json["AIJ"].as_str() {
+                        am.aij = sea_orm::ActiveValue::Set(v.to_string());
+                    }
+                    if let Some(v) = json["AJI"].as_str() {
+                        am.aji = sea_orm::ActiveValue::Set(v.to_string());
+                    }
+                    if let Some(v) = json["BIJ"].as_str() {
+                        am.bij = sea_orm::ActiveValue::Set(v.to_string());
+                    }
+                    if let Some(v) = json["BJI"].as_str() {
+                        am.bji = sea_orm::ActiveValue::Set(v.to_string());
+                    }
+                    if let Some(v) = json["CIJ"].as_str() {
+                        am.cij = sea_orm::ActiveValue::Set(v.to_string());
+                    }
+                    if let Some(v) = json["DIJ"].as_str() {
+                        am.dij = sea_orm::ActiveValue::Set(v.to_string());
+                    }
+                    if let Some(v) = json["EIJ"].as_str() {
+                        am.eij = sea_orm::ActiveValue::Set(v.to_string());
+                    }
+                    if let Some(v) = json["EJI"].as_str() {
+                        am.eji = sea_orm::ActiveValue::Set(v.to_string());
+                    }
+                    if let Some(v) = json["FIJ"].as_str() {
+                        am.fij = sea_orm::ActiveValue::Set(v.to_string());
+                    }
+                    if let Some(v) = json["FJI"].as_str() {
+                        am.fji = sea_orm::ActiveValue::Set(v.to_string());
+                    }
+                    if let Some(v) = json["minT"].as_str() {
+                        am.min_t = sea_orm::ActiveValue::Set(v.to_string());
+                    }
+                    if let Some(v) = json["maxT"].as_str() {
+                        am.max_t = sea_orm::ActiveValue::Set(v.to_string());
+                    }
+                },
+            )
+            .await
         }
         _ => Err(DbErr::Custom(format!("不支持的方程编码: {}", func_code))),
     }
@@ -156,7 +426,7 @@ pub async fn dispatch_query_request(
         "RK" => BinarySyncService::generic_query::<rk::Entity>(db, ids).await,
         "SRK" => BinarySyncService::generic_query::<srk::Entity>(db, ids).await,
         "NRTL" => BinarySyncService::generic_query::<nrtl::Entity>(db, ids).await,
-        "NRTL-RK" => BinarySyncService::generic_query::<nrtl_rk::Entity>(db, ids).await,
+        "NRTLRK" => BinarySyncService::generic_query::<nrtl_rk::Entity>(db, ids).await,
         "PSRK" => BinarySyncService::generic_query::<psrk::Entity>(db, ids).await,
         "UNIQUAC" => BinarySyncService::generic_query::<uniquac::Entity>(db, ids).await,
         "WILSON" => BinarySyncService::generic_query::<wilson::Entity>(db, ids).await,

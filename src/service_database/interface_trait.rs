@@ -1,5 +1,4 @@
 use sea_orm::entity::*;
-
 // 定义一个 Trait，让不同的 Model 都能返回 ID
 pub trait HasId {
     fn get_id(&self) -> i32;
@@ -13,16 +12,50 @@ pub trait SyncableBinaryEntity: EntityTrait {
         "component_j_id".into()
     }
 }
-
+// 必须加上 pub
+pub trait SyncableBinaryActiveModel: ActiveModelTrait {
+    fn set_ids(&mut self, i_id: i32, j_id: i32);
+    fn sync_set_from_json(&mut self, json: serde_json::Value) -> Result<(), sea_orm::DbErr>;
+}
 #[macro_export]
 macro_rules! impl_binary_syncable {
-    ($model:ty, $entity:ty) => {
+    ($model:ty,$active_model:ty, $entity:ty) => {
         impl HasId for $model {
             fn get_id(&self) -> i32 {
                 self.id
             } // 假设你的表主键都叫 id
         }
         impl SyncableBinaryEntity for $entity {}
+
+        // 3. 为 ActiveModel 实现设置 ID 的逻辑
+        impl $crate::service_database::interface_trait::SyncableBinaryActiveModel
+            for $active_model
+        {
+            fn set_ids(&mut self, i_id: i32, j_id: i32) {
+                // 这里的字段名必须与你生成的 ActiveModel 成员名一致
+                self.component_i_id = sea_orm::ActiveValue::Set(i_id);
+                self.component_j_id = sea_orm::ActiveValue::Set(j_id);
+            }
+            // 这个方法是公共的
+            fn sync_set_from_json(
+                &mut self,
+                json: serde_json::Value,
+            ) -> Result<(), sea_orm::DbErr> {
+                let i_id = json["componentIId"].as_i64().unwrap_or(0) as i32;
+                let j_id = json["componentJId"].as_i64().unwrap_or(0) as i32;
+
+                self.set_ids(i_id, j_id); // 复用之前定义的 set_ids 方法
+
+                if let Some(v) = json["componentI"].as_str() {
+                    self.component_i = sea_orm::ActiveValue::Set(v.to_string());
+                }
+                if let Some(v) = json["componentJ"].as_str() {
+                    self.component_j = sea_orm::ActiveValue::Set(v.to_string());
+                }
+
+                Ok(())
+            }
+        }
     };
 }
 #[macro_export]

@@ -52,8 +52,8 @@ pub async fn initialize_auto_shutter_db(
         let final_db_url = DB_URL.get().unwrap().as_str();
 
         let mut opt = migration_orm::ConnectOptions::new(final_db_url.to_owned());
-        opt.max_connections(16)
-            .min_connections(4)
+        opt.max_connections(1)
+            .min_connections(1)
             .connect_timeout(Duration::from_secs(10))
             .acquire_timeout(Duration::from_secs(5))
             .idle_timeout(Duration::from_secs(60))

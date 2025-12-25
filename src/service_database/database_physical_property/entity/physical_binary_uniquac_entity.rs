@@ -7,6 +7,7 @@ use serde::{Deserialize, Serialize};
     table_name = "pp_binary_uniquac_entity",
     comment = "二元交互参数信息表， 该信息表主要用于存储二元交互参数数据，具体表结构是由二元交互参数方法表去定义 -uniquac"
 )]
+#[serde(rename_all = "camelCase")]
 pub struct Model {
     /// 主键
     #[sea_orm(primary_key)]
@@ -91,4 +92,4 @@ pub enum Relation {}
 impl ActiveModelBehavior for ActiveModel {}
 use crate::impl_binary_syncable;
 use crate::service_database::interface_trait::{HasId, SyncableBinaryEntity};
-impl_binary_syncable!(Model, Entity);
+impl_binary_syncable!(Model, ActiveModel, Entity);

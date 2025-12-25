@@ -19,8 +19,8 @@ pub async fn ensure_cache_db(
         let db_url = "sqlite::memory:?cache=shared".to_string();
         // 创建连接参数
         let mut opt = migration_orm::ConnectOptions::new(db_url);
-        opt.max_connections(16)
-            .min_connections(4)
+        opt.max_connections(1)
+            .min_connections(1)
             .connect_timeout(Duration::from_secs(10))
             .acquire_timeout(Duration::from_secs(5))
             .sqlx_logging(true);
