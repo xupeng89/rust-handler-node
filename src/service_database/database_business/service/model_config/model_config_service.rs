@@ -4,8 +4,8 @@ use crate::service_database::database_business::entity::model_config::model_conf
     Entity as ModelConfigEntity, Model as ModelConfigModel,
 };
 use napi_derive::napi;
-use sea_orm::QuerySelect;
-use sea_orm::{entity::prelude::*, QueryFilter, Set};
+
+use sea_orm::{entity::prelude::*, QueryFilter, QuerySelect, Set};
 use serde::{Deserialize, Serialize};
 
 #[napi(object, namespace = "modelConfig", js_name = "AutoShutterParams")]
@@ -197,6 +197,23 @@ pub async fn get_model_config_auto_shutter_config(
     Ok(params)
 }
 
+pub async fn get_model_config_show_label_params(
+    model_id: String,
+) -> Result<ShowLabelParams, DbErr> {
+    let db = get_business_db().await?;
+    let res = ModelConfigEntity::find()
+        .select_only()
+        .column(ModelConfigColumn::ShowLabelParams)
+        .filter(ModelConfigColumn::ModelId.eq(model_id))
+        .into_tuple::<String>()
+        .one(db)
+        .await?;
+
+    let json_str = res.unwrap_or_else(|| r#"{}"#.to_string());
+    let params: ShowLabelParams = serde_json::from_str(&json_str).unwrap_or_default();
+    Ok(params)
+}
+
 #[napi(object, namespace = "modelConfig")]
 #[derive(Serialize, Deserialize, Clone, Default)]
 pub struct FilterLabelItem {
@@ -218,7 +235,7 @@ pub struct ShowLabelParams {
     pub flow_sheet_label: Vec<FilterLabelItem>,
 }
 
-#[napi(object)]
+#[napi(object, namespace = "modelConfig")]
 pub struct FilterLabelParamsResult {
     pub filter_label_params: Vec<FilterLabelItem>,
     pub range_status: i32,
@@ -291,7 +308,7 @@ pub struct RateParams {
     pub flash_calc: i32,
 }
 
-#[napi(object)]
+#[napi(object, namespace = "modelConfig")]
 pub struct ControlAndRateResult {
     pub id: Option<i32>,
     pub control_params: ControlParams,

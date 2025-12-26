@@ -155,6 +155,80 @@ impl MigrationTrait for Migration {
                     .to_owned(),
             )
             .await?;
+        manager
+            .create_table(
+                Table::create()
+                    .table(ModelSystemVariable::Table)
+                    .if_not_exists()
+                    .col(
+                        ColumnDef::new(ModelSystemVariable::Id)
+                            .string()
+                            .primary_key(),
+                    )
+                    .col(
+                        ColumnDef::new(ModelSystemVariable::ModelId)
+                            .string()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(ModelSystemVariable::Name)
+                            .string()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(ModelSystemVariable::Code)
+                            .string()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(ModelSystemVariable::Value)
+                            .double()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(ModelSystemVariable::SortId)
+                            .integer()
+                            .not_null(),
+                    )
+                    .to_owned(),
+            )
+            .await?;
+        // 创建 UnitSet 表
+        manager
+            .create_table(
+                Table::create()
+                    .table(ModelUnitSet::Table)
+                    .if_not_exists()
+                    .col(ColumnDef::new(ModelUnitSet::Id).string().primary_key())
+                    .col(ColumnDef::new(ModelUnitSet::ModelId).string().not_null())
+                    .col(ColumnDef::new(ModelUnitSet::EnName).string().not_null())
+                    .col(ColumnDef::new(ModelUnitSet::Name).string().not_null())
+                    .col(ColumnDef::new(ModelUnitSet::Code).string().not_null())
+                    .col(
+                        ColumnDef::new(ModelUnitSet::Status)
+                            .integer()
+                            .not_null()
+                            .default(0),
+                    )
+                    .col(ColumnDef::new(ModelUnitSet::IsDefault).integer().not_null())
+                    .to_owned(),
+            )
+            .await?;
+
+        // 创建 UnitItem 表
+        manager
+            .create_table(
+                Table::create()
+                    .table(ModelUnitItem::Table)
+                    .if_not_exists()
+                    .col(ColumnDef::new(ModelUnitItem::Id).string().primary_key())
+                    .col(ColumnDef::new(ModelUnitItem::SetId).string().not_null())
+                    .col(ColumnDef::new(ModelUnitItem::ModelId).string().not_null())
+                    .col(ColumnDef::new(ModelUnitItem::Code).string().not_null())
+                    .col(ColumnDef::new(ModelUnitItem::Value).string().not_null())
+                    .to_owned(),
+            )
+            .await?;
         Ok(())
     }
 
@@ -164,6 +238,15 @@ impl MigrationTrait for Migration {
             .await?;
         manager
             .drop_table(Table::drop().table(ModelConfig::Table).to_owned())
+            .await?;
+        manager
+            .drop_table(Table::drop().table(ModelSystemVariable::Table).to_owned())
+            .await?;
+        manager
+            .drop_table(Table::drop().table(ModelUnitItem::Table).to_owned())
+            .await?;
+        manager
+            .drop_table(Table::drop().table(ModelUnitSet::Table).to_owned())
             .await?;
         Ok(())
     }
@@ -207,4 +290,36 @@ enum ModelConfig {
     RelatePoint,
     RelateInterlock,
     DefaultParams,
+}
+#[derive(Iden)]
+enum ModelSystemVariable {
+    Table,
+    Id,
+    ModelId,
+    Name,
+    Code,
+    Value,
+    SortId,
+}
+
+#[derive(Iden)]
+enum ModelUnitSet {
+    Table,
+    Id,
+    ModelId,
+    EnName,
+    Name,
+    Code,
+    Status,
+    IsDefault,
+}
+
+#[derive(Iden)]
+enum ModelUnitItem {
+    Table,
+    Id,
+    SetId,
+    ModelId,
+    Code,
+    Value,
 }

@@ -11,12 +11,6 @@ export declare const enum BinaryFuncCode {
   PSRK = 'PSRK'
 }
 
-export interface ControlAndRateResult {
-  id?: number
-  controlParams: ControlParams
-  rateParams: RateParams
-}
-
 export interface ControlParams {
   mode: string
   realFlag: number
@@ -30,12 +24,6 @@ export interface ControlParams {
   realTime: number
   runCount: number
   curTime: number
-}
-
-export interface FilterLabelParamsResult {
-  filterLabelParams: Array<FilterLabelItem>
-  rangeStatus: number
-  showLabelParams: ShowLabelParams
 }
 
 export interface FullCacheData {
@@ -55,6 +43,15 @@ export interface FullCacheData {
 export interface FunctionOptionDTO {
   label: string
   value: string
+}
+
+export interface Model {
+  id: string
+  modelId: string
+  name: string
+  code: string
+  value: number
+  sortId: number
 }
 
 export interface RateParams {
@@ -306,6 +303,11 @@ export declare namespace modelConfig {
     autoTimeInterval: number
     autoCount: number
   }
+  export interface ControlAndRateResult {
+    id?: number
+    controlParams: ControlParams
+    rateParams: RateParams
+  }
   export interface FilterLabelItem {
     id: number
     name: string
@@ -317,10 +319,16 @@ export declare namespace modelConfig {
     type: string
     show: boolean
   }
+  export interface FilterLabelParamsResult {
+    filterLabelParams: Array<FilterLabelItem>
+    rangeStatus: number
+    showLabelParams: ShowLabelParams
+  }
   export function getAutoShutterConfigApi(modelId: string): Promise<AutoShutterParams>
   export function getModelConfigByModelIdApi(modelId: string): Promise<ModelConfigDTO>
   export function getModelConfigControlAndRateApi(modelId: string): Promise<ControlAndRateResult>
   export function getModelConfigFilterLabelParamsApi(modelId: string): Promise<FilterLabelParamsResult>
+  export function getShowLabelParamsConfigApi(modelId: string): Promise<ShowLabelParams>
   export function insertModelConfigApi(data: ModelConfigDTO): Promise<number>
   export interface ModelConfigDTO {
     id: number
@@ -405,6 +413,73 @@ export declare namespace modelHandle {
   export function selectModelByModelNameApi(name: string): Promise<string>
   export function selectModelByNoApi(modelNo: string): Promise<string>
   export function updateModelApi(modelData: ModelUpdateDTO): Promise<string>
+}
+
+export declare namespace modelSystem {
+  export function getSystemDetailApi(modelId: string): Promise<Array<ModelSystemVariableDTO>>
+  export function initModelSystemVariableApi(systems: Array<ModelSystemVariableDTO>, modelId: string): Promise<boolean>
+  export interface ModelSystemVariableDTO {
+    id: string
+    modelId: string
+    name: string
+    code: string
+    value: number
+    sortId: number
+  }
+  export function updateSystemDetailApi(systems: Array<ModelSystemVariableDTO>): Promise<boolean>
+}
+
+export declare namespace modelUnit {
+  /** 删除单位集及其关联项 */
+  export function deleteAllModelUnitByIdApi(id: string): Promise<number>
+  export function getModelUnitSetOneByIdApi(id: string): Promise<ModelUnitSetDTO>
+  export function getModelUnitSetOneByModelIdAndDefaultApi(modelId: string): Promise<ModelUnitSetDTO>
+  export function getModelUnitSetWithItemsApi(id: string): Promise<UnitFullDataDTO>
+  /** 插入完整的单位集合及所有 Items */
+  export function insertModelUnitModelFullApi(setData: ModelUnitSetDTO, items: Array<ModelUnitItemDTO>): Promise<string>
+  export interface ModelUnitItemDTO {
+    id: string
+    setId: string
+    modelId: string
+    code: string
+    value: string
+  }
+  export interface ModelUnitSetDTO {
+    id: string
+    modelId: string
+    enName: string
+    name: string
+    code: string
+    status: number
+    isDefault: number
+  }
+  export interface ModelUnitSetItemsUpdateDTO {
+    id: string
+    enName: string
+    name: string
+    code: string
+    status: number
+    modelId: string
+    isDefault: number
+    items: Array<ModelUnitItemDTO>
+  }
+  export interface ModelUnitSetUpdateDTO {
+    id: string
+    modelId: string
+    enName?: string
+    name?: string
+    code?: string
+    status?: number
+    isDefault?: number
+  }
+  export interface UnitFullDataDTO {
+    set: ModelUnitSetDTO
+    items: Array<ModelUnitItemDTO>
+  }
+  /** 更新单位集基本信息（如 Code）并循环更新所有关联项的 Value */
+  export function updateModelUnitAllItemsApi(unitSet: ModelUnitSetItemsUpdateDTO, modelId: string): Promise<boolean>
+  /** 增量更新单位集合信息（含默认值排他性逻辑） */
+  export function updateModelUnitSetLogicApi(data: ModelUnitSetUpdateDTO): Promise<boolean>
 }
 
 export declare namespace physicalBinarySync {

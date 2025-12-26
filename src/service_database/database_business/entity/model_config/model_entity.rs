@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Serialize, Deserialize)]
 #[sea_orm(table_name = "model_model", comment = "模版表")]
 pub struct Model {
-    #[sea_orm(primary_key, column_type = "Text")]
+    #[sea_orm(primary_key)]
     pub id: String,
 
     #[sea_orm(column_name = "model_no", default = "")]

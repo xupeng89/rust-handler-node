@@ -41,6 +41,14 @@ pub async fn get_auto_shutter_config_api(model_id: String) -> Result<AutoShutter
 }
 
 #[napi(namespace = "modelConfig")]
+pub async fn get_show_label_params_config_api(model_id: String) -> Result<ShowLabelParams> {
+    let result = get_model_config_show_label_params(model_id)
+        .await
+        .map_err(handle_db_err)?;
+    Ok(result)
+}
+
+#[napi(namespace = "modelConfig")]
 pub async fn get_model_config_filter_label_params_api(
     model_id: String,
 ) -> Result<FilterLabelParamsResult> {
