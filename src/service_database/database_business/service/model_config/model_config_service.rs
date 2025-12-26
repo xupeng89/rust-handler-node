@@ -60,6 +60,7 @@ impl From<ModelConfigModel> for ModelConfigDTO {
 impl From<ModelConfigDTO> for ModelConfigActiveModel {
     fn from(data: ModelConfigDTO) -> Self {
         Self {
+            id: Set(data.id),
             property_params: Set(data.property_params),
             control_params: Set(data.control_params),
             rate_params: Set(data.rate_params),
@@ -74,7 +75,6 @@ impl From<ModelConfigDTO> for ModelConfigActiveModel {
             relate_point: Set(data.relate_point),
             relate_interlock: Set(data.relate_interlock),
             default_params: Set(data.default_params),
-            ..Default::default() // 处理 id 等自增主键
         }
     }
 }

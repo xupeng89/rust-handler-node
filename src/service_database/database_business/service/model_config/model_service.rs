@@ -72,7 +72,6 @@ impl ModelDTO {
             create_at: Set(chrono::Utc::now().naive_utc()),
             update_at: Set(chrono::Utc::now().naive_utc()),
             status: Set(0), // 默认正常状态
-            ..Default::default()
         }
     }
 }
