@@ -72,13 +72,100 @@ impl MigrationTrait for Migration {
                     .to_owned(),
             )
             .await?;
+        manager
+            .create_table(
+                Table::create()
+                    .table(ModelConfig::Table)
+                    .if_not_exists()
+                    .col(
+                        ColumnDef::new(ModelConfig::Id)
+                            .integer()
+                            .not_null()
+                            .auto_increment()
+                            .primary_key(),
+                    )
+                    .col(
+                        ColumnDef::new(ModelConfig::PropertyParams)
+                            .text()
+                            .default("")
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(ModelConfig::ControlParams)
+                            .text()
+                            .default("")
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(ModelConfig::RateParams)
+                            .text()
+                            .default("")
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(ModelConfig::FlashParams)
+                            .text()
+                            .default("")
+                            .not_null(),
+                    )
+                    .col(ColumnDef::new(ModelConfig::ModelId).string().not_null())
+                    .col(
+                        ColumnDef::new(ModelConfig::ModelState)
+                            .integer()
+                            .default(0)
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(ModelConfig::FilterLabelParams)
+                            .text()
+                            .default("")
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(ModelConfig::RangeStatus)
+                            .integer()
+                            .default(1)
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(ModelConfig::ShowLabelParams)
+                            .text()
+                            .default("")
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(ModelConfig::AutoShutterParams)
+                            .text()
+                            .not_null(),
+                    )
+                    .col(ColumnDef::new(ModelConfig::OilParams).text().not_null())
+                    .col(
+                        ColumnDef::new(ModelConfig::RelatePoint)
+                            .string()
+                            .default("1")
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(ModelConfig::RelateInterlock)
+                            .string()
+                            .default("1")
+                            .not_null(),
+                    )
+                    .col(ColumnDef::new(ModelConfig::DefaultParams).text().not_null())
+                    .to_owned(),
+            )
+            .await?;
         Ok(())
     }
 
     async fn down(&self, manager: &SchemaManager) -> Result<(), DbErr> {
         manager
             .drop_table(Table::drop().table(ModelModel::Table).to_owned())
-            .await
+            .await?;
+        manager
+            .drop_table(Table::drop().table(ModelConfig::Table).to_owned())
+            .await?;
+        Ok(())
     }
 }
 
@@ -100,4 +187,24 @@ enum ModelModel {
     UpdateAt,
     Status,
     DefaultModelId,
+}
+
+#[derive(Iden)]
+enum ModelConfig {
+    Table,
+    Id,
+    PropertyParams,
+    ControlParams,
+    RateParams,
+    FlashParams,
+    ModelId,
+    ModelState,
+    FilterLabelParams,
+    RangeStatus,
+    ShowLabelParams,
+    AutoShutterParams,
+    OilParams,
+    RelatePoint,
+    RelateInterlock,
+    DefaultParams,
 }
