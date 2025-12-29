@@ -62,11 +62,10 @@ export interface RateParams {
 }
 
 export declare namespace autoShutter {
-  export function syncCacheToLocalApi(): Promise<void>
-  export function syncLocalToCacheApi(): Promise<void>
-}
-
-export declare namespace autoShutterCache {
+  /**
+   * 批量插入数据到缓存数据库
+   * 查询缓存数据并返回 (供外部同步到持久化存储)
+   */
   export interface AutoShutterData {
     objects: string
     sysvars: string
@@ -89,9 +88,10 @@ export declare namespace autoShutterCache {
   export function getAutoShutterCacheListApi(orderFlag: string, autoCount: number, modelId: string): Promise<Array<AutoShutterListItem>>
   /** 插入新的快照记录 (Service: insert_model_auto_shutter_entity_cache) */
   export function insertAutoShutterCacheApi(data: AutoShutterData, modelId: string): Promise<number>
-  /** 批量插入数据到缓存数据库 (Service: read_model_auto_shutter_entity_cache) */
-  export function readAutoShutterCacheApi(data: Array<FullCacheData>): Promise<void>
-  /** 更新自动快照 (Service: update_model_auto_shutter_entity_cache) */
+  /**
+   * 批量插入数据到缓存数据库 (Service: read_model_auto_shutter_entity_cache)
+   * 更新自动快照 (Service: update_model_auto_shutter_entity_cache)
+   */
   export function updateAutoShutterCacheApi(data: AutoShutterData, modelId: string): Promise<number>
 }
 
@@ -432,12 +432,16 @@ export declare namespace modelSystem {
 export declare namespace modelUnit {
   /** 删除单位集及其关联项 */
   export function deleteAllModelUnitByIdApi(id: string): Promise<number>
+  /** 通过set_id获取所有的item信息 */
+  export function getModelUnitItemsBySetIdAndModelIdApi(setId: string, modelId: string): Promise<Array<ModelUnitItemDTO>>
   export function getModelUnitSetAllByModelIdApi(modelId: string): Promise<Array<ModelUnitSetDTO>>
+  export function getModelUnitSetItemsByCodesAndSetIdApi(codes: Array<string>, setId: string, modelId: string): Promise<Array<ModelUnitItemDTO>>
   export function getModelUnitSetOneByIdApi(id: string): Promise<ModelUnitSetDTO>
   export function getModelUnitSetOneByModelIdAndDefaultApi(modelId: string): Promise<ModelUnitSetDTO>
   export function getModelUnitSetWithItemsApi(id: string): Promise<UnitFullDataDTO>
   /** 插入完整的单位集合及所有 Items */
   export function insertModelUnitModelFullApi(setData: ModelUnitSetDTO, items: Array<ModelUnitItemDTO>): Promise<string>
+  export function insertModelUnitSetOnlyApi(unitSet: Array<ModelUnitSetDTO>): Promise<boolean>
   export interface ModelUnitItemDTO {
     id: string
     setId: string

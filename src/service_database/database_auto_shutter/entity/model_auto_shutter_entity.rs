@@ -15,7 +15,7 @@ pub struct Model {
     pub sim_time: String,
 
     #[sea_orm(column_name = "update_at", default = "")]
-    pub update_at: String,
+    pub update_at: DateTimeUtc,
 
     // 假设 objects 和 sysvars 存储的是 JSON 字符串
     #[sea_orm(default = "")]

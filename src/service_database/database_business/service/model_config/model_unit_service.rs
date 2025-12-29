@@ -338,3 +338,20 @@ pub async fn update_unit_all_items(
 
     Ok(true)
 }
+
+pub async fn get_model_unit_set_items_by_codes_and_set_id(
+    codes: Vec<String>,
+    set_id: String,
+    model_id: String,
+) -> Result<Vec<ModelUnitItemDTO>, DbErr> {
+    let db = get_business_db().await?;
+
+    let res = ItemEntity::find()
+        .filter(ItemColumn::Code.is_in(codes))
+        .filter(ItemColumn::SetId.eq(set_id))
+        .filter(ItemColumn::ModelId.eq(model_id))
+        .all(db)
+        .await?;
+
+    Ok(res.into_iter().map(ModelUnitItemDTO::from).collect())
+}

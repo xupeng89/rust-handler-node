@@ -85,3 +85,14 @@ pub async fn insert_model_unit_set_only_api(unit_set: Vec<ModelUnitSetDTO>) -> R
         .await
         .map_err(handle_db_err)
 }
+
+#[napi(namespace = "modelUnit")]
+pub async fn get_model_unit_set_items_by_codes_and_set_id_api(
+    codes: Vec<String>,
+    set_id: String,
+    model_id: String,
+) -> Result<Vec<ModelUnitItemDTO>> {
+    get_model_unit_set_items_by_codes_and_set_id(codes, set_id, model_id)
+        .await
+        .map_err(handle_db_err)
+}

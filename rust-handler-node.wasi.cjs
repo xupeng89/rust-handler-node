@@ -110,7 +110,6 @@ const { instance: __napiInstance, module: __wasiModule, napiModule: __napiModule
 module.exports = __napiModule.exports
 module.exports.BinaryFuncCode = __napiModule.exports.BinaryFuncCode
 module.exports.autoShutter = __napiModule.exports.autoShutter
-module.exports.autoShutterCache = __napiModule.exports.autoShutterCache
 module.exports.confConfig = __napiModule.exports.confConfig
 module.exports.confFunctionPic = __napiModule.exports.confFunctionPic
 module.exports.confGraphicCustom = __napiModule.exports.confGraphicCustom

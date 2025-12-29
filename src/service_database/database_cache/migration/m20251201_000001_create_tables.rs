@@ -93,57 +93,58 @@ impl MigrationTrait for Migration {
         // =========================================================================
         // 3. model_auto_shutter_entity_cache
         // =========================================================================
-        manager
-            .create_table(
-                Table::create()
-                    .table(ModelAutoShutterEntityCache::Table)
-                    .if_not_exists()
-                    .col(
-                        ColumnDef::new(ModelAutoShutterEntityCache::Id)
-                            .integer()
-                            .not_null()
-                            .auto_increment()
-                            .primary_key(),
-                    )
-                    .col(
-                        ColumnDef::new(ModelAutoShutterEntityCache::SimTime)
-                            .string_len(32)
-                            .default(""),
-                    )
-                    .col(
-                        ColumnDef::new(ModelAutoShutterEntityCache::UpdateAt)
-                            .date_time()
-                            .not_null(),
-                    )
-                    .col(ColumnDef::new(ModelAutoShutterEntityCache::Objects).text())
-                    .col(ColumnDef::new(ModelAutoShutterEntityCache::Sysvars).text())
-                    .col(
-                        ColumnDef::new(ModelAutoShutterEntityCache::ModelId)
-                            .string_len(64)
-                            .default(""),
-                    )
-                    .col(
-                        ColumnDef::new(ModelAutoShutterEntityCache::BaseStateCode)
-                            .string_len(32)
-                            .default(""),
-                    )
-                    .col(ColumnDef::new(ModelAutoShutterEntityCache::UserName).string_len(64))
-                    .col(ColumnDef::new(ModelAutoShutterEntityCache::StateIndex).integer())
-                    .col(ColumnDef::new(ModelAutoShutterEntityCache::StateDesc).string_len(128))
-                    .to_owned(),
-            )
-            .await?;
-        manager
-            .create_index(
-                Index::create()
-                    .name("idx-auto_shutter-model_id-update_at")
-                    .table(ModelAutoShutterEntityCache::Table)
-                    // 顺序非常重要：先过滤字段，后排序字段
-                    .col(ModelAutoShutterEntityCache::ModelId)
-                    .col(ModelAutoShutterEntityCache::UpdateAt)
-                    .to_owned(),
-            )
-            .await?;
+        // manager
+        //     .create_table(
+        //         Table::create()
+        //             .table(ModelAutoShutterEntityCache::Table)
+        //             .if_not_exists()
+        //             .col(
+        //                 ColumnDef::new(ModelAutoShutterEntityCache::Id)
+        //                     .integer()
+        //                     .not_null()
+        //                     .auto_increment()
+        //                     .primary_key(),
+        //             )
+        //             .col(
+        //                 ColumnDef::new(ModelAutoShutterEntityCache::SimTime)
+        //                     .string_len(32)
+        //                     .default(""),
+        //             )
+        //             .col(
+        //                 ColumnDef::new(ModelAutoShutterEntityCache::UpdateAt)
+        //                     .date_time()
+        //                     .not_null(),
+        //             )
+        //             .col(ColumnDef::new(ModelAutoShutterEntityCache::Objects).text())
+        //             .col(ColumnDef::new(ModelAutoShutterEntityCache::Sysvars).text())
+        //             .col(
+        //                 ColumnDef::new(ModelAutoShutterEntityCache::ModelId)
+        //                     .string_len(64)
+        //                     .default(""),
+        //             )
+        //             .col(
+        //                 ColumnDef::new(ModelAutoShutterEntityCache::BaseStateCode)
+        //                     .string_len(32)
+        //                     .default(""),
+        //             )
+        //             .col(ColumnDef::new(ModelAutoShutterEntityCache::UserName).string_len(64))
+        //             .col(ColumnDef::new(ModelAutoShutterEntityCache::StateIndex).integer())
+        //             .col(ColumnDef::new(ModelAutoShutterEntityCache::StateDesc).string_len(128))
+        //             .to_owned(),
+        //     )
+        //     .await?;
+        // manager
+        //     .create_index(
+        //         Index::create()
+        //             .name("idx-auto_shutter-model_id-update_at")
+        //             .table(ModelAutoShutterEntityCache::Table)
+        //             // 顺序非常重要：先过滤字段，后排序字段
+        //             .col(ModelAutoShutterEntityCache::ModelId)
+        //             .col(ModelAutoShutterEntityCache::UpdateAt)
+        //             .to_owned(),
+        //     )
+        //     .await?;
+
         // =========================================================================
         // 4. model_variable_curve_entity_cache (新增)
         // =========================================================================
@@ -199,13 +200,13 @@ impl MigrationTrait for Migration {
                     .to_owned(),
             )
             .await?;
-        manager
-            .drop_table(
-                Table::drop()
-                    .table(ModelAutoShutterEntityCache::Table)
-                    .to_owned(),
-            )
-            .await?;
+        // manager
+        //     .drop_table(
+        //         Table::drop()
+        //             .table(ModelAutoShutterEntityCache::Table)
+        //             .to_owned(),
+        //     )
+        //     .await?;
         manager
             .drop_table(
                 Table::drop()
@@ -217,14 +218,14 @@ impl MigrationTrait for Migration {
             .drop_table(Table::drop().table(ModelUndoEntityCache::Table).to_owned())
             .await?;
         // 1. 删除 model_id 和 update_at 上的联合索引
-        manager
-            .drop_index(
-                Index::drop()
-                    .name("idx-auto_shutter-model_id-update_at")
-                    .table(ModelAutoShutterEntityCache::Table)
-                    .to_owned(),
-            )
-            .await?;
+        // manager
+        //     .drop_index(
+        //         Index::drop()
+        //             .name("idx-auto_shutter-model_id-update_at")
+        //             .table(ModelAutoShutterEntityCache::Table)
+        //             .to_owned(),
+        //     )
+        //     .await?;
 
         Ok(())
     }
@@ -257,20 +258,20 @@ enum ModelPositionInformationEntity {
     TypeName,
 }
 
-#[derive(Iden)]
-enum ModelAutoShutterEntityCache {
-    Table,
-    Id,
-    SimTime,
-    UpdateAt,
-    Objects,
-    Sysvars,
-    ModelId,
-    BaseStateCode,
-    UserName,
-    StateIndex,
-    StateDesc,
-}
+// #[derive(Iden)]
+// enum ModelAutoShutterEntityCache {
+//     Table,
+//     Id,
+//     SimTime,
+//     UpdateAt,
+//     Objects,
+//     Sysvars,
+//     ModelId,
+//     BaseStateCode,
+//     UserName,
+//     StateIndex,
+//     StateDesc,
+// }
 
 #[derive(Iden)]
 enum ModelVariableCurveEntityCache {
