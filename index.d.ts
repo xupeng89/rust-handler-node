@@ -432,6 +432,7 @@ export declare namespace modelSystem {
 export declare namespace modelUnit {
   /** 删除单位集及其关联项 */
   export function deleteAllModelUnitByIdApi(id: string): Promise<number>
+  export function getModelUnitSetAllByModelIdApi(modelId: string): Promise<Array<ModelUnitSetDTO>>
   export function getModelUnitSetOneByIdApi(id: string): Promise<ModelUnitSetDTO>
   export function getModelUnitSetOneByModelIdAndDefaultApi(modelId: string): Promise<ModelUnitSetDTO>
   export function getModelUnitSetWithItemsApi(id: string): Promise<UnitFullDataDTO>

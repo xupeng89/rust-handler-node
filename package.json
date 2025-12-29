@@ -109,7 +109,7 @@
     "singleQuote": true,
     "arrowParens": "always"
   },
-  "packageManager": "pnpm@10.24.0",
+  "packageManager": "pnpm@10.26.2",
   "optionalDependencies": {
     "rust-handler-node-darwin-arm64": "0.0.1",
     "rust-handler-node-darwin-x64": "0.0.1",

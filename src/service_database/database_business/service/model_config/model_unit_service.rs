@@ -6,7 +6,7 @@ use crate::service_database::database_business::entity::model_config::model_unit
     ActiveModel as SetActiveModel, Column as SetColumn, Entity as SetEntity, Model as SetModel,
 };
 use napi_derive::napi;
-use sea_orm::{entity::prelude::*, Set, TransactionTrait};
+use sea_orm::{Set, TransactionTrait, entity::prelude::*};
 use serde::{Deserialize, Serialize};
 
 #[napi(object, namespace = "modelUnit", js_name = "ModelUnitSetDTO")]
@@ -188,6 +188,21 @@ pub async fn get_model_unit_set_all_by_model_id(
     Ok(res.into_iter().map(ModelUnitSetDTO::from).collect())
 }
 
+pub async fn get_model_unit_items_by_set_id_and_model_id(
+    set_id: String,
+    model_id: String,
+) -> Result<Vec<ModelUnitItemDTO>, DbErr> {
+    let db = get_business_db().await?;
+
+    let res = ItemEntity::find()
+        .filter(ItemColumn::SetId.eq(set_id))
+        .filter(ItemColumn::ModelId.eq(model_id))
+        .all(db)
+        .await?;
+
+    Ok(res.into_iter().map(ModelUnitItemDTO::from).collect())
+}
+
 /// 更新 UnitSet (含默认值排他性逻辑)
 pub async fn update_unit_set_logic(data: ModelUnitSetUpdateDTO) -> Result<bool, DbErr> {
     let db = get_business_db().await?;
@@ -258,6 +273,18 @@ pub async fn insert_unit_model_full(
 
     txn.commit().await?;
     Ok(set_id)
+}
+
+/// 插入新单位集合及关联项 (带事务)
+pub async fn insert_model_unit_set_only(set_data: Vec<ModelUnitSetDTO>) -> Result<bool, DbErr> {
+    let db = get_business_db().await?;
+    let txn = db.begin().await?;
+
+    let active_set: Vec<SetActiveModel> = set_data.into_iter().map(Into::into).collect();
+    SetEntity::insert_many(active_set).exec(&txn).await?;
+
+    txn.commit().await?;
+    Ok(true)
 }
 
 /// 对应 deleteAllModelUnit

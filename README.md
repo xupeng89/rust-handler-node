@@ -1,8 +1,5 @@
+# 该文档使用napi-rs官方模版
 # `@napi-rs/package-template`
-
-![https://github.com/napi-rs/package-template/actions](https://github.com/napi-rs/package-template/workflows/CI/badge.svg)
-
-> Template project for writing node packages with napi-rs.
 
 # Usage
 
@@ -11,75 +8,222 @@
 3. Run `pnpm install` to install dependencies.
 4. Run `npx napi rename -n [name]` command under the project folder to rename your package.
 
-## Install this test package
-
-```
-pnpm add @napi-rs/package-template
-```
-
-## Usage
-
-### Build
-
-After `pnpm build` command, you can see `package-template.[darwin|win32|linux].node` file in project root. This is the native addon built from [lib.rs](./src/lib.rs).
-
-### Test
-
-With [ava](https://github.com/avajs/ava), run `pnpm test` to testing native addon. You can also switch to another testing framework if you want.
-
-### CI
-
-With GitHub Actions, each commit and pull request will be built and tested automatically in [`node@18`, `node@20`] x [`macOS`, `Linux`, `Windows`] matrix. You will never be afraid of the native addon broken in these platforms.
-
-### Release
-
-Release native package is very difficult in old days. Native packages may ask developers who use it to install `build toolchain` like `gcc/llvm`, `node-gyp` or something more.
-
-With `GitHub actions`, we can easily prebuild a `binary` for major platforms. And with `N-API`, we should never be afraid of **ABI Compatible**.
-
-The other problem is how to deliver prebuild `binary` to users. Downloading it in `postinstall` script is a common way that most packages do it right now. The problem with this solution is it introduced many other packages to download binary that has not been used by `runtime codes`. The other problem is some users may not easily download the binary from `GitHub/CDN` if they are behind a private network (But in most cases, they have a private NPM mirror).
-
-In this package, we choose a better way to solve this problem. We release different `npm packages` for different platforms. And add it to `optionalDependencies` before releasing the `Major` package to npm.
-
-`NPM` will choose which native package should download from `registry` automatically. You can see [npm](./npm) dir for details. And you can also run `pnpm add @napi-rs/package-template` to see how it works.
-
-## Develop requirements
-
-- Install the latest `Rust`
-- Install `Node.js@16+` which fully supported `Node-API`
-- Run `corepack enable`
-
-## Test in local
-
+## run 
 - pnpm
 - pnpm build
 - pnpm test
 
-And you will see:
+---
 
-```bash
-$ ava --verbose
-
-  ✔ sync function from native code
-  ✔ sleep function from native code (201ms)
-  ─
-
-  2 tests passed
-✨  Done in 1.12s.
-```
-
-## Release package
-
-Ensure you have set your **NPM_TOKEN** in the `GitHub` project setting.
-
-In `Settings -> Secrets`, add **NPM_TOKEN** into it.
-
-When you want to release the package:
+# DTSP 技术架构总览
 
 ```
-npm version [<newversion> | major | minor | patch | premajor | preminor | prepatch | prerelease [--preid=<prerelease-id>] | from-git]
-
-git push
+┌──── L6 表现层 (Presentation) ────┐
+│ Electron + AntV X6 + Leptos      │
+├──── L5 应用层 (Application) ────┤
+│ 工程操作 / Undo / Case 管理     │
+├──── L4 仿真服务层 (Simulation) ─┤
+│ 求解调度 / 收敛策略 / 任务管理  │
+├──── L3 领域模型层 (Domain) ─────┤
+│ Unit / Stream / Network / Spec  │
+├──── L2 数学与物性层 (Math):这块有问题 ─────┤
+│ 物性 / 数值方法 / 方程求解      │
+├──── L1 基础设施层 (Infra) ──────┤
+│ DB / 文件 / 日志 / 并发         │
+└───────────────────────────────┘
 ```
 
-GitHub actions will do the rest job for you.
+---
+
+## L6：交互与表现层（Presentation / Reactive UI）
+
+**目标**：高性能、可扩展的工业级流程交互界面
+
+### 技术选型
+
+* **容器**：Electron
+* **UI 框架**：Leptos（WASM）
+* **流程编辑器**：AntV X6
+* **构建工具**：Vite
+
+### 核心设计
+
+* **前端引擎**
+
+  * Leptos（WASM）承载核心 UI 状态与业务逻辑
+* **渲染优化（大规模流程图）**
+
+  * AntV X6 启用 Canvas / Virtual DOM
+  * 引入 **LOD（Level of Detail）策略**：
+
+    * 🔍 高倍率：仅显示节点轮廓
+    * 🔎 中倍率：显示设备类型
+    * 🎯 低倍率（聚焦）：显示实时流股参数
+* **状态同步**
+
+  * 使用 Reactive Storage
+  * UI 仅订阅当前 **Viewport 内节点** 的状态变化
+
+---
+
+## L5：应用编排层（Application / Orchestration）
+
+**角色定位**：UI 与仿真内核之间的“语义缓冲区”
+
+### 核心职责
+
+* **计算图构建**
+
+  * 将流程节点转化为：
+
+    * Directed Acyclic Graph（DAG）
+    * 或 Cyclic Graph（含 recycle）
+* **子系统解耦**
+
+  * 自动切分大系统为多个 **Sub-domain**
+  * 每个子系统：
+
+    * 独立 Undo / Redo 栈
+    * 独立参数事务
+* **工程语义**
+
+  * Case 管理
+  * 参数修改事务
+  * 操作级 Undo / Redo（非数值级）
+
+---
+
+## L4：仿真服务层（Simulation Service）
+
+**目标**：高可扩展、高可靠的求解调度系统
+
+### 功能模块
+
+* Tearing
+* Recycle 处理
+* 收敛策略
+* 计算顺序管理
+* 错误与异常处理
+
+### 分布式设计
+
+* **求解模式**
+
+  * 基于 Rust + Tokio 的 Task Worker 模型
+  * 横向扩展（多核 / 多节点）
+* **热启动（Hot Start）**
+
+  * 保存历史收敛解
+  * 作为新工况 Initial Guess
+* **负载均衡**
+
+  * 根据子系统规模与非线性程度
+  * 动态分配计算资源
+
+---
+
+## L3：领域模型层（Domain Model）【核心层】
+
+**数字孪生的语义核心**
+
+### 核心对象
+
+* `UnitOperation`
+* `MaterialStream`
+* `EnergyStream`
+* `Specification`
+* `Network`
+
+### 统一接口规范
+
+* 强制执行 **Unit Model Interface（UMI）**
+
+```rust
+// L3
+trait UnitOperation {
+    fn residual(&self, x: &[f64], r: &mut [f64]);
+    fn jacobian(&self, x: &[f64], entries: &mut Vec<(usize, usize, f64)>);
+}
+
+// L2
+trait NonlinearProblem {
+    fn assemble_residual(&self, x: &[f64], r: &mut [f64]);
+    fn assemble_jacobian(&self, x: &[f64], j: &mut SparseMatrix);
+}
+
+```
+
+### 状态模型
+
+* **state**：可计算变量（自由度）
+* **spec**：约束条件（设计规格）
+
+### 参数体系
+
+* **Global Parameter Space**
+
+  * 支持数万个参数
+  * 高效索引 / 批量修改
+
+---
+
+## L2：数学与物性层（Math & Thermo）这块有问题，该设计不明朗
+
+**目标**：工业级高性能数值内核（HPC）
+
+### 功能模块
+
+* 数值方法
+* 热物性计算
+* 非线性方程组
+* Jacobian 生成
+
+### 技术特性
+
+* **稀疏矩阵求解**
+
+  * KLU
+  * SuperLU
+  * Intel MKL PARDISO
+* **自动微分（AD）**
+
+  * Rust 自动微分库
+  * 自动生成 Jacobian
+  * 相比数值差分：
+
+* **多精度支持**
+
+  * FP32 / FP64 动态切换
+* **外部集成**
+
+  * Fortran / C 数值库
+  * 外部 Property Package
+
+---
+
+## L1：基础设施层（Infrastructure）
+
+**目标**：稳定、可维护、Rust-native
+
+### 模块与技术选型
+
+| 模块  | 技术                 |
+| --- | ------------------ |
+| DB  | SQLite             |
+| ORM | SeaORM             |
+| 日志  | tracing            |
+| 并发  | Rust async + rayon |
+| 文件  | serde + 自定义格式      |
+
+### 存储与通信
+
+* **高速通信总线**
+
+  * gRPC
+  * Zenoh（Rust-native，适合高频数据流）
+* **数据存储**
+
+  * Parquet（OLAP / 结果分析）
+  * RocksDB（临时快照 / 热状态）
+  * sqlite 本地数据存储
+---

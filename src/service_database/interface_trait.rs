@@ -129,6 +129,10 @@ macro_rules! setup_db_instance {
                     opt.max_connections(1)
                         .min_connections(1)
                         .connect_timeout(std::time::Duration::from_secs(10))
+                        // 设置连接永远不被回收（无限生命周期）
+                        .max_lifetime(None)
+                        // 设置永远不因空闲而关闭连接
+                        .idle_timeout(None)
                         .sqlx_logging(true);
 
                     let db = sea_orm_migration::sea_orm::Database::connect(opt).await?;

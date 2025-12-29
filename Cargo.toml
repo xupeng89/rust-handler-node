@@ -1,8 +1,8 @@
 [package]
 authors = ["xupeng <710324612@qq.com>"]
-edition = "2021"
+edition = "2024"
 name = "rust_handler_node"
-version = "0.1.0"
+version = "0.2.0"
 
 [lib]
 crate-type = ["cdylib"]

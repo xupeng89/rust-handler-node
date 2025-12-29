@@ -68,3 +68,20 @@ pub async fn update_model_unit_all_items_api(
         .await
         .map_err(handle_db_err)
 }
+
+/// 通过set_id获取所有的item信息
+#[napi(namespace = "modelUnit")]
+pub async fn get_model_unit_items_by_set_id_and_model_id_api(
+    set_id: String,
+    model_id: String,
+) -> Result<Vec<ModelUnitItemDTO>> {
+    get_model_unit_items_by_set_id_and_model_id(set_id, model_id)
+        .await
+        .map_err(handle_db_err)
+}
+#[napi(namespace = "modelUnit")]
+pub async fn insert_model_unit_set_only_api(unit_set: Vec<ModelUnitSetDTO>) -> Result<bool> {
+    insert_model_unit_set_only(unit_set)
+        .await
+        .map_err(handle_db_err)
+}
