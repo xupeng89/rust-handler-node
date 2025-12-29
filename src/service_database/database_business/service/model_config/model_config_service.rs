@@ -276,7 +276,11 @@ pub async fn get_model_config_for_filter_label_params(
             show_label_params,
         })
     } else {
-        Ok(None.unwrap())
+        Ok(FilterLabelParamsResult {
+            filter_label_params: vec![],
+            range_status: 0,
+            show_label_params: ShowLabelParams::default(),
+        })
     }
 }
 
@@ -343,6 +347,10 @@ pub async fn get_model_config_control_and_rate_params(
             rate_params,
         })
     } else {
-        Ok(None.unwrap())
+        Ok(ControlAndRateResult {
+            id: None,
+            control_params: ControlParams::default(),
+            rate_params: RateParams::default(),
+        })
     }
 }
