@@ -28,7 +28,7 @@ impl MigrationTrait for Migration {
                     )
                     .col(
                         ColumnDef::new(ModelAutoShutterEntity::UpdateAt)
-                            .date_time()
+                            .big_integer()
                             .not_null(),
                     )
                     .col(ColumnDef::new(ModelAutoShutterEntity::Objects).text())

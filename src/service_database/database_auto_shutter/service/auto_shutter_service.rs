@@ -1,4 +1,7 @@
-use crate::service_database::database_auto_shutter::db_auto_shutter_connection::get_auto_shutter_db;
+use crate::{
+    service_database::database_auto_shutter::db_auto_shutter_connection::get_auto_shutter_db,
+    tool_handle::time_tool::integer_to_string,
+};
 
 use chrono::Utc;
 use napi_derive::napi;
@@ -109,7 +112,7 @@ impl From<AutoShutterModel> for FullCacheData {
             model_id: ele.model_id,
             objects: ele.objects,
             sysvars: ele.sysvars,
-            update_at: ele.update_at.to_rfc3339(),
+            update_at: integer_to_string(ele.update_at),
             sim_time: ele.sim_time,
             base_state_code: ele.base_state_code,
             user_name: ele.user_name,
@@ -135,7 +138,7 @@ impl From<AutoShutterModel> for AutoShutterListItem {
     fn from(ele: AutoShutterModel) -> Self {
         AutoShutterListItem {
             id: ele.id,
-            update_at: ele.update_at.to_rfc3339(),
+            update_at: integer_to_string(ele.update_at),
             sim_time: ele.sim_time,
             base_state_code: ele.base_state_code,
         }
@@ -181,7 +184,7 @@ pub async fn update_model_auto_shutter_entity_cache(
                     // 更新字段（保持原逻辑）
                     active.objects = Set(data.objects);
                     active.sysvars = Set(data.sysvars);
-                    active.update_at = Set(Utc::now());
+                    active.update_at = Set(Utc::now().timestamp_millis());
                     active.sim_time = Set(data.sim_time);
                     active.base_state_code = Set(data.base_state_code);
 
@@ -215,7 +218,7 @@ pub async fn read_one_model_auto_shutter_entity_cache(
         model_id: Set(model_id),
         objects: Set(data.objects),
         sysvars: Set(data.sysvars),
-        update_at: Set(Utc::now()),
+        update_at: Set(Utc::now().timestamp_millis()),
         sim_time: Set(data.sim_time),
         base_state_code: Set(data.base_state_code),
         ..Default::default()

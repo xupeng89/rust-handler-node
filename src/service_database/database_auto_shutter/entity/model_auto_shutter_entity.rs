@@ -1,6 +1,5 @@
 use sea_orm::entity::prelude::*;
 use serde::{Deserialize, Serialize};
-
 #[derive(Clone, Debug, PartialEq, Eq, DeriveEntityModel, Serialize, Deserialize)]
 #[sea_orm(
     table_name = "model_auto_shutter_entity",
@@ -15,7 +14,7 @@ pub struct Model {
     pub sim_time: String,
 
     #[sea_orm(column_name = "update_at", default = "")]
-    pub update_at: DateTimeUtc,
+    pub update_at: i64,
 
     // 假设 objects 和 sysvars 存储的是 JSON 字符串
     #[sea_orm(default = "")]
