@@ -1,5 +1,5 @@
 use chrono::Utc;
-use sea_orm::{entity::*, query::*, ActiveValue::Set, DbErr, InsertResult};
+use sea_orm::{ActiveValue::Set, DbErr, InsertResult, entity::*, query::*};
 use serde::{Deserialize, Serialize};
 
 // 假设 Entity 定义位于此路径下

@@ -221,7 +221,9 @@ pub async fn init_physical_temperature_equation_data_fast(
         txn.execute_raw(statement).await?; // 传递引用 &statement
     } else {
         // Handle the case for unsupported database backends
-        eprintln!("Warning: Unsupported database backend for resetting auto-increment.   ->pp_component_temperature_equation_entity");
+        eprintln!(
+            "Warning: Unsupported database backend for resetting auto-increment.   ->pp_component_temperature_equation_entity"
+        );
     }
 
     txn.commit().await?;

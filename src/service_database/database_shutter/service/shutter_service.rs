@@ -2,8 +2,8 @@ use crate::service_database::database_shutter::db_shutter_connection::get_shutte
 use napi_derive::napi;
 
 use sea_orm::{
-    prelude::Expr, ActiveModelTrait, ColumnTrait, DbErr, EntityTrait, FromQueryResult,
-    IntoActiveModel, QueryFilter, QuerySelect, Set,
+    ActiveModelTrait, ColumnTrait, DbErr, EntityTrait, FromQueryResult, IntoActiveModel,
+    QueryFilter, QuerySelect, Set, prelude::Expr,
 };
 use serde::Serialize;
 // ======================================

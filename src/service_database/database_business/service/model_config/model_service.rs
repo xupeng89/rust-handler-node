@@ -3,7 +3,7 @@ use crate::service_database::database_business::entity::model_config::model_enti
     ActiveModel, Column as ModelColumn, Entity as ModelEntity, Model as ModelModel,
 };
 use napi_derive::napi;
-use sea_orm::{entity::prelude::*, FromQueryResult, QueryFilter, QueryOrder, Set};
+use sea_orm::{FromQueryResult, QueryFilter, QueryOrder, Set, entity::prelude::*};
 use serde::{Deserialize, Serialize};
 
 use crate::tool_handle::time_tool::naive_dt_utc_to_millis;

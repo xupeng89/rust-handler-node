@@ -1,6 +1,6 @@
 use napi_derive::napi;
-use sea_orm::entity::prelude::*;
 use sea_orm::DeriveActiveEnum;
+use sea_orm::entity::prelude::*;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, PartialEq, Eq, DeriveActiveEnum, EnumIter, Serialize, Deserialize)]

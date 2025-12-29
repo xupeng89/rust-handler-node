@@ -10,7 +10,7 @@ use crate::service_database::database_physical_property::entity::physical_calc_b
 use crate::sync_physical_calc_data;
 use crate::tool_handle::result_entity::FunctionOptionDTO;
 use napi_derive::napi;
-use sea_orm::{entity::prelude::*, FromQueryResult, JoinType, QuerySelect, Set, TransactionTrait};
+use sea_orm::{FromQueryResult, JoinType, QuerySelect, Set, TransactionTrait, entity::prelude::*};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 #[derive(Clone, Debug, Deserialize, Serialize)]

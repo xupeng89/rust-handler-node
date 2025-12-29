@@ -142,7 +142,9 @@ pub async fn init_physical_information_data_fast(init_json_data: Vec<Value>) -> 
         txn.execute_raw(statement).await?; // 传递引用 &statement
     } else {
         // Handle the case for unsupported database backends
-        eprintln!("Warning: Unsupported database backend for resetting auto-increment.   ->pp_component_information_entity");
+        eprintln!(
+            "Warning: Unsupported database backend for resetting auto-increment.   ->pp_component_information_entity"
+        );
     }
 
     txn.commit().await?;

@@ -5,7 +5,7 @@ use crate::service_database::database_business::entity::model_config::model_conf
 };
 use napi_derive::napi;
 
-use sea_orm::{entity::prelude::*, QueryFilter, QuerySelect, Set};
+use sea_orm::{QueryFilter, QuerySelect, Set, entity::prelude::*};
 use serde::{Deserialize, Serialize};
 
 #[napi(object, namespace = "modelConfig", js_name = "AutoShutterParams")]

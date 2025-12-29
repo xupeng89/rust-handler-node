@@ -1,7 +1,7 @@
 use crate::service_database::database_physical_property::db_physical_property_connection::get_physical_property_db;
 use sea_orm::{
-    entity::prelude::*, ActiveModelTrait, ActiveValue::Set, ColumnTrait, Condition, EntityTrait,
-    QueryFilter, TransactionTrait,
+    ActiveModelTrait, ActiveValue::Set, ColumnTrait, Condition, EntityTrait, QueryFilter,
+    TransactionTrait, entity::prelude::*,
 };
 
 use napi_derive::napi;

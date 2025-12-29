@@ -7,8 +7,8 @@ use crate::service_database::database_physical_property::entity::physical_compon
 use napi_derive::napi;
 use sea_orm::Statement;
 use sea_orm::{
-    entity::prelude::*, ActiveValue::Set, ColumnTrait, EntityTrait, NotSet, QueryFilter,
-    TransactionTrait,
+    ActiveValue::Set, ColumnTrait, EntityTrait, NotSet, QueryFilter, TransactionTrait,
+    entity::prelude::*,
 };
 use serde_json::Value;
 
@@ -140,7 +140,9 @@ pub async fn init_physical_base_data_fast(init_json_data: Vec<Value>) -> Result<
         txn.execute_raw(statement).await?; // 传递引用 &statement
     } else {
         // Handle the case for unsupported database backends
-        eprintln!("Warning: Unsupported database backend for resetting auto-increment.  ->pp_component_base_entity");
+        eprintln!(
+            "Warning: Unsupported database backend for resetting auto-increment.  ->pp_component_base_entity"
+        );
     }
 
     txn.commit().await?;

@@ -4,9 +4,9 @@ use crate::service_database::{
     interface_trait::{HasId, SyncableBinaryEntity},
 };
 use sea_orm::{
+    ExprTrait, IntoActiveModel, TransactionTrait, TryIntoModel,
     entity::prelude::*,
     sea_query::{Alias, Expr},
-    ExprTrait, IntoActiveModel, TransactionTrait, TryIntoModel,
 };
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
