@@ -205,8 +205,6 @@
 //     Ok(())
 // }
 
-// /// 查询缓存数据并返回 (供外部同步到持久化存储)
-// /// TS: updateAllModelAutoShutterEntityCache (现改为返回参数)
 // pub async fn get_all_model_auto_shutter_entity_cache() -> Result<Vec<FullCacheData>, DbErr> {
 //     let db = get_cache_db().await?;
 
@@ -219,8 +217,6 @@
 //     Ok(result)
 // }
 
-// /// 查询缓存数据并返回 (供外部同步到持久化存储)
-// /// TS: updateAllModelAutoShutterEntityCache (现改为返回参数)
 // pub async fn get_all_model_auto_shutter_entity_cache_model_id(
 //     model_id: String,
 // ) -> Result<Vec<FullCacheData>, DbErr> {
