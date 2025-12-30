@@ -229,6 +229,32 @@ impl MigrationTrait for Migration {
                     .to_owned(),
             )
             .await?;
+        manager
+            .create_table(
+                Table::create()
+                    .table(ModelNameGenerator::Table)
+                    .if_not_exists()
+                    .col(
+                        ColumnDef::new(ModelNameGenerator::Id)
+                            .integer()
+                            .not_null()
+                            .auto_increment()
+                            .primary_key(),
+                    )
+                    .col(ColumnDef::new(ModelNameGenerator::Code).string().not_null())
+                    .col(
+                        ColumnDef::new(ModelNameGenerator::UsedName)
+                            .string()
+                            .not_null(),
+                    ) // 对应 TS 中的 numberSegment
+                    .col(
+                        ColumnDef::new(ModelNameGenerator::ModelId)
+                            .string()
+                            .not_null(),
+                    )
+                    .to_owned(),
+            )
+            .await?;
         Ok(())
     }
 
@@ -247,6 +273,9 @@ impl MigrationTrait for Migration {
             .await?;
         manager
             .drop_table(Table::drop().table(ModelUnitSet::Table).to_owned())
+            .await?;
+        manager
+            .drop_table(Table::drop().table(ModelNameGenerator::Table).to_owned())
             .await?;
         Ok(())
     }
@@ -322,4 +351,13 @@ enum ModelUnitItem {
     ModelId,
     Code,
     Value,
+}
+
+#[derive(Iden)]
+pub enum ModelNameGenerator {
+    Table,
+    Id,
+    Code,
+    UsedName, // 这里根据你的 Entity 定义，映射字段名
+    ModelId,
 }
