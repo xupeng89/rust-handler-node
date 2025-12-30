@@ -26,7 +26,6 @@ use crate::service_database::database_auto_shutter::entity::model_auto_shutter_e
 
 // 读取完整数据
 
-/// 批量插入数据到缓存数据库
 // pub async fn read_current_model_auto_shutter_entity(data: Vec<FullCacheData>) -> Result<(), DbErr> {
 //     let db = get_auto_shutter_db().await?;
 
@@ -229,8 +228,6 @@ pub async fn read_one_model_auto_shutter_entity_cache(
     Ok(result.last_insert_id)
 }
 
-/// 批量插入数据到缓存数据库
-/// TS: readModelAutoShutterEntityCache (现改为接受数据作为参数)
 // pub async fn read_model_auto_shutter_entity_cache(data: Vec<FullCacheData>) -> Result<(), DbErr> {
 //     let db = get_auto_shutter_db().await?;
 

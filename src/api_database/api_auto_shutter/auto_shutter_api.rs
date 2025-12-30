@@ -45,7 +45,7 @@ use crate::service_database::database_auto_shutter::service::auto_shutter_servic
 // }
 
 // #[napi(namespace = "autoShutter")]
-/// 批量插入数据到缓存数据库 (Service: read_model_auto_shutter_entity_cache)
+
 // pub async fn read_auto_shutter_cache_api(data: Vec<FullCacheData>) -> Result<()> {
 //     read_model_auto_shutter_entity_cache(data)
 //         .await
