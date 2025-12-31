@@ -5,13 +5,35 @@ use napi_derive::napi;
 use sea_orm::{QueryFilter, Set, entity::prelude::*};
 use serde::{Deserialize, Serialize};
 
-#[napi(object)]
+#[napi(object, namespace = "nameGenerator", js_name = "NameGenDTO")]
 #[derive(Serialize, Deserialize)]
 pub struct NameGenDTO {
     pub id: i32,
     pub code: String,
-    pub used_name: String,
+    pub number_segment: String,
     pub model_id: String,
+}
+
+impl From<NameGenModel> for NameGenDTO {
+    fn from(c: NameGenModel) -> Self {
+        NameGenDTO {
+            id: c.id,
+            model_id: c.model_id,
+            code: c.code,
+            number_segment: c.number_segment,
+        }
+    }
+}
+
+impl From<NameGenDTO> for NameGenActiveModel {
+    fn from(data: NameGenDTO) -> Self {
+        Self {
+            id: Set(data.id),
+            model_id: Set(data.model_id),
+            code: Set(data.code),
+            number_segment: Set(data.number_segment),
+        }
+    }
 }
 
 // --- 内部算法工具函数 ---
@@ -96,62 +118,6 @@ fn get_number_from_name(name: &str) -> i32 {
 
 // --- 数据库 Service ---
 
-pub async fn get_used_name_detail(
-    code: String,
-    model_id: String,
-) -> Result<Option<NameGenModel>, DbErr> {
-    let db = get_business_db().await?;
-    NameGenEntity::find()
-        .filter(NameGenColumn::Code.eq(code))
-        .filter(NameGenColumn::ModelId.eq(model_id))
-        .one(db)
-        .await
-}
-
-pub async fn update_number_segment_delete(
-    code: String,
-    name_delete: String,
-    model_id: String,
-) -> Result<(), DbErr> {
-    let db = get_business_db().await?;
-    if let Some(res) = get_used_name_detail(code.clone(), model_id.clone()).await? {
-        let num = get_number_from_name(&name_delete);
-        let new_segment = remove_number_from_ranges(num, &res.used_name);
-
-        let mut active: NameGenActiveModel = res.into();
-        active.used_name = Set(new_segment);
-        active.update(db).await?;
-    }
-    Ok(())
-}
-
-pub async fn insert_or_update_name_business(
-    code: String,
-    segment: String,
-    model_id: String,
-) -> Result<(), DbErr> {
-    let db = get_business_db().await?;
-    let existing = get_used_name_detail(code.clone(), model_id.clone()).await?;
-
-    match existing {
-        Some(res) => {
-            let mut active: NameGenActiveModel = res.into();
-            active.used_name = Set(segment);
-            active.update(db).await?;
-        }
-        None => {
-            let active = NameGenActiveModel {
-                code: Set(code),
-                used_name: Set(segment),
-                model_id: Set(model_id),
-                ..Default::default()
-            };
-            active.insert(db).await?;
-        }
-    }
-    Ok(())
-}
-
 use std::collections::HashMap;
 use std::sync::OnceLock;
 
@@ -161,6 +127,7 @@ static UNIT_CODE_PREFIX: OnceLock<HashMap<&'static str, &'static str>> = OnceLoc
 fn get_unit_prefix_map() -> &'static HashMap<&'static str, &'static str> {
     UNIT_CODE_PREFIX.get_or_init(|| {
         let mut m = HashMap::new();
+        // 核心单元与物流
         m.insert("seperator", "V");
         m.insert("simpleDistTower", "T");
         m.insert("heatX", "E");
@@ -169,8 +136,42 @@ fn get_unit_prefix_map() -> &'static HashMap<&'static str, &'static str> {
         m.insert("valve", "VLV");
         m.insert("material", "MS");
         m.insert("energy", "Q");
-        // ... 此处省略你 TS 中定义的其他几十个前缀，模式相同
+        m.insert("airCooler", "A");
+        m.insert("furnace", "F");
+        m.insert("pipe", "PIPE");
+
+        // 反应器与压缩机
+        m.insert("conversionReactor", "R");
+        m.insert("centrifugalCompressor", "C");
+
+        // 逻辑计算与信号
+        m.insert("signal", "SI");
+        m.insert("byPass", "BP");
+        m.insert("vote", "NSM");
+        m.insert("rs", "RS");
+        m.insert("not", "INV");
+        m.insert("andOr", "LO");
+        m.insert("delay", "DLY");
+        m.insert("pulse", "PLS");
+        m.insert("positionInformation", "PI");
+
+        // 传感器 (Sensors)
+        m.insert("tSensor", "TG");
+        m.insert("compSensor", "CG");
+        m.insert("fSensor", "FG");
+        m.insert("nvfSensor", "NVFG");
+        m.insert("vfSensor", "VFG");
+        m.insert("pSensor", "PG");
+        m.insert("lSensor", "LG");
+        m.insert("dSensor", "DG");
+
+        // 算法、脚本与包
+        m.insert("aiuo", "AI");
+        m.insert("reactionPackage", "Rxn");
+        m.insert("cutter", "CUT");
+        m.insert("scriptLogic", "LOGIC");
         m.insert("scriptUO", "UO");
+
         m
     })
 }
@@ -280,4 +281,88 @@ pub fn get_graph_name_logic(code: String, number_segment: String) -> NameResult 
         number_segment: final_segment,
         name: format!("{}{}", prefix, raw_name),
     }
+}
+
+pub async fn get_used_name_detail(code: String, model_id: String) -> Result<NameGenDTO, DbErr> {
+    let db = get_business_db().await?;
+    let model = NameGenEntity::find()
+        .filter(NameGenColumn::Code.eq(code))
+        .filter(NameGenColumn::ModelId.eq(model_id))
+        .one(db)
+        .await?;
+
+    let result = model.map(NameGenDTO::from).unwrap();
+    Ok(result)
+}
+
+pub async fn update_number_segment_delete(
+    code: String,
+    name_delete: String,
+    model_id: String,
+) -> Result<(), DbErr> {
+    let db = get_business_db().await?;
+    let service_result = get_used_name_detail(code, model_id).await?;
+    let num = get_number_from_name(&name_delete);
+    let new_segment = remove_number_from_ranges(num, &service_result.number_segment);
+    let mut active: NameGenActiveModel = service_result.into();
+    active.number_segment = Set(new_segment);
+    active.update(db).await?;
+
+    Ok(())
+}
+
+pub async fn update_number_segment_name_number(
+    code: String,
+    name_number: String,
+    model_id: String,
+) -> Result<(), DbErr> {
+    let db = get_business_db().await?;
+    let service_result = get_used_name_detail(code, model_id).await?;
+    let num = get_number_from_name(&name_number);
+    let new_segment = insert_single_number(num, &service_result.number_segment);
+    let mut active: NameGenActiveModel = service_result.into();
+    active.number_segment = Set(new_segment);
+    active.update(db).await?;
+
+    Ok(())
+}
+
+pub async fn insert_or_update_name_business(
+    code: String,
+    segment: String,
+    model_id: String,
+) -> Result<(), DbErr> {
+    let db = get_business_db().await?;
+
+    // 1. 尝试获取现有记录
+    // 注意：这里去掉了 ?，因为我们需要手动处理 Err 逻辑
+    let existing_result = get_used_name_detail(code.clone(), model_id.clone()).await;
+
+    match existing_result {
+        // 情况 A：查询成功，说明记录存在，执行更新
+        Ok(res) => {
+            // 注意：如果 res 是 DTO，确保它实现了 into ActiveModel 且带有 ID
+            let mut active: NameGenActiveModel = res.into();
+            active.number_segment = Set(segment);
+            active.update(db).await?;
+        }
+        // 情况 B：查询报错
+        Err(e) => {
+            // 如果错误是因为“找不到记录”，则执行插入逻辑
+            if let DbErr::RecordNotFound(_) = e {
+                let active = NameGenActiveModel {
+                    code: Set(code),
+                    number_segment: Set(segment),
+                    model_id: Set(model_id),
+                    ..Default::default()
+                };
+                active.insert(db).await?;
+            } else {
+                // 如果是其他数据库错误（如连接断开），则继续向上抛出
+                return Err(e);
+            }
+        }
+    }
+
+    Ok(())
 }

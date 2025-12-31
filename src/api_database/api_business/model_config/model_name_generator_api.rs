@@ -4,12 +4,32 @@ use napi::Result;
 use napi_derive::napi;
 
 #[napi(namespace = "nameGenerator")]
+pub async fn get_used_name_detail_api(code: String, model_id: String) -> Result<NameGenDTO> {
+    let result = get_used_name_detail(code, model_id)
+        .await
+        .map_err(handle_db_err)?;
+    Ok(result)
+}
+
+#[napi(namespace = "nameGenerator")]
 pub async fn update_name_segment_by_delete_api(
     code: String,
     number_delete: String,
     model_id: String,
 ) -> Result<()> {
     update_number_segment_delete(code, number_delete, model_id)
+        .await
+        .map_err(handle_db_err)?;
+    Ok(())
+}
+
+#[napi(namespace = "nameGenerator")]
+pub async fn update_name_segment_by_name_number_api(
+    code: String,
+    number_number: String,
+    model_id: String,
+) -> Result<()> {
+    update_number_segment_name_number(code, number_number, model_id)
         .await
         .map_err(handle_db_err)?;
     Ok(())
@@ -25,13 +45,4 @@ pub async fn save_or_update_name_gen_api(
         .await
         .map_err(handle_db_err)?;
     Ok(())
-}
-
-#[napi(namespace = "nameGenerator")]
-pub fn get_number_segment_from_name_tool(name: String) -> i32 {
-    // 纯工具函数，无需 async
-    let re = regex::Regex::new(r"\d+").unwrap();
-    re.find(&name)
-        .map(|m| m.as_str().parse().unwrap_or(-1))
-        .unwrap_or(-1)
 }

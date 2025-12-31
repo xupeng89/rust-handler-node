@@ -1,6 +1,6 @@
-// use std::time::Duration;
+use sea_orm::ConnectionTrait;
+use std::time::Duration;
 use tokio::sync::OnceCell;
-
 // 使用 sea-orm-migration 提供的 sea_orm，保证类型一致
 use sea_orm_migration::MigratorTrait;
 use sea_orm_migration::sea_orm as migration_orm;
@@ -14,28 +14,27 @@ pub static DB: OnceCell<migration_orm::DatabaseConnection> = OnceCell::const_new
 pub async fn ensure_cache_db()
 -> Result<&'static migration_orm::DatabaseConnection, migration_orm::DbErr> {
     DB.get_or_try_init(|| async {
-        // SQLite 数据库 URL
-        // let db_url = "sqlite:app.db?mode=rwc".to_string();
-        let db_url = "sqlite::memory:".to_string();
-        // 创建连接参数
-        let opt = migration_orm::ConnectOptions::new(db_url);
-        // opt.max_connections(1)
-        //     .min_connections(1)
-        //     .connect_timeout(Duration::from_secs(10))
-        //     .acquire_timeout(Duration::from_secs(5))
-        //     // 设置连接永远不被回收（无限生命周期）
-        //     .max_lifetime(None)
-        //     // 设置永远不因空闲而关闭连接
-        //     .idle_timeout(None)
-        //     .sqlx_logging(true);
+        let db_url = "sqlite::memory:?cache=shared".to_string();
+        let mut opt = migration_orm::ConnectOptions::new(db_url);
 
-        // 创建连接（注意使用 migration_orm::Database）
+        // 2. 核心配置：保持至少一个连接存活
+        opt.max_connections(10) // 最大连接数
+            .min_connections(1) // 关键：始终保持至少 1 个连接，防止内存被释放
+            .connect_timeout(Duration::from_secs(10))
+            .idle_timeout(None) // 关键：禁止关闭空闲连接
+            .max_lifetime(None) // 关键：禁止回收连接（防止重启连接间隙导致数据丢失）
+            .sqlx_logging(true); // 调试时开启，可以看到连接池的状态
+        // 第一次初始化时跑一次 migration
         let db = migration_orm::Database::connect(opt).await?;
 
-        // 运行 migration（最重要：必须传 2 个参数）
+        db.execute_unprepared("PRAGMA journal_mode = WAL;").await?;
+        db.execute_unprepared("PRAGMA synchronous = NORMAL;")
+            .await?;
+
         Migrator::up(&db, None).await?;
-        eprintln!("✅ [CacheDB] 数据库连接成功");
-        Ok::<migration_orm::DatabaseConnection, migration_orm::DbErr>(db)
+        eprintln!("✅ [CacheDB] 内存数据库初始化并执行 Migration");
+
+        Ok(db)
     })
     .await
 }

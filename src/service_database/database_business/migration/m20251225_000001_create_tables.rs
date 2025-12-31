@@ -243,7 +243,7 @@ impl MigrationTrait for Migration {
                     )
                     .col(ColumnDef::new(ModelNameGenerator::Code).string().not_null())
                     .col(
-                        ColumnDef::new(ModelNameGenerator::UsedName)
+                        ColumnDef::new(ModelNameGenerator::NumberSegment)
                             .string()
                             .not_null(),
                     ) // 对应 TS 中的 numberSegment
@@ -358,6 +358,6 @@ pub enum ModelNameGenerator {
     Table,
     Id,
     Code,
-    UsedName, // 这里根据你的 Entity 定义，映射字段名
+    NumberSegment, // 这里根据你的 Entity 定义，映射字段名
     ModelId,
 }

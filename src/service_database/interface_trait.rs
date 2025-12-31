@@ -102,7 +102,6 @@ macro_rules! setup_db_instance {
             pub async fn [<initialize_ $name _db>](
                 file_path: String,
             ) -> Result<&'static sea_orm_migration::sea_orm::DatabaseConnection, sea_orm_migration::sea_orm::DbErr> {
-                // 【核心修复】引入 Trait，这样 $migrator_path::up 才能被找到
                 use sea_orm_migration::MigratorTrait;
                 use sea_orm_migration::sea_orm::ConnectionTrait;
 

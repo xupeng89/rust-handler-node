@@ -54,6 +54,12 @@ export interface Model {
   sortId: number
 }
 
+/** 核心函数：根据号段获取名称 (对应 TS 的 getGraphNameByNumberSegment) */
+export interface NameResult {
+  numberSegment: string
+  name: string
+}
+
 export interface RateParams {
   pfSolver: number
   controlAndLogic: number
@@ -62,10 +68,6 @@ export interface RateParams {
 }
 
 export declare namespace autoShutter {
-  /**
-   * 批量插入数据到缓存数据库
-   * 查询缓存数据并返回 (供外部同步到持久化存储)
-   */
   export interface AutoShutterData {
     objects: string
     sysvars: string
@@ -88,10 +90,7 @@ export declare namespace autoShutter {
   export function getAutoShutterCacheListApi(orderFlag: string, autoCount: number, modelId: string): Promise<Array<AutoShutterListItem>>
   /** 插入新的快照记录 (Service: insert_model_auto_shutter_entity_cache) */
   export function insertAutoShutterCacheApi(data: AutoShutterData, modelId: string): Promise<number>
-  /**
-   * 批量插入数据到缓存数据库 (Service: read_model_auto_shutter_entity_cache)
-   * 更新自动快照 (Service: update_model_auto_shutter_entity_cache)
-   */
+  /** 更新自动快照 (Service: update_model_auto_shutter_entity_cache) */
   export function updateAutoShutterCacheApi(data: AutoShutterData, modelId: string): Promise<number>
 }
 
@@ -485,6 +484,127 @@ export declare namespace modelUnit {
   export function updateModelUnitAllItemsApi(unitSet: ModelUnitSetItemsUpdateDTO, modelId: string): Promise<boolean>
   /** 增量更新单位集合信息（含默认值排他性逻辑） */
   export function updateModelUnitSetLogicApi(data: ModelUnitSetUpdateDTO): Promise<boolean>
+}
+
+export declare namespace model_type {
+  /** 自定义节点名称 */
+  export const enum CustomNodeName {
+    ScriptLogic = '脚本逻辑',
+    ScriptUO = '脚本模块',
+    CustomUserUO = '自定义算法',
+    CustomUserLogic0 = '电加热',
+    CustomUserLogic1 = '防喘振控制器',
+    CustomUserLogic2 = 'ITCC压缩机升速',
+    CustomUserLogic3 = '轴系监测'
+  }
+  export interface GraphListData {
+    typeName: GraphType
+    data: string
+  }
+  /** 图形/连线分类 */
+  export const enum GraphType {
+    Node = 'Node',
+    Edge = 'Edge',
+    Image = 'Image'
+  }
+  export interface ModelFlowSheetGraphListInsertDto {
+    graphicPageId: string
+    graphList: Array<GraphListData>
+  }
+  export interface ModelFlowSheetUpdateDto {
+    id: string
+    name?: string
+    description?: string
+  }
+  export interface ModelGraphCheckListDto {
+    id: string
+    key: string
+    modelId: string
+    type: string
+  }
+  /** 节点类型核心枚举 */
+  export const enum NodeType {
+    Material = 'Material',
+    Energy = 'Energy',
+    Valve = 'Valve',
+    MixerTee = 'MixerTee',
+    Seperator = 'Seperator',
+    SimpleDistTower = 'SimpleDistTower',
+    Pump = 'Pump',
+    HeatX = 'HeatX',
+    AirCooler = 'AirCooler',
+    ConversionReactor = 'ConversionReactor',
+    Furnace = 'Furnace',
+    Pipe = 'Pipe',
+    CentrifugalCompressor = 'CentrifugalCompressor',
+    Signal = 'Signal',
+    ByPass = 'ByPass',
+    Vote = 'Vote',
+    Rs = 'Rs',
+    Not = 'Not',
+    AndOr = 'AndOr',
+    Delay = 'Delay',
+    Pulse = 'Pulse',
+    PositionInformation = 'PositionInformation',
+    CustomVueNode = 'CustomVueNode',
+    Aiuo = 'Aiuo',
+    TSensor = 'TSensor',
+    PSensor = 'PSensor',
+    LSensor = 'LSensor',
+    CompSensor = 'CompSensor',
+    FSensor = 'FSensor',
+    NvfSensor = 'NvfSensor',
+    VfSensor = 'VfSensor',
+    DSensor = 'DSensor',
+    Cutter = 'Cutter',
+    Rect = 'Rect',
+    Ellipse = 'Ellipse',
+    Path = 'Path',
+    Text = 'Text',
+    ScriptLogic = 'ScriptLogic',
+    ScriptUO = 'ScriptUO',
+    CustomCustomerUO = 'CustomCustomerUO',
+    CustomUserUO = 'CustomUserUO',
+    CustomSpecialUO = 'CustomSpecialUO',
+    CustomUserLogic0 = 'CustomUserLogic0',
+    CustomUserLogic1 = 'CustomUserLogic1',
+    CustomUserLogic2 = 'CustomUserLogic2',
+    CustomUserLogic3 = 'CustomUserLogic3'
+  }
+  /** 自定义模块前缀 */
+  export const enum NodeTypeCustom {
+    CustomCustomerUO = 'CustomCustomerUO',
+    CustomUserUO = 'CustomUserUO',
+    CustomSpecialUO = 'CustomSpecialUO',
+    CustomSysUO = 'CustomSysUO',
+    CustomUserLogic = 'CustomUserLogic',
+    CustomCustomerLogic = 'CustomCustomerLogic',
+    CustomSysLogic = 'CustomSysLogic'
+  }
+  /** 传感器节点名称 */
+  export const enum SensorNodeName {
+    TSensor = '温度传感器',
+    PSensor = '压力传感器',
+    LSensor = '液位传感器',
+    CompSensor = '组分传感器',
+    FSensor = '流量传感器',
+    NvfSensor = '标准体积流量传感器',
+    VfSensor = '体积流量传感器',
+    DSensor = '密度传感器'
+  }
+}
+
+export declare namespace nameGenerator {
+  export function getUsedNameDetailApi(code: string, modelId: string): Promise<NameGenDTO>
+  export interface NameGenDTO {
+    id: number
+    code: string
+    numberSegment: string
+    modelId: string
+  }
+  export function saveOrUpdateNameGenApi(code: string, numberSegment: string, modelId: string): Promise<void>
+  export function updateNameSegmentByDeleteApi(code: string, numberDelete: string, modelId: string): Promise<void>
+  export function updateNameSegmentByNameNumberApi(code: string, numberNumber: string, modelId: string): Promise<void>
 }
 
 export declare namespace physicalBinarySync {

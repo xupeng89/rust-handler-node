@@ -51,7 +51,7 @@ pub async fn add_undo_log_service(
         .await?;
 
     let new_item = ActiveModel {
-        model_id: Set(model_id),
+        model_id: Set(model_id.clone()),
         table_name: Set(table_name),
         op_type: Set(op_type),
         old_data: Set(old_data),
@@ -64,7 +64,8 @@ pub async fn add_undo_log_service(
     let result = model_undo_entity_cache::Entity::insert(new_item)
         .exec(db)
         .await?;
-
+    // 4. 限制步数：只保留最近 10 步
+    prune_undo_logs(db, &model_id, 10).await?;
     Ok(result.last_insert_id)
 }
 
@@ -191,5 +192,34 @@ pub async fn bench_insert() -> Result<(), DbErr> {
     }
 
     txn.commit().await?;
+    Ok(())
+}
+
+/// 内部函数：限制某个模型的撤销步数
+async fn prune_undo_logs(
+    db: &sea_orm::DatabaseConnection,
+    model_id: &str,
+    max_steps: usize,
+) -> Result<(), DbErr> {
+    // 找到该模型下所有 status=0 的记录，按时间倒序排列
+    let logs = UndoEntity::find()
+        .filter(UndoEntityColumn::ModelId.eq(model_id))
+        .filter(UndoEntityColumn::Status.eq(0))
+        .order_by_desc(UndoEntityColumn::OperatorAt)
+        .all(db)
+        .await?;
+
+    // 如果记录数超过限制，删除较旧的记录
+    if logs.len() > max_steps {
+        let ids_to_delete: Vec<i32> = logs[max_steps..] // 截取第 11 条之后的所有记录
+            .iter()
+            .map(|m| m.id)
+            .collect();
+
+        UndoEntity::delete_many()
+            .filter(UndoEntityColumn::Id.is_in(ids_to_delete))
+            .exec(db)
+            .await?;
+    }
     Ok(())
 }
