@@ -17,7 +17,7 @@ pub async fn ensure_cache_db()
     DB.get_or_try_init(|| async {
         // 使用命名的内存数据库 + 共享缓存模式
         // 这允许通过名称访问同一个内存区域
-        let db_url = "file:memdb1?mode=memory&cache=shared";
+        let db_url = "sqlite:file:memdb1?mode=memory&cache=shared";
 
         // --- 步骤 A: 建立守护连接 ---
         // 这个连接没有任何连接池配置，只是为了“占坑”
@@ -54,3 +54,48 @@ pub async fn get_cache_db()
 -> Result<&'static migration_orm::DatabaseConnection, migration_orm::DbErr> {
     ensure_cache_db().await
 }
+
+// #[cfg(test)]
+// mod tests {
+//     use super::*;
+//     use sea_orm::{ConnectionTrait, Statement};
+
+//     #[tokio::test]
+//     async fn test_memory_db_persistence() {
+//         // 1. 初始化数据库（会触发 Guard 连接和 Migration）
+//         let db = get_cache_db().await.expect("数据库初始化失败");
+
+//         // 2. 使用 execute_unprepared 执行原始 SQL
+//         // 创建测试表
+//         db.execute_unprepared("CREATE TABLE test_persistence (id INTEGER PRIMARY KEY, name TEXT);")
+//             .await
+//             .expect("创建测试表失败");
+
+//         // 插入测试数据
+//         db.execute_unprepared("INSERT INTO test_persistence (name) VALUES ('persistence_test');")
+//             .await
+//             .expect("插入数据失败");
+
+//         eprintln!("✅ 数据已插入 (使用 execute_unprepared)");
+
+//         // 3. 模拟新连接接入同一个命名内存库
+//         let db_url = "sqlite:file:memdb1?mode=memory&cache=shared";
+//         let new_db = migration_orm::Database::connect(db_url).await.unwrap();
+
+//         // 4. 验证数据是否依然存在
+//         // 查询数据仍建议使用 query_one，因为它能处理结果集
+//         let res = new_db
+//             .query_one_raw(Statement::from_string(
+//                 new_db.get_database_backend(),
+//                 "SELECT name FROM test_persistence WHERE id = 1;",
+//             ))
+//             .await
+//             .unwrap();
+
+//         assert!(res.is_some());
+//         let name: String = res.unwrap().try_get_by_index(0).unwrap();
+//         assert_eq!(name, "persistence_test");
+
+//         eprintln!("✅ 验证成功：即使是新连接，表和数据依然存在！");
+//     }
+// }
