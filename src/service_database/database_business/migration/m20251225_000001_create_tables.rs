@@ -284,6 +284,80 @@ impl MigrationTrait for Migration {
                     .to_owned(),
             )
             .await?;
+        manager
+            .create_table(
+                Table::create()
+                    .table(ModelCompoundAllDetail::Table)
+                    .if_not_exists()
+                    .col(
+                        ColumnDef::new(ModelCompoundAllDetail::Id)
+                            .string()
+                            .not_null()
+                            .primary_key(),
+                    )
+                    .col(
+                        ColumnDef::new(ModelCompoundAllDetail::SourceId)
+                            .string()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(ModelCompoundAllDetail::SourceType)
+                            .string()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(ModelCompoundAllDetail::Name)
+                            .string()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(ModelCompoundAllDetail::Formula)
+                            .string()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(ModelCompoundAllDetail::CasNo)
+                            .string()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(ModelCompoundAllDetail::BaseCasNo)
+                            .string()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(ModelCompoundAllDetail::Number)
+                            .integer()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(ModelCompoundAllDetail::InternalName)
+                            .string()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(ModelCompoundAllDetail::SortNum)
+                            .integer()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(ModelCompoundAllDetail::CompoundChannelId)
+                            .string()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(ModelCompoundAllDetail::BasePhysicalProperty)
+                            .text()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(ModelCompoundAllDetail::TemperatureEquationProprety)
+                            .text()
+                            .not_null(),
+                    )
+                    .to_owned(),
+            )
+            .await?;
         Ok(())
     }
 
@@ -308,6 +382,14 @@ impl MigrationTrait for Migration {
             .await?;
         manager
             .drop_table(Table::drop().table(ModelCompoundChannel::Table).to_owned())
+            .await?;
+
+        manager
+            .drop_table(
+                Table::drop()
+                    .table(ModelCompoundAllDetail::Table)
+                    .to_owned(),
+            )
             .await?;
         Ok(())
     }
@@ -401,4 +483,24 @@ pub enum ModelCompoundChannel {
     RefName,
     Name,
     ModelId,
+}
+
+#[derive(Iden)]
+pub enum ModelCompoundAllDetail {
+    Table,
+    Id,
+    SourceId,
+    SourceType,
+    Name,
+    Formula,
+    CasNo,
+    BaseCasNo,
+    Number,
+    #[iden = "internalName"]
+    InternalName,
+    #[iden = "sortNum"]
+    SortNum,
+    CompoundChannelId,
+    BasePhysicalProperty,
+    TemperatureEquationProprety,
 }
