@@ -255,6 +255,35 @@ impl MigrationTrait for Migration {
                     .to_owned(),
             )
             .await?;
+        manager
+            .create_table(
+                Table::create()
+                    .table(ModelCompoundChannel::Table)
+                    .if_not_exists()
+                    .col(
+                        ColumnDef::new(ModelCompoundChannel::Id)
+                            .string()
+                            .not_null()
+                            .primary_key(),
+                    )
+                    .col(
+                        ColumnDef::new(ModelCompoundChannel::RefName)
+                            .string()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(ModelCompoundChannel::Name)
+                            .string()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(ModelCompoundChannel::ModelId)
+                            .string()
+                            .not_null(),
+                    )
+                    .to_owned(),
+            )
+            .await?;
         Ok(())
     }
 
@@ -276,6 +305,9 @@ impl MigrationTrait for Migration {
             .await?;
         manager
             .drop_table(Table::drop().table(ModelNameGenerator::Table).to_owned())
+            .await?;
+        manager
+            .drop_table(Table::drop().table(ModelCompoundChannel::Table).to_owned())
             .await?;
         Ok(())
     }
@@ -359,5 +391,14 @@ pub enum ModelNameGenerator {
     Id,
     Code,
     NumberSegment, // 这里根据你的 Entity 定义，映射字段名
+    ModelId,
+}
+
+#[derive(Iden)]
+pub enum ModelCompoundChannel {
+    Table,
+    Id,
+    RefName,
+    Name,
     ModelId,
 }

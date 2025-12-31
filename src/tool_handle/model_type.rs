@@ -119,35 +119,35 @@ pub mod model_type {
 
     // --- 结构体与 Interface 转换 ---
 
-    #[napi(object)]
-    #[derive(Serialize, Deserialize)]
-    pub struct ModelFlowSheetUpdateDTO {
-        pub id: String,
-        pub name: Option<String>,
-        pub description: Option<String>,
-        // 其他字段根据 ModelGraphicPageEntity 补充
-    }
+    // #[napi(object)]
+    // #[derive(Serialize, Deserialize)]
+    // pub struct ModelFlowSheetUpdateDTO {
+    //     pub id: String,
+    //     pub name: Option<String>,
+    //     pub description: Option<String>,
+    //     // 其他字段根据 ModelGraphicPageEntity 补充
+    // }
 
-    #[napi(object)]
-    #[derive(Serialize, Deserialize)]
-    pub struct GraphListData {
-        pub type_name: GraphType, // 使用 r# 避开 Rust 关键字
-        pub data: String,         // 建议存为 JSON 字符串
-    }
+    // #[napi(object)]
+    // #[derive(Serialize, Deserialize)]
+    // pub struct GraphListData {
+    //     pub type_name: GraphType, // 使用 r# 避开 Rust 关键字
+    //     pub data: String,         // 建议存为 JSON 字符串
+    // }
 
-    #[napi(object)]
-    #[derive(Serialize, Deserialize)]
-    pub struct ModelFlowSheetGraphListInsertDTO {
-        pub graphic_page_id: String,
-        pub graph_list: Vec<GraphListData>,
-    }
+    // #[napi(object)]
+    // #[derive(Serialize, Deserialize)]
+    // pub struct ModelFlowSheetGraphListInsertDTO {
+    //     pub graphic_page_id: String,
+    //     pub graph_list: Vec<GraphListData>,
+    // }
 
-    #[napi(object)]
-    #[derive(Serialize, Deserialize)]
-    pub struct ModelGraphCheckListDTO {
-        pub id: String,
-        pub key: String, // "material" | "energy"
-        pub model_id: String,
-        pub r#type: String, // "in" | "out" | "energyStreamIn"
-    }
+    // #[napi(object)]
+    // #[derive(Serialize, Deserialize)]
+    // pub struct ModelGraphCheckListDTO {
+    //     pub id: String,
+    //     pub key: String, // "material" | "energy"
+    //     pub model_id: String,
+    //     pub r#type: String, // "in" | "out" | "energyStreamIn"
+    // }
 }

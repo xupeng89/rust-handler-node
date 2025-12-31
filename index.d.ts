@@ -296,6 +296,28 @@ export declare namespace initDB {
   export function moveDbByUrl(targetPath: string): Promise<void>
 }
 
+export declare namespace modelComponentChannel {
+  export function deleteComponentChannelByIdsApi(ids: Array<string>): Promise<number>
+  export function getAllComponentChannelByIdsApi(ids: Array<string>): Promise<Array<ModelComponentChannelDTO>>
+  export function getAllComponentChannelByModelIdApi(modelId: string): Promise<Array<ModelComponentChannelDTO>>
+  export function getFirstComponentChannelApi(id: string, modelId: string): Promise<ModelComponentChannelDTO | null>
+  export function insertComponentChannelApi(data: ModelComponentChannelDTO): Promise<string>
+  export function insertComponentChannelsCopyApi(datas: Array<ModelComponentChannelDTO>): Promise<boolean>
+  export interface ModelComponentChannelDTO {
+    id: string
+    refName: string
+    name: string
+    modelId: string
+  }
+  export interface ModelComponentChannelUpdateDTO {
+    id: string
+    refName?: string
+    name?: string
+  }
+  export function selectComponentChannelByNameApi(name: string, modelId: string): Promise<boolean>
+  export function updateComponentChannelApi(data: ModelComponentChannelUpdateDTO, modelId: string): Promise<string>
+}
+
 export declare namespace modelConfig {
   export interface AutoShutterParams {
     autoShutter: number
@@ -497,30 +519,11 @@ export declare namespace model_type {
     CustomUserLogic2 = 'ITCC压缩机升速',
     CustomUserLogic3 = '轴系监测'
   }
-  export interface GraphListData {
-    typeName: GraphType
-    data: string
-  }
   /** 图形/连线分类 */
   export const enum GraphType {
     Node = 'Node',
     Edge = 'Edge',
     Image = 'Image'
-  }
-  export interface ModelFlowSheetGraphListInsertDto {
-    graphicPageId: string
-    graphList: Array<GraphListData>
-  }
-  export interface ModelFlowSheetUpdateDto {
-    id: string
-    name?: string
-    description?: string
-  }
-  export interface ModelGraphCheckListDto {
-    id: string
-    key: string
-    modelId: string
-    type: string
   }
   /** 节点类型核心枚举 */
   export const enum NodeType {
