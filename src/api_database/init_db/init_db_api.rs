@@ -1,5 +1,8 @@
 use napi::Result;
 use napi_derive::napi;
+
+use crate::service_database::database_cache::db_cache_connection::{DbStats, get_cache_db_stats};
+
 #[napi(namespace = "initDB")]
 /// 初始化缓存数据库
 pub async fn init_cache_db() -> Result<()> {
@@ -104,4 +107,9 @@ pub async fn move_db_by_url(target_path: String) -> Result<()> {
         Ok(_) => Ok(()),
         Err(e) => Err(napi::Error::from_reason(format!("Database Error: {}", e))),
     }
+}
+
+#[napi(namespace = "initDB")]
+pub async fn get_cache_db_stats_api() -> Result<DbStats> {
+    get_cache_db_stats().await
 }

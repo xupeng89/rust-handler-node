@@ -1,10 +1,10 @@
-use sea_orm::ConnectionTrait;
+use crate::service_database::database_cache::migration::Migrator;
+use napi_derive::napi;
+use sea_orm::{ConnectionTrait, Statement};
 use sea_orm_migration::MigratorTrait;
 use sea_orm_migration::sea_orm as migration_orm;
 use std::time::Duration;
 use tokio::sync::OnceCell;
-
-use crate::service_database::database_cache::migration::Migrator;
 
 // 1. 全局 DB 连接池（业务逻辑使用）
 pub static DB: OnceCell<migration_orm::DatabaseConnection> = OnceCell::const_new();
@@ -55,47 +55,93 @@ pub async fn get_cache_db()
     ensure_cache_db().await
 }
 
-// #[cfg(test)]
-// mod tests {
-//     use super::*;
-//     use sea_orm::{ConnectionTrait, Statement};
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use sea_orm::{ConnectionTrait, Statement};
 
-//     #[tokio::test]
-//     async fn test_memory_db_persistence() {
-//         // 1. 初始化数据库（会触发 Guard 连接和 Migration）
-//         let db = get_cache_db().await.expect("数据库初始化失败");
+    #[tokio::test]
+    async fn test_memory_db_persistence() {
+        // 1. 初始化数据库（会触发 Guard 连接和 Migration）
+        let db = get_cache_db().await.expect("数据库初始化失败");
 
-//         // 2. 使用 execute_unprepared 执行原始 SQL
-//         // 创建测试表
-//         db.execute_unprepared("CREATE TABLE test_persistence (id INTEGER PRIMARY KEY, name TEXT);")
-//             .await
-//             .expect("创建测试表失败");
+        // 2. 使用 execute_unprepared 执行原始 SQL
+        // 创建测试表
+        db.execute_unprepared("CREATE TABLE test_persistence (id INTEGER PRIMARY KEY, name TEXT);")
+            .await
+            .expect("创建测试表失败");
 
-//         // 插入测试数据
-//         db.execute_unprepared("INSERT INTO test_persistence (name) VALUES ('persistence_test');")
-//             .await
-//             .expect("插入数据失败");
+        // 插入测试数据
+        db.execute_unprepared("INSERT INTO test_persistence (name) VALUES ('persistence_test');")
+            .await
+            .expect("插入数据失败");
 
-//         eprintln!("✅ 数据已插入 (使用 execute_unprepared)");
+        eprintln!("✅ 数据已插入 (使用 execute_unprepared)");
 
-//         // 3. 模拟新连接接入同一个命名内存库
-//         let db_url = "sqlite:file:memdb1?mode=memory&cache=shared";
-//         let new_db = migration_orm::Database::connect(db_url).await.unwrap();
+        // 3. 模拟新连接接入同一个命名内存库
+        let db_url = "sqlite:file:memdb1?mode=memory&cache=shared";
+        let new_db = migration_orm::Database::connect(db_url).await.unwrap();
 
-//         // 4. 验证数据是否依然存在
-//         // 查询数据仍建议使用 query_one，因为它能处理结果集
-//         let res = new_db
-//             .query_one_raw(Statement::from_string(
-//                 new_db.get_database_backend(),
-//                 "SELECT name FROM test_persistence WHERE id = 1;",
-//             ))
-//             .await
-//             .unwrap();
+        // 4. 验证数据是否依然存在
+        // 查询数据仍建议使用 query_one，因为它能处理结果集
+        let res = new_db
+            .query_one_raw(Statement::from_string(
+                new_db.get_database_backend(),
+                "SELECT name FROM test_persistence WHERE id = 1;",
+            ))
+            .await
+            .unwrap();
 
-//         assert!(res.is_some());
-//         let name: String = res.unwrap().try_get_by_index(0).unwrap();
-//         assert_eq!(name, "persistence_test");
+        assert!(res.is_some());
+        let name: String = res.unwrap().try_get_by_index(0).unwrap();
+        assert_eq!(name, "persistence_test");
 
-//         eprintln!("✅ 验证成功：即使是新连接，表和数据依然存在！");
-//     }
-// }
+        eprintln!("✅ 验证成功：即使是新连接，表和数据依然存在！");
+    }
+}
+
+#[napi(object, namespace = "initDB")]
+pub struct DbStats {
+    pub active_connections: u32,
+    pub idle_connections: u32,
+    pub memory_used_bytes: i64,
+}
+
+pub async fn get_cache_db_stats() -> napi::Result<DbStats> {
+    let db = get_cache_db()
+        .await
+        .map_err(|e| napi::Error::from_reason(e.to_string()))?;
+
+    // 1. 获取 SQLite 内存占用 (page_count * page_size)
+    let page_count: i64 = db
+        .query_one_raw(Statement::from_string(
+            db.get_database_backend(),
+            "PRAGMA page_count;",
+        ))
+        .await
+        .map_err(|e| napi::Error::from_reason(e.to_string()))?
+        .unwrap()
+        .try_get_by_index(0)
+        .unwrap_or(0);
+
+    let page_size: i64 = db
+        .query_one_raw(Statement::from_string(
+            db.get_database_backend(),
+            "PRAGMA page_size;",
+        ))
+        .await
+        .map_err(|e| napi::Error::from_reason(e.to_string()))?
+        .unwrap()
+        .try_get_by_index(0)
+        .unwrap_or(0);
+
+    // 2. 获取连接池状态 (sqlx 内部状态)
+    // 注意：Sea-ORM 屏蔽了部分底层细节，这里可以通过简单的逻辑或尝试获取连接来估算
+    // 工业级通常会配合 metrics 库，这里我们先重点关注内存
+
+    Ok(DbStats {
+        active_connections: 0, // Sea-ORM 原生较难直接拿，通常看 pool
+        idle_connections: 0,
+        memory_used_bytes: page_count * page_size,
+    })
+}

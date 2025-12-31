@@ -280,6 +280,12 @@ export declare namespace heryDetail {
 export declare namespace initDB {
   /** 关闭数据库使用 */
   export function closeAllDbs(): Promise<void>
+  export interface DbStats {
+    activeConnections: number
+    idleConnections: number
+    memoryUsedBytes: number
+  }
+  export function getCacheDbStatsApi(): Promise<DbStats>
   /** 初始化自动快照数据库 */
   export function initAutoShutterDb(url: string): Promise<void>
   /** 初始化自动快照数据库 */
@@ -300,6 +306,7 @@ export declare namespace modelComponentChannel {
   export function deleteComponentChannelByIdsApi(ids: Array<string>): Promise<number>
   export function getAllComponentChannelByIdsApi(ids: Array<string>): Promise<Array<ModelComponentChannelDTO>>
   export function getAllComponentChannelByModelIdApi(modelId: string): Promise<Array<ModelComponentChannelDTO>>
+  export function getComponentChannelByModelFirstApi(modelId: string): Promise<ModelComponentChannelDTO>
   export function getFirstComponentChannelApi(id: string, modelId: string): Promise<ModelComponentChannelDTO | null>
   export function insertComponentChannelApi(data: ModelComponentChannelDTO): Promise<string>
   export function insertComponentChannelsCopyApi(datas: Array<ModelComponentChannelDTO>): Promise<boolean>
@@ -314,7 +321,8 @@ export declare namespace modelComponentChannel {
     refName?: string
     name?: string
   }
-  export function selectComponentChannelByNameApi(name: string, modelId: string): Promise<boolean>
+  export function selectComponentChannelByNameCountApi(name: string, modelId: string): Promise<boolean>
+  export function selectComponentChannelByNameLikeApi(name: string, modelId: string): Promise<Array<ModelComponentChannelDTO>>
   export function updateComponentChannelApi(data: ModelComponentChannelUpdateDTO, modelId: string): Promise<string>
 }
 
@@ -525,6 +533,17 @@ export declare namespace model_type {
     Edge = 'Edge',
     Image = 'Image'
   }
+  /** 传感器节点名称 */
+  export const enum ModelSensorNodeName {
+    TSensor = '温度传感器',
+    PSensor = '压力传感器',
+    LSensor = '液位传感器',
+    CompSensor = '组分传感器',
+    FSensor = '流量传感器',
+    NvfSensor = '标准体积流量传感器',
+    VfSensor = '体积流量传感器',
+    DSensor = '密度传感器'
+  }
   /** 节点类型核心枚举 */
   export const enum NodeType {
     Material = 'Material',
@@ -583,17 +602,6 @@ export declare namespace model_type {
     CustomUserLogic = 'CustomUserLogic',
     CustomCustomerLogic = 'CustomCustomerLogic',
     CustomSysLogic = 'CustomSysLogic'
-  }
-  /** 传感器节点名称 */
-  export const enum SensorNodeName {
-    TSensor = '温度传感器',
-    PSensor = '压力传感器',
-    LSensor = '液位传感器',
-    CompSensor = '组分传感器',
-    FSensor = '流量传感器',
-    NvfSensor = '标准体积流量传感器',
-    VfSensor = '体积流量传感器',
-    DSensor = '密度传感器'
   }
 }
 

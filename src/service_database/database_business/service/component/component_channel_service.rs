@@ -98,14 +98,14 @@ pub async fn get_all_component_channel_by_ids(
 /// 随机取一个（对应 TS 的 ASC 排序取第一个）
 pub async fn get_component_channel_by_model_first(
     model_id: String,
-) -> Result<Option<ModelComponentChannelDTO>, DbErr> {
+) -> Result<ModelComponentChannelDTO, DbErr> {
     let db = get_business_db().await?;
     let res = ModelEntity::find()
         .filter(ModelColumn::ModelId.eq(model_id))
         .order_by_asc(ModelColumn::Id)
         .one(db)
         .await?;
-    Ok(res.map(ModelComponentChannelDTO::from))
+    Ok(res.map(ModelComponentChannelDTO::from).unwrap())
 }
 
 /// 插入数据 (逻辑需在 API 层调用名称校验)

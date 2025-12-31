@@ -15,6 +15,16 @@ pub async fn get_first_component_channel_api(
 }
 
 #[napi(namespace = "modelComponentChannel")]
+pub async fn get_component_channel_by_model_first_api(
+    model_id: String,
+) -> Result<ModelComponentChannelDTO> {
+    let result = get_component_channel_by_model_first(model_id)
+        .await
+        .map_err(handle_db_err)?;
+    Ok(result)
+}
+
+#[napi(namespace = "modelComponentChannel")]
 pub async fn get_all_component_channel_by_model_id_api(
     model_id: String,
 ) -> Result<Vec<ModelComponentChannelDTO>> {
@@ -74,8 +84,22 @@ pub async fn update_component_channel_api(
 }
 
 #[napi(namespace = "modelComponentChannel")]
-pub async fn select_component_channel_by_name_api(name: String, model_id: String) -> Result<bool> {
+pub async fn select_component_channel_by_name_count_api(
+    name: String,
+    model_id: String,
+) -> Result<bool> {
     let result = select_component_channel_by_name(name, model_id)
+        .await
+        .map_err(handle_db_err)?;
+    Ok(result)
+}
+
+#[napi(namespace = "modelComponentChannel")]
+pub async fn select_component_channel_by_name_like_api(
+    name: String,
+    model_id: String,
+) -> Result<Vec<ModelComponentChannelDTO>> {
+    let result = get_component_channel_by_name_like(name, model_id)
         .await
         .map_err(handle_db_err)?;
     Ok(result)
