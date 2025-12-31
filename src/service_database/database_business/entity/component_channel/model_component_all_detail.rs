@@ -21,8 +21,8 @@ pub struct Model {
     pub compound_channel_id: String,
     #[sea_orm(column_type = "Text")]
     pub base_physical_property: String,
-    #[sea_orm(column_type = "Text")]
-    pub temperature_equation_proprety: String,
+    #[sea_orm(column_type = "Text", column_name = "temperature_equation_proprety")]
+    pub temperature_equation_property: String,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

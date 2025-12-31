@@ -327,6 +327,11 @@ export declare namespace modelComponentChannel {
 }
 
 export declare namespace modelComponentDetail {
+  export interface ComponentCasNoNameDTO {
+    casNo: string
+    name: string
+    internalName: string
+  }
   export interface ComponentNormalDTO {
     casNo: string
     name: string
@@ -334,13 +339,16 @@ export declare namespace modelComponentDetail {
     sourceId: string
     sourceType: string
   }
-  export function deleteCompoundAllDetailByIdsApi(ids: Array<string>): Promise<number>
-  export function getAllDetailByChannelIdApi(channelId: string): Promise<Array<ModelComponentAllDetailDTO>>
-  export function getAllModelCompoundChannelCountApi(channelId: string): Promise<number>
-  export function getNormalDetailApi(channelId: string): Promise<Array<ComponentNormalDTO>>
-  export function getNormalDetailNameCasnoApi(channelId: string): Promise<Array<ComponentCasNoNameDTO>>
-  export function getOneAllCompoundDetailByIdApi(id: string): Promise<ModelComponentAllDetailDTO | null>
-  export function insertModelCompoundAllDetailListApi(list: Array<ModelComponentAllDetailDTO>): Promise<number>
+  export function deleteComponentAllDetailByChannelIdsApi(channelIds: Array<string>): Promise<number>
+  export function deleteComponentAllDetailByIdsApi(ids: Array<string>): Promise<number>
+  export function findComponentAllDetailByIdsApi(ids: Array<string>): Promise<Array<ModelComponentAllDetailDTO>>
+  export function getAllComponentDetailByChannelIdApi(channelId: string): Promise<Array<ModelComponentAllDetailDTO>>
+  export function getAllDetailByChannelIdVecApi(channelId: Array<string>): Promise<Array<ModelComponentAllDetailDTO>>
+  export function getAllModelComponentChannelCountApi(channelId: string): Promise<number>
+  export function getComponentNormalDetailApi(channelId: string): Promise<Array<ComponentNormalDTO>>
+  export function getComponentNormalDetailNameCasnoApi(channelId: string): Promise<Array<ComponentCasNoNameDTO>>
+  export function getOneAllComponentDetailByIdApi(id: string): Promise<ModelComponentAllDetailDTO | null>
+  export function insertModelComponentAllDetailListApi(list: Array<ModelComponentAllDetailDTO>): Promise<number>
   export interface ModelComponentAllDetailDTO {
     id: string
     sourceId: string
@@ -354,14 +362,29 @@ export declare namespace modelComponentDetail {
     sortNum: number
     compoundChannelId: string
     basePhysicalProperty: string
-    temperatureEquationProprety: string
+    temperatureEquationProperty: string
   }
-  export interface ModelComponentChannelDTO {
-    casNo: string
-    name: string
-    internalName: string
+  export function selectComponentAllDetailHaveByNameApi(name: string, channelId: string): Promise<boolean>
+  export function updateComponentPhysicalDataApi(id: string, base: string, temp: string): Promise<number>
+  export function updateModelComponentAllDetailOptionApi(updateData: ModelCompoundAllDetailUpdateDTO): Promise<string>
+}
+
+export declare namespace modelCompoundDetail {
+  export interface ModelCompoundAllDetailUpdateDTO {
+    id: string
+    sourceId?: string
+    sourceType?: string
+    name?: string
+    formula?: string
+    casNo?: string
+    baseCasNo?: string
+    number?: number
+    internalName?: string
+    sortNum?: number
+    compoundChannelId?: string
+    basePhysicalProperty?: string
+    temperatureEquationProprety?: string
   }
-  export function updatePhysicalDataApi(id: string, base: string, temp: string): Promise<number>
 }
 
 export declare namespace modelConfig {

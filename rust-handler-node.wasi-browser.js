@@ -69,6 +69,7 @@ export const heryDetail = __napiModule.exports.heryDetail
 export const initDB = __napiModule.exports.initDB
 export const modelComponentChannel = __napiModule.exports.modelComponentChannel
 export const modelComponentDetail = __napiModule.exports.modelComponentDetail
+export const modelCompoundDetail = __napiModule.exports.modelCompoundDetail
 export const modelConfig = __napiModule.exports.modelConfig
 export const modelHandle = __napiModule.exports.modelHandle
 export const modelSystem = __napiModule.exports.modelSystem
