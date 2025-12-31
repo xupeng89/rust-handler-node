@@ -184,7 +184,7 @@ fn format_number(num: i32) -> String {
 /// 处理双号段逻辑 (对应 TS 的 getDoubleNumberSegment)
 fn get_double_number_segment(list: Vec<String>) -> (String, String) {
     // 逻辑与 TS 保持一致：取前两个号段进行判断
-    let first = list.get(0).cloned().unwrap_or_else(|| "0-0".to_string());
+    let first = list.first().cloned().unwrap_or_else(|| "0-0".to_string());
     let second = list.get(1).cloned().unwrap_or_else(|| "0-0".to_string());
     let rest = if list.len() > 2 {
         list[2..].to_vec()
@@ -195,9 +195,9 @@ fn get_double_number_segment(list: Vec<String>) -> (String, String) {
     let first_parts: Vec<i32> = first.split('-').map(|s| s.parse().unwrap_or(0)).collect();
     let second_parts: Vec<i32> = second.split('-').map(|s| s.parse().unwrap_or(0)).collect();
 
-    let f_start = *first_parts.get(0).unwrap_or(&0);
+    let f_start = *first_parts.first().unwrap_or(&0);
     let f_end = *first_parts.get(1).unwrap_or(&0);
-    let s_start = *second_parts.get(0).unwrap_or(&0);
+    let s_start = *second_parts.first().unwrap_or(&0);
     let s_end = *second_parts.get(1).unwrap_or(&0);
 
     let mut number_segment_res = Vec::new();
@@ -234,7 +234,7 @@ fn get_end_by_number_segment(number_segment: &str) -> (String, String) {
         .split('-')
         .map(|s| s.parse().unwrap_or(1))
         .collect();
-    let start = *parts.get(0).unwrap_or(&1);
+    let start = *parts.first().unwrap_or(&1);
     let last_end = *parts.last().unwrap_or(&0);
 
     if start == 0 {

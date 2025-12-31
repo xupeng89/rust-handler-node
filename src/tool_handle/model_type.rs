@@ -7,7 +7,7 @@ pub mod model_type {
 
     /// 传感器节点名称
     #[napi(string_enum)]
-    pub enum SensorNodeName {
+    pub enum ModelSensorNodeName {
         #[napi(value = "温度传感器")]
         TSensor,
         #[napi(value = "压力传感器")]
