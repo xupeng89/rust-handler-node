@@ -7,6 +7,7 @@ pub mod model_type {
 
     /// 传感器节点名称
     #[napi(string_enum)]
+    #[allow(clippy::enum_variant_names)]
     pub enum ModelSensorNodeName {
         #[napi(value = "温度传感器")]
         TSensor,
