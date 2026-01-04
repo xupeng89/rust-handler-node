@@ -408,6 +408,36 @@ export declare namespace modelComponentHenry {
   export function updateComponentHenryNameApi(id: string, name: string): Promise<boolean>
 }
 
+export declare namespace modelComponentHenryDetail {
+  export function deleteCompoundHenryDetailByCasnoApi(casnos: Array<string>, henryId: string): Promise<number>
+  export function deleteCompoundHenryDetailByHenryIdsApi(henryIds: Array<string>): Promise<number>
+  export function deleteCompoundHenryDetailByIdsApi(ids: Array<string>): Promise<number>
+  export function insertCompoundHenryDetailListApi(list: Array<ModelComponentHenryDetailDTO>): Promise<number>
+  export interface ModelComponentHenryDetailDTO {
+    id: string
+    isDefaultId: string
+    componentIId: number
+    componentI: string
+    componentJId: number
+    componentJ: string
+    sourceName: string
+    aij: number
+    bij: number
+    cij: number
+    dij: number
+    eij: number
+    tlower: number
+    tupper: number
+    isDefault: number
+    compoundHenryId: string
+  }
+  export function selectCompoundHenryDetailByHenryIdApi(henryId: string, isDefault: number): Promise<Array<ModelComponentHenryDetailDTO>>
+  export function selectCompoundHenryDetailByHenryIdsApi(henryIds: Array<string>, isDefault: number): Promise<Array<ModelComponentHenryDetailDTO>>
+  export function selectCompoundHenryDetailByIdsApi(ids: Array<string>): Promise<Array<ModelComponentHenryDetailDTO>>
+  export function selectCompoundHenryDetailByOnlyHenryIdsApi(ids: Array<string>): Promise<Array<ModelComponentHenryDetailDTO>>
+  export function updateCompoundHenryDetailApi(data: ModelComponentHenryDetailDTO): Promise<string>
+}
+
 export declare namespace modelConfig {
   export interface AutoShutterParams {
     autoShutter: number

@@ -586,6 +586,7 @@ module.exports.initDB = nativeBinding.initDB
 module.exports.modelComponentChannel = nativeBinding.modelComponentChannel
 module.exports.modelComponentDetail = nativeBinding.modelComponentDetail
 module.exports.modelComponentHenry = nativeBinding.modelComponentHenry
+module.exports.modelComponentHenryDetail = nativeBinding.modelComponentHenryDetail
 module.exports.modelConfig = nativeBinding.modelConfig
 module.exports.modelHandle = nativeBinding.modelHandle
 module.exports.modelSystem = nativeBinding.modelSystem

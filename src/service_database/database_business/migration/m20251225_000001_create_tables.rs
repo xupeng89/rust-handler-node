@@ -383,6 +383,96 @@ impl MigrationTrait for Migration {
                     .to_owned(),
             )
             .await?;
+
+        manager
+            .create_table(
+                Table::create()
+                    .table(ModelCompoundHenryDetail::Table)
+                    .if_not_exists()
+                    .col(
+                        ColumnDef::new(ModelCompoundHenryDetail::Id)
+                            .string()
+                            .not_null()
+                            .primary_key(),
+                    )
+                    .col(
+                        ColumnDef::new(ModelCompoundHenryDetail::IsDefaultId)
+                            .string()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(ModelCompoundHenryDetail::ComponentIId)
+                            .integer()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(ModelCompoundHenryDetail::ComponentI)
+                            .string()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(ModelCompoundHenryDetail::ComponentJId)
+                            .integer()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(ModelCompoundHenryDetail::ComponentJ)
+                            .string()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(ModelCompoundHenryDetail::SourceName)
+                            .string()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(ModelCompoundHenryDetail::Aij)
+                            .double()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(ModelCompoundHenryDetail::Bij)
+                            .double()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(ModelCompoundHenryDetail::Cij)
+                            .double()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(ModelCompoundHenryDetail::Dij)
+                            .double()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(ModelCompoundHenryDetail::Eij)
+                            .double()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(ModelCompoundHenryDetail::Tlower)
+                            .double()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(ModelCompoundHenryDetail::Tupper)
+                            .double()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(ModelCompoundHenryDetail::IsDefault)
+                            .integer()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(ModelCompoundHenryDetail::CompoundHenryId)
+                            .string()
+                            .not_null(),
+                    )
+                    .to_owned(),
+            )
+            .await?;
         Ok(())
     }
 
@@ -419,6 +509,14 @@ impl MigrationTrait for Migration {
 
         manager
             .drop_table(Table::drop().table(ModelCompoundHenry::Table).to_owned())
+            .await?;
+
+        manager
+            .drop_table(
+                Table::drop()
+                    .table(ModelCompoundHenryDetail::Table)
+                    .to_owned(),
+            )
             .await?;
         Ok(())
     }
@@ -543,4 +641,25 @@ pub enum ModelCompoundHenry {
     CompoundChannelId,
     #[iden = "compoundDetailIds"]
     CompoundDetailIds,
+}
+#[derive(Iden)]
+pub enum ModelCompoundHenryDetail {
+    Table,
+    Id,
+    #[iden = "isDefaultId"]
+    IsDefaultId,
+    ComponentIId,
+    ComponentI,
+    ComponentJId,
+    ComponentJ,
+    SourceName,
+    Aij,
+    Bij,
+    Cij,
+    Dij,
+    Eij,
+    Tlower,
+    Tupper,
+    IsDefault,
+    CompoundHenryId,
 }
