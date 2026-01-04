@@ -35,10 +35,14 @@ impl From<ModelModel> for ModelComponentHenryDTO {
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
-#[napi(object, namespace = "modelComponentHenry")]
+#[napi(
+    object,
+    namespace = "modelComponentHenry",
+    js_name = "ComponentHenryConnectDTO"
+)]
 pub struct ComponentHenryConnectDTO {
     pub component_henry_id: String,
-    pub compound_detail_ids: Vec<Option<String>>,
+    pub component_detail_ids: Vec<Option<String>>,
 }
 
 // ======================================
@@ -93,7 +97,7 @@ pub async fn update_component_henry_name(id: String, name: String) -> Result<boo
     let db = get_business_db().await?;
     ModelEntity::update_many()
         .col_expr(ModelColumn::Name, Expr::value(name))
-        .filter(ModelColumn::Id.eq(id.clone()))
+        .filter(ModelColumn::Id.eq(id))
         .exec(db)
         .await?;
     Ok(true)
@@ -111,12 +115,23 @@ pub async fn select_by_component_channel_id(
     Ok(res.into_iter().map(ModelComponentHenryDTO::from).collect())
 }
 
+pub async fn select_by_component_channel_ids(
+    channel_ids: Vec<String>,
+) -> Result<Vec<ModelComponentHenryDTO>, DbErr> {
+    let db = get_business_db().await?;
+    let res = ModelEntity::find()
+        .filter(ModelColumn::CompoundChannelId.is_in(channel_ids))
+        .all(db)
+        .await?;
+    Ok(res.into_iter().map(ModelComponentHenryDTO::from).collect())
+}
+
 /// 核心业务：连接组分详情 ID 列表 (String 拼接存储)
 pub async fn henry_connect_component_detail(msg: ComponentHenryConnectDTO) -> Result<u64, DbErr> {
     let db = get_business_db().await?;
     // 过滤掉 None 值的 ID 并用逗号拼接
     let save_details = msg
-        .compound_detail_ids
+        .component_detail_ids
         .into_iter()
         .flatten() // 移除 Option::None
         .collect::<Vec<String>>()
@@ -149,4 +164,10 @@ pub async fn get_model_component_henry_by_ids(
         .all(db)
         .await?;
     Ok(res.into_iter().map(ModelComponentHenryDTO::from).collect())
+}
+
+pub async fn get_model_component_henry_by_id(id: String) -> Result<ModelComponentHenryDTO, DbErr> {
+    let db = get_business_db().await?;
+    let res = ModelEntity::find_by_id(id).one(db).await?;
+    Ok(res.map(ModelComponentHenryDTO::from).unwrap())
 }

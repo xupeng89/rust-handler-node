@@ -121,6 +121,7 @@ module.exports.heryDetail = __napiModule.exports.heryDetail
 module.exports.initDB = __napiModule.exports.initDB
 module.exports.modelComponentChannel = __napiModule.exports.modelComponentChannel
 module.exports.modelComponentDetail = __napiModule.exports.modelComponentDetail
+module.exports.modelComponentHenry = __napiModule.exports.modelComponentHenry
 module.exports.modelConfig = __napiModule.exports.modelConfig
 module.exports.modelHandle = __napiModule.exports.modelHandle
 module.exports.modelSystem = __napiModule.exports.modelSystem

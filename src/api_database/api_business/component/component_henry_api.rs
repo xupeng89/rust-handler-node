@@ -43,6 +43,15 @@ pub async fn select_by_component_channel_id_api(
 }
 
 #[napi(namespace = "modelComponentHenry")]
+pub async fn select_by_component_channel_ids_api(
+    channel_ids: Vec<String>,
+) -> Result<Vec<ModelComponentHenryDTO>> {
+    select_by_component_channel_ids(channel_ids)
+        .await
+        .map_err(handle_db_err)
+}
+
+#[napi(namespace = "modelComponentHenry")]
 pub async fn henry_connect_component_detail_api(msg: ComponentHenryConnectDTO) -> Result<u32> {
     let res = henry_connect_component_detail(msg)
         .await
@@ -63,6 +72,13 @@ pub async fn get_model_component_henry_by_ids_api(
     ids: Vec<String>,
 ) -> Result<Vec<ModelComponentHenryDTO>> {
     get_model_component_henry_by_ids(ids)
+        .await
+        .map_err(handle_db_err)
+}
+
+#[napi(namespace = "modelComponentHenry")]
+pub async fn get_model_component_henry_by_id_api(id: String) -> Result<ModelComponentHenryDTO> {
+    get_model_component_henry_by_id(id)
         .await
         .map_err(handle_db_err)
 }

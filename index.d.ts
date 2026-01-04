@@ -385,6 +385,29 @@ export declare namespace modelComponentDetail {
   export function updateModelComponentAllDetailOptionApi(updateData: ModelComponentAllDetailUpdateDTO): Promise<string>
 }
 
+export declare namespace modelComponentHenry {
+  export interface ComponentHenryConnectDTO {
+    componentHenryId: string
+    componentDetailIds: Array<string | undefined | null>
+  }
+  export function deleteByComponentChannelIdsApi(channelIds: Array<string>): Promise<number>
+  export function deleteComponentHenryByIdsApi(ids: Array<string>): Promise<number>
+  export function getModelComponentHenryByIdApi(id: string): Promise<ModelComponentHenryDTO>
+  export function getModelComponentHenryByIdsApi(ids: Array<string>): Promise<Array<ModelComponentHenryDTO>>
+  export function henryConnectComponentDetailApi(msg: ComponentHenryConnectDTO): Promise<number>
+  export function insertComponentHenryListApi(list: Array<ModelComponentHenryDTO>): Promise<number>
+  export interface ModelComponentHenryDTO {
+    id: string
+    name: string
+    compoundChannelId: string
+    compoundDetailIds: string
+  }
+  export function selectByComponentChannelIdApi(channelId: string): Promise<Array<ModelComponentHenryDTO>>
+  export function selectByComponentChannelIdsApi(channelIds: Array<string>): Promise<Array<ModelComponentHenryDTO>>
+  export function selectComponentHenryByNameApi(name: string, channelId: string): Promise<boolean>
+  export function updateComponentHenryNameApi(id: string, name: string): Promise<boolean>
+}
+
 export declare namespace modelConfig {
   export interface AutoShutterParams {
     autoShutter: number
