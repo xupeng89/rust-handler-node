@@ -613,6 +613,7 @@ export declare namespace modelUnit {
   export function getModelUnitItemsBySetIdAndModelIdApi(setId: string, modelId: string): Promise<Array<ModelUnitItemDTO>>
   export function getModelUnitSetAllByModelIdApi(modelId: string): Promise<Array<ModelUnitSetDTO>>
   export function getModelUnitSetItemsByCodesAndSetIdApi(codes: Array<string>, setId: string, modelId: string): Promise<Array<ModelUnitItemDTO>>
+  export function getModelUnitSetItemsByModelIdApi(modelId: string): Promise<Array<ModelUnitItemDTO>>
   export function getModelUnitSetOneByIdApi(id: string): Promise<ModelUnitSetDTO>
   export function getModelUnitSetOneByModelIdAndDefaultApi(modelId: string): Promise<ModelUnitSetDTO>
   export function getModelUnitSetWithItemsApi(id: string): Promise<UnitFullDataDTO>

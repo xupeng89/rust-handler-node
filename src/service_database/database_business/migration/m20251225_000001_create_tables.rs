@@ -520,6 +520,66 @@ impl MigrationTrait for Migration {
                     .to_owned(),
             )
             .await?;
+        manager
+            .create_table(
+                Table::create()
+                    .table(ModelPfModelParams::Table)
+                    .if_not_exists()
+                    .col(
+                        ColumnDef::new(ModelPfModelParams::Id)
+                            .string()
+                            .not_null()
+                            .primary_key(),
+                    )
+                    .col(
+                        ColumnDef::new(ModelPfModelParams::ModelId)
+                            .string()
+                            .not_null(),
+                    )
+                    .col(ColumnDef::new(ModelPfModelParams::Code).string().not_null())
+                    .col(ColumnDef::new(ModelPfModelParams::Name).string().not_null())
+                    .col(
+                        ColumnDef::new(ModelPfModelParams::SolverType)
+                            .string()
+                            .not_null(),
+                    )
+                    .col(ColumnDef::new(ModelPfModelParams::Params).text().not_null())
+                    .col(
+                        ColumnDef::new(ModelPfModelParams::DefaultId)
+                            .integer()
+                            .not_null(),
+                    )
+                    .to_owned(),
+            )
+            .await?;
+        manager
+            .create_table(
+                Table::create()
+                    .table(ModelPfVarParams::Table)
+                    .if_not_exists()
+                    .col(
+                        ColumnDef::new(ModelPfVarParams::Id)
+                            .integer()
+                            .not_null()
+                            .auto_increment()
+                            .primary_key(),
+                    )
+                    .col(
+                        ColumnDef::new(ModelPfVarParams::ModelId)
+                            .string()
+                            .not_null(),
+                    )
+                    .col(ColumnDef::new(ModelPfVarParams::Name).string().not_null())
+                    .col(
+                        ColumnDef::new(ModelPfVarParams::DeltaMax)
+                            .string()
+                            .not_null(),
+                    )
+                    .col(ColumnDef::new(ModelPfVarParams::Min).string().not_null())
+                    .col(ColumnDef::new(ModelPfVarParams::Max).string().not_null())
+                    .to_owned(),
+            )
+            .await?;
         Ok(())
     }
 
@@ -568,6 +628,15 @@ impl MigrationTrait for Migration {
         manager
             .drop_table(Table::drop().table(ModelCompoundOil::Table).to_owned())
             .await?;
+
+        manager
+            .drop_table(Table::drop().table(ModelPfModelParams::Table).to_owned())
+            .await?;
+
+        manager
+            .drop_table(Table::drop().table(ModelPfVarParams::Table).to_owned())
+            .await?;
+
         Ok(())
     }
 }
@@ -728,4 +797,28 @@ pub enum ModelCompoundOil {
     BasePhysicalProperty,
     DefaultPhysicalProperty,
     TemperatureEquationProperty,
+}
+
+#[derive(Iden)]
+pub enum ModelPfModelParams {
+    Table,
+    Id,
+    ModelId,
+    Code,
+    Name,
+    SolverType,
+    Params,
+    DefaultId,
+}
+
+#[derive(Iden)]
+pub enum ModelPfVarParams {
+    #[iden = "model_pf_var_default_params_entity"]
+    Table,
+    Id,
+    ModelId,
+    Name,
+    DeltaMax,
+    Min,
+    Max,
 }

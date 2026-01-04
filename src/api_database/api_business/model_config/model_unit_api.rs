@@ -96,3 +96,12 @@ pub async fn get_model_unit_set_items_by_codes_and_set_id_api(
         .await
         .map_err(handle_db_err)
 }
+
+#[napi(namespace = "modelUnit")]
+pub async fn get_model_unit_set_items_by_model_id_api(
+    model_id: String,
+) -> Result<Vec<ModelUnitItemDTO>> {
+    get_model_unit_set_items_by_model_id(model_id)
+        .await
+        .map_err(handle_db_err)
+}
