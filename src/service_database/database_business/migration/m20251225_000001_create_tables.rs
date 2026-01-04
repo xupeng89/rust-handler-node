@@ -473,6 +473,53 @@ impl MigrationTrait for Migration {
                     .to_owned(),
             )
             .await?;
+        manager
+            .create_table(
+                Table::create()
+                    .table(ModelCompoundOil::Table)
+                    .if_not_exists()
+                    .col(
+                        ColumnDef::new(ModelCompoundOil::Id)
+                            .string()
+                            .not_null()
+                            .primary_key(),
+                    )
+                    .col(
+                        ColumnDef::new(ModelCompoundOil::CompoundChannelId)
+                            .string()
+                            .not_null(),
+                    )
+                    .col(ColumnDef::new(ModelCompoundOil::Name).string().not_null())
+                    .col(
+                        ColumnDef::new(ModelCompoundOil::InternalName)
+                            .string()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(ModelCompoundOil::Formula)
+                            .string()
+                            .not_null(),
+                    )
+                    .col(ColumnDef::new(ModelCompoundOil::CasNo).string().not_null())
+                    .col(ColumnDef::new(ModelCompoundOil::Group).integer().not_null())
+                    .col(
+                        ColumnDef::new(ModelCompoundOil::BasePhysicalProperty)
+                            .text()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(ModelCompoundOil::DefaultPhysicalProperty)
+                            .text()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(ModelCompoundOil::TemperatureEquationProperty)
+                            .text()
+                            .not_null(),
+                    )
+                    .to_owned(),
+            )
+            .await?;
         Ok(())
     }
 
@@ -517,6 +564,9 @@ impl MigrationTrait for Migration {
                     .table(ModelCompoundHenryDetail::Table)
                     .to_owned(),
             )
+            .await?;
+        manager
+            .drop_table(Table::drop().table(ModelCompoundOil::Table).to_owned())
             .await?;
         Ok(())
     }
@@ -662,4 +712,20 @@ pub enum ModelCompoundHenryDetail {
     Tupper,
     IsDefault,
     CompoundHenryId,
+}
+
+#[derive(Iden)]
+pub enum ModelCompoundOil {
+    Table,
+    Id,
+    CompoundChannelId,
+    Name,
+    #[iden = "internalName"]
+    InternalName,
+    Formula,
+    CasNo,
+    Group,
+    BasePhysicalProperty,
+    DefaultPhysicalProperty,
+    TemperatureEquationProperty,
 }

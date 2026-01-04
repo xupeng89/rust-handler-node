@@ -438,6 +438,42 @@ export declare namespace modelComponentHenryDetail {
   export function updateCompoundHenryDetailApi(data: ModelComponentHenryDetailDTO): Promise<string>
 }
 
+export declare namespace modelComponentOil {
+  export function deleteModelComponentOilsByChannelIdsApi(channelIds: Array<string>): Promise<number>
+  export function deleteModelComponentOilsByIdsApi(ids: Array<string>): Promise<number>
+  export function getModelComponentOilByIdApi(id: string): Promise<ModelComponentOilDTO | null>
+  export function getOilsByChannelIdApi(channelId: string): Promise<Array<ModelComponentOilDTO>>
+  export function getOilsByChannelIdsApi(channelIds: Array<string>): Promise<Array<ModelComponentOilDTO>>
+  export function getOilsByComponentCasNoApi(casNo: Array<string>): Promise<Array<ModelComponentOilDTO>>
+  export function insertModelComponentOilApi(list: Array<ModelComponentOilDTO>): Promise<number>
+  export interface ModelComponentOilDTO {
+    id: string
+    compoundChannelId: string
+    name: string
+    internalName: string
+    formula: string
+    casNo: string
+    group: number
+    basePhysicalProperty: string
+    defaultPhysicalProperty: string
+    temperatureEquationProperty: string
+  }
+  export interface ModelComponentOilUpdateDTO {
+    id: string
+    compoundChannelId?: string
+    name?: string
+    internalName?: string
+    formula?: string
+    casNo?: string
+    group?: number
+    basePhysicalProperty?: string
+    defaultPhysicalProperty?: string
+    temperatureEquationProperty?: string
+  }
+  export function updateModelComponentOilApi(data: ModelComponentOilUpdateDTO): Promise<string>
+  export function updateModelCompoundOilsApi(list: Array<ModelComponentOilUpdateDTO>): Promise<Array<string>>
+}
+
 export declare namespace modelConfig {
   export interface AutoShutterParams {
     autoShutter: number

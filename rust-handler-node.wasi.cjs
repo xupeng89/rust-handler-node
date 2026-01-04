@@ -123,6 +123,7 @@ module.exports.modelComponentChannel = __napiModule.exports.modelComponentChanne
 module.exports.modelComponentDetail = __napiModule.exports.modelComponentDetail
 module.exports.modelComponentHenry = __napiModule.exports.modelComponentHenry
 module.exports.modelComponentHenryDetail = __napiModule.exports.modelComponentHenryDetail
+module.exports.modelComponentOil = __napiModule.exports.modelComponentOil
 module.exports.modelConfig = __napiModule.exports.modelConfig
 module.exports.modelHandle = __napiModule.exports.modelHandle
 module.exports.modelSystem = __napiModule.exports.modelSystem

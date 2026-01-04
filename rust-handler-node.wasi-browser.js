@@ -71,6 +71,7 @@ export const modelComponentChannel = __napiModule.exports.modelComponentChannel
 export const modelComponentDetail = __napiModule.exports.modelComponentDetail
 export const modelComponentHenry = __napiModule.exports.modelComponentHenry
 export const modelComponentHenryDetail = __napiModule.exports.modelComponentHenryDetail
+export const modelComponentOil = __napiModule.exports.modelComponentOil
 export const modelConfig = __napiModule.exports.modelConfig
 export const modelHandle = __napiModule.exports.modelHandle
 export const modelSystem = __napiModule.exports.modelSystem
