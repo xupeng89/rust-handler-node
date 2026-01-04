@@ -585,7 +585,6 @@ module.exports.heryDetail = nativeBinding.heryDetail
 module.exports.initDB = nativeBinding.initDB
 module.exports.modelComponentChannel = nativeBinding.modelComponentChannel
 module.exports.modelComponentDetail = nativeBinding.modelComponentDetail
-module.exports.modelCompoundDetail = nativeBinding.modelCompoundDetail
 module.exports.modelConfig = nativeBinding.modelConfig
 module.exports.modelHandle = nativeBinding.modelHandle
 module.exports.modelSystem = nativeBinding.modelSystem

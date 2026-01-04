@@ -121,9 +121,9 @@ pub async fn update_component_physical_data_api(
 
 #[napi(namespace = "modelComponentDetail")]
 pub async fn update_model_component_all_detail_option_api(
-    update_data: ModelCompoundAllDetailUpdateDTO,
+    update_data: ModelComponentAllDetailUpdateDTO,
 ) -> Result<String> {
-    let res = update_compound_all_detail_data(update_data)
+    let res = update_component_all_detail_data(update_data)
         .await
         .map_err(handle_db_err)?;
     Ok(res)

@@ -82,10 +82,10 @@ impl From<ModelModel> for ModelComponentAllDetailDTO {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[napi(
     object,
-    namespace = "modelCompoundDetail",
-    js_name = "ModelCompoundAllDetailUpdateDTO"
+    namespace = "modelComponentDetail",
+    js_name = "ModelComponentAllDetailUpdateDTO"
 )]
-pub struct ModelCompoundAllDetailUpdateDTO {
+pub struct ModelComponentAllDetailUpdateDTO {
     pub id: String, // ID 是定位记录的必填项
     pub source_id: Option<String>,
     pub source_type: Option<String>,
@@ -98,7 +98,7 @@ pub struct ModelCompoundAllDetailUpdateDTO {
     pub sort_num: Option<i32>,
     pub compound_channel_id: Option<String>,
     pub base_physical_property: Option<String>,
-    pub temperature_equation_proprety: Option<String>,
+    pub temperature_equation_property: Option<String>,
 }
 
 // ======================================
@@ -285,8 +285,8 @@ pub async fn update_physical_data(id: String, base: String, temp: String) -> Res
     Ok(res.rows_affected)
 }
 
-pub async fn update_compound_all_detail_data(
-    data: ModelCompoundAllDetailUpdateDTO,
+pub async fn update_component_all_detail_data(
+    data: ModelComponentAllDetailUpdateDTO,
 ) -> Result<String, DbErr> {
     let db = get_business_db().await?;
 
@@ -333,7 +333,7 @@ pub async fn update_compound_all_detail_data(
     if let Some(val) = data.base_physical_property {
         active_model.base_physical_property = Set(val);
     }
-    if let Some(val) = data.temperature_equation_proprety {
+    if let Some(val) = data.temperature_equation_property {
         active_model.temperature_equation_property = Set(val);
     }
 

@@ -342,6 +342,7 @@ export declare namespace modelComponentDetail {
   export function deleteComponentAllDetailByChannelIdsApi(channelIds: Array<string>): Promise<number>
   export function deleteComponentAllDetailByIdsApi(ids: Array<string>): Promise<number>
   export function findComponentAllDetailByIdsApi(ids: Array<string>): Promise<Array<ModelComponentAllDetailDTO>>
+  export function findComponentAllDetailCasnoByIdsApi(ids: Array<string>): Promise<Array<string>>
   export function getAllComponentDetailByChannelIdApi(channelId: string): Promise<Array<ModelComponentAllDetailDTO>>
   export function getAllDetailByChannelIdVecApi(channelId: Array<string>): Promise<Array<ModelComponentAllDetailDTO>>
   export function getAllModelComponentChannelCountApi(channelId: string): Promise<number>
@@ -364,13 +365,7 @@ export declare namespace modelComponentDetail {
     basePhysicalProperty: string
     temperatureEquationProperty: string
   }
-  export function selectComponentAllDetailHaveByNameApi(name: string, channelId: string): Promise<boolean>
-  export function updateComponentPhysicalDataApi(id: string, base: string, temp: string): Promise<number>
-  export function updateModelComponentAllDetailOptionApi(updateData: ModelCompoundAllDetailUpdateDTO): Promise<string>
-}
-
-export declare namespace modelCompoundDetail {
-  export interface ModelCompoundAllDetailUpdateDTO {
+  export interface ModelComponentAllDetailUpdateDTO {
     id: string
     sourceId?: string
     sourceType?: string
@@ -383,8 +378,11 @@ export declare namespace modelCompoundDetail {
     sortNum?: number
     compoundChannelId?: string
     basePhysicalProperty?: string
-    temperatureEquationProprety?: string
+    temperatureEquationProperty?: string
   }
+  export function selectComponentAllDetailHaveByNameApi(name: string, channelId: string): Promise<boolean>
+  export function updateComponentPhysicalDataApi(id: string, base: string, temp: string): Promise<number>
+  export function updateModelComponentAllDetailOptionApi(updateData: ModelComponentAllDetailUpdateDTO): Promise<string>
 }
 
 export declare namespace modelConfig {

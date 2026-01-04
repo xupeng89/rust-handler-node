@@ -358,6 +358,31 @@ impl MigrationTrait for Migration {
                     .to_owned(),
             )
             .await?;
+        manager
+            .create_table(
+                Table::create()
+                    .table(ModelCompoundHenry::Table)
+                    .if_not_exists()
+                    .col(
+                        ColumnDef::new(ModelCompoundHenry::Id)
+                            .string()
+                            .not_null()
+                            .primary_key(),
+                    )
+                    .col(ColumnDef::new(ModelCompoundHenry::Name).string().not_null())
+                    .col(
+                        ColumnDef::new(ModelCompoundHenry::CompoundChannelId)
+                            .string()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(ModelCompoundHenry::CompoundDetailIds)
+                            .string()
+                            .not_null(),
+                    )
+                    .to_owned(),
+            )
+            .await?;
         Ok(())
     }
 
@@ -390,6 +415,10 @@ impl MigrationTrait for Migration {
                     .table(ModelCompoundAllDetail::Table)
                     .to_owned(),
             )
+            .await?;
+
+        manager
+            .drop_table(Table::drop().table(ModelCompoundHenry::Table).to_owned())
             .await?;
         Ok(())
     }
@@ -503,4 +532,15 @@ pub enum ModelCompoundAllDetail {
     CompoundChannelId,
     BasePhysicalProperty,
     TemperatureEquationProprety,
+}
+
+#[derive(Iden)]
+pub enum ModelCompoundHenry {
+    Table,
+    Id,
+    Name,
+    #[iden = "compoundChannel_id"]
+    CompoundChannelId,
+    #[iden = "compoundDetailIds"]
+    CompoundDetailIds,
 }
