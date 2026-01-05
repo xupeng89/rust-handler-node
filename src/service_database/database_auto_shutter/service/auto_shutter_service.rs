@@ -298,8 +298,12 @@ pub async fn get_all_model_auto_shutter_entity_list_cache(
     } else {
         Order::Desc
     };
-
     let base_entity = AutoShutterEntity::find()
+        .select_only()
+        .column(AutoShutterColumn::Id)
+        .column(AutoShutterColumn::UpdateAt)
+        .column(AutoShutterColumn::SimTime)
+        .column(AutoShutterColumn::BaseStateCode)
         .filter(AutoShutterColumn::ModelId.eq(model_id))
         .order_by(AutoShutterColumn::UpdateAt, order)
         .limit(auto_count)
