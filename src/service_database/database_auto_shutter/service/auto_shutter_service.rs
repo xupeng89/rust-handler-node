@@ -130,6 +130,37 @@ pub struct AutoShutterListItem {
     pub sim_time: String,
     pub base_state_code: String,
 }
+#[derive(Clone, Debug, FromQueryResult)]
+struct AutoShutterSelectModel {
+    pub id: i32,
+    pub update_at: i64,
+    pub sim_time: String,
+    pub base_state_code: String,
+}
+
+// 读取完整数据
+impl From<AutoShutterModel> for AutoShutterSelectModel {
+    fn from(ele: AutoShutterModel) -> Self {
+        AutoShutterSelectModel {
+            id: ele.id,
+            update_at: ele.update_at,
+            sim_time: ele.sim_time,
+            base_state_code: ele.base_state_code,
+        }
+    }
+}
+
+// 读取完整数据
+impl From<AutoShutterSelectModel> for AutoShutterListItem {
+    fn from(ele: AutoShutterSelectModel) -> Self {
+        AutoShutterListItem {
+            id: ele.id,
+            update_at: integer_to_string(ele.update_at),
+            sim_time: ele.sim_time,
+            base_state_code: ele.base_state_code,
+        }
+    }
+}
 
 // 读取完整数据
 impl From<AutoShutterModel> for AutoShutterListItem {
@@ -307,11 +338,11 @@ pub async fn get_all_model_auto_shutter_entity_list_cache(
         .filter(AutoShutterColumn::ModelId.eq(model_id))
         .order_by(AutoShutterColumn::UpdateAt, order)
         .limit(auto_count)
-        .into_model::<AutoShutterListItem>()
+        .into_model::<AutoShutterSelectModel>()
         .all(db)
         .await?;
 
-    Ok(result)
+    Ok(result.into_iter().map(AutoShutterListItem::from).collect())
 }
 
 /// 获取单个详情 (返回 FullCacheData 或 DbErr)
