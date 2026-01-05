@@ -580,6 +580,108 @@ impl MigrationTrait for Migration {
                     .to_owned(),
             )
             .await?;
+        // 1. 流体包主表
+        manager
+            .create_table(
+                Table::create()
+                    .table(ModelFluidPackage::Table)
+                    .if_not_exists()
+                    .col(
+                        ColumnDef::new(ModelFluidPackage::Id)
+                            .string()
+                            .not_null()
+                            .primary_key(),
+                    )
+                    .col(ColumnDef::new(ModelFluidPackage::Name).string().not_null())
+                    .col(
+                        ColumnDef::new(ModelFluidPackage::ModelId)
+                            .string()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(ModelFluidPackage::CompoundChannelId)
+                            .string()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(ModelFluidPackage::CompoundHenryId)
+                            .string()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(ModelFluidPackage::PropertyMethodId)
+                            .integer()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(ModelFluidPackage::IsDefault)
+                            .integer()
+                            .not_null(),
+                    )
+                    .to_owned(),
+            )
+            .await?;
+
+        // 2. 物性计算详情表
+        manager
+            .create_table(
+                Table::create()
+                    .table(ModelPhysicalPropertyCalc::Table)
+                    .if_not_exists()
+                    .col(
+                        ColumnDef::new(ModelPhysicalPropertyCalc::Id)
+                            .string()
+                            .not_null()
+                            .primary_key(),
+                    )
+                    .col(
+                        ColumnDef::new(ModelPhysicalPropertyCalc::PhysicalPropertyName)
+                            .string()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(ModelPhysicalPropertyCalc::PhysicalPropertyId)
+                            .string()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(ModelPhysicalPropertyCalc::FluidPackageId)
+                            .string()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(ModelPhysicalPropertyCalc::PhysicalPropertyCode)
+                            .string()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(ModelPhysicalPropertyCalc::CalcCode)
+                            .string()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(ModelPhysicalPropertyCalc::DefaultCalcCode)
+                            .string()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(ModelPhysicalPropertyCalc::Key)
+                            .string()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(ModelPhysicalPropertyCalc::Phase)
+                            .string()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(ModelPhysicalPropertyCalc::Mixture)
+                            .integer()
+                            .not_null(),
+                    )
+                    .to_owned(),
+            )
+            .await?;
         Ok(())
     }
 
@@ -636,7 +738,16 @@ impl MigrationTrait for Migration {
         manager
             .drop_table(Table::drop().table(ModelPfVarParams::Table).to_owned())
             .await?;
-
+        manager
+            .drop_table(
+                Table::drop()
+                    .table(ModelPhysicalPropertyCalc::Table)
+                    .to_owned(),
+            )
+            .await?;
+        manager
+            .drop_table(Table::drop().table(ModelFluidPackage::Table).to_owned())
+            .await?;
         Ok(())
     }
 }
@@ -821,4 +932,31 @@ pub enum ModelPfVarParams {
     DeltaMax,
     Min,
     Max,
+}
+
+#[derive(Iden)]
+pub enum ModelFluidPackage {
+    Table,
+    Id,
+    Name,
+    ModelId,
+    CompoundChannelId,
+    CompoundHenryId,
+    PropertyMethodId,
+    IsDefault,
+}
+
+#[derive(Iden)]
+pub enum ModelPhysicalPropertyCalc {
+    Table,
+    Id,
+    PhysicalPropertyName,
+    PhysicalPropertyId,
+    FluidPackageId,
+    PhysicalPropertyCode,
+    CalcCode,
+    DefaultCalcCode,
+    Key,
+    Phase,
+    Mixture,
 }

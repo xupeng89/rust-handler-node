@@ -548,6 +548,48 @@ export declare namespace modelConfig {
   export function updateModelConfigByModelIdApi(modelId: string, data: ModelConfigUpdateDTO): Promise<string>
 }
 
+export declare namespace modelFluidPackage {
+  export function getCalcFunctionsByPackageIdApi(packageId: string): Promise<Array<ModelPhysicalPropertyCalcDTO>>
+  export function getCalcFunctionsByPackageIdsApi(packageIds: Array<string>): Promise<Array<ModelPhysicalPropertyCalcDTO>>
+  export function getFluidPackageCountApi(modelId: string, onlyDefault: boolean): Promise<number>
+  export interface ModelFluidPackageDTO {
+    id: string
+    name: string
+    modelId: string
+    compoundChannelId: string
+    compoundHenryId: string
+    propertyMethodId: number
+    isDefault: number
+  }
+  export interface ModelFluidPackageUpdateDTO {
+    id: string
+    name?: string
+    propertyMethodId?: number
+    isDefault?: number
+    compoundChannelId?: string
+    compoundHenryId?: string
+  }
+  export interface ModelPhysicalPropertyCalcDTO {
+    id: string
+    physicalPropertyName: string
+    physicalPropertyId: string
+    fluidPackageId: string
+    physicalPropertyCode: string
+    calcCode: string
+    defaultCalcCode: string
+    key: string
+    phase: string
+    mixture: number
+  }
+  export interface PpMethodFunctionDto {
+    id: string
+    funcCode: string
+  }
+  export function setFluidPackageDefaultApi(modelId: string, targetId: string): Promise<void>
+  export function updateCalcFunctionsSelectedApi(packageId: string, list: Array<PpMethodFunctionDTO>): Promise<void>
+  export function updateFluidPackageApi(data: ModelFluidPackageUpdateDTO): Promise<string>
+}
+
 export declare namespace modelHandle {
   export function deleteModelByIdApi(id: string): Promise<number>
   export function getAllModelApi(): Promise<Array<ModelDTO>>
@@ -590,6 +632,52 @@ export declare namespace modelHandle {
   export function selectModelByModelNameApi(name: string): Promise<string>
   export function selectModelByNoApi(modelNo: string): Promise<string>
   export function updateModelApi(modelData: ModelUpdateDTO): Promise<string>
+}
+
+export declare namespace modelPfModelParams {
+  export function getAllPfModelParamsApi(modelId: string): Promise<Array<ModelPfModelParamsDTO>>
+  export function insertPfModelParamsMessageApi(list: Array<ModelPfModelParamsDTO>): Promise<boolean>
+  export interface ModelPfModelParamsDTO {
+    id: string
+    modelId: string
+    code: string
+    name: string
+    solverType: string
+    params: string
+    defaultId: number
+  }
+  export interface ModelPfModelParamsUpdateDTO {
+    id: string
+    modelId?: string
+    code?: string
+    name?: string
+    solverType?: string
+    params?: string
+    defaultId?: number
+  }
+  export function updatePfModelParamsMessageApi(data: ModelPfModelParamsUpdateDTO): Promise<string>
+}
+
+export declare namespace modelPfVarParams {
+  export function deleteModelPfVarParamsByModelIdApi(modelId: string): Promise<number>
+  export function getModelPfVarParamsByModelIdApi(modelId: string): Promise<Array<ModelPfVarParamsDTO>>
+  export function insertModelPfVarParamsApi(list: Array<ModelPfVarParamsDTO>): Promise<boolean>
+  export interface ModelPfVarParamsDTO {
+    id: number
+    modelId: string
+    name: string
+    deltaMax: string
+    min: string
+    max: string
+  }
+  export interface ModelPfVarParamsUpdateDTO {
+    modelId: string
+    name: string
+    deltaMax?: string
+    min?: string
+    max?: string
+  }
+  export function updateModelPfVarParamsByNameApi(data: ModelPfVarParamsUpdateDTO): Promise<number>
 }
 
 export declare namespace modelSystem {

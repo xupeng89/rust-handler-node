@@ -49,10 +49,11 @@ impl MigrationTrait for Migration {
         manager
             .create_index(
                 Index::create()
-                    .name("idx-auto_shutter-model_id-update_at")
+                    .name("idx_auto_shutter_model_id_update_at")
                     .table(ModelAutoShutterEntity::Table)
                     .col(ModelAutoShutterEntity::ModelId)
                     .col(ModelAutoShutterEntity::UpdateAt)
+                    .if_not_exists()
                     .to_owned(),
             )
             .await?;
