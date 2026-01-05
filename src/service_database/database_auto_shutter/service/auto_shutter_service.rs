@@ -298,7 +298,7 @@ pub async fn get_all_model_auto_shutter_entity_list_cache(
     } else {
         Order::Desc
     };
-    let base_entity = AutoShutterEntity::find()
+    let result = AutoShutterEntity::find()
         .select_only()
         .column(AutoShutterColumn::Id)
         .column(AutoShutterColumn::UpdateAt)
@@ -307,12 +307,10 @@ pub async fn get_all_model_auto_shutter_entity_list_cache(
         .filter(AutoShutterColumn::ModelId.eq(model_id))
         .order_by(AutoShutterColumn::UpdateAt, order)
         .limit(auto_count)
+        .into_model::<AutoShutterListItem>()
         .all(db)
         .await?;
-    let result: Vec<AutoShutterListItem> = base_entity
-        .into_iter()
-        .map(AutoShutterListItem::from)
-        .collect();
+
     Ok(result)
 }
 
