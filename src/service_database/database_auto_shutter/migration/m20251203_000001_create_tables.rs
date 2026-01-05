@@ -61,17 +61,6 @@ impl MigrationTrait for Migration {
                     .to_owned(),
             )
             .await?;
-        manager
-            .create_index(
-                Index::create()
-                    .name("idx_auto_shutter_model_id_update_at")
-                    .table(ModelAutoShutterEntity::Table)
-                    .col(ModelAutoShutterEntity::ModelId)
-                    .col(ModelAutoShutterEntity::UpdateAt)
-                    .if_not_exists()
-                    .to_owned(),
-            )
-            .await?;
 
         Ok(())
     }
@@ -86,14 +75,7 @@ impl MigrationTrait for Migration {
                     .to_owned(),
             )
             .await?;
-        manager
-            .drop_index(
-                Index::drop()
-                    .name("idx-auto_shutter-model_id-update_at")
-                    .table(ModelAutoShutterEntity::Table)
-                    .to_owned(),
-            )
-            .await?;
+
         Ok(())
     }
 }

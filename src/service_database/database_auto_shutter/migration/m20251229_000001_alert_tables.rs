@@ -6,8 +6,6 @@ pub struct Migration;
 #[derive(Iden)]
 enum ModelAutoShutterEntity {
     Table,
-    UpdateAt,
-    ModelId,
 }
 
 #[derive(Iden)]
@@ -46,17 +44,17 @@ impl MigrationTrait for Migration {
         let db = manager.get_connection();
 
         // 1️⃣ 创建索引
-        manager
-            .create_index(
-                Index::create()
-                    .name("idx_auto_shutter_model_id_update_at")
-                    .table(ModelAutoShutterEntity::Table)
-                    .col(ModelAutoShutterEntity::ModelId)
-                    .col(ModelAutoShutterEntity::UpdateAt)
-                    .if_not_exists()
-                    .to_owned(),
-            )
-            .await?;
+        // manager
+        //     .create_index(
+        //         Index::create()
+        //             .name("idx_auto_shutter_model_id_update_at")
+        //             .table(ModelAutoShutterEntity::Table)
+        //             .col(ModelAutoShutterEntity::ModelId)
+        //             .col(ModelAutoShutterEntity::UpdateAt)
+        //             .if_not_exists()
+        //             .to_owned(),
+        //     )
+        //     .await?;
 
         // 2️⃣ 检查 update_at 类型是否为 TEXT
         let stmt = sea_orm::Statement::from_string(
@@ -193,14 +191,14 @@ impl MigrationTrait for Migration {
         let db = manager.get_connection();
 
         // 删除索引
-        manager
-            .drop_index(
-                Index::drop()
-                    .name("idx-auto_shutter-model_id-update_at")
-                    .table(ModelAutoShutterEntity::Table)
-                    .to_owned(),
-            )
-            .await?;
+        // manager
+        //     .drop_index(
+        //         Index::drop()
+        //             .name("idx-auto_shutter-model_id-update_at")
+        //             .table(ModelAutoShutterEntity::Table)
+        //             .to_owned(),
+        //     )
+        //     .await?;
 
         // 回滚 BIGINT -> TEXT
         manager
