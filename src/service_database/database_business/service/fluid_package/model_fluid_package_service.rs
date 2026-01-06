@@ -156,7 +156,7 @@ pub async fn get_calc_functions_by_package_ids(
 pub async fn update_calc_functions_selected(
     package_id: String,
     list: Vec<PpMethodFunctionDTO>,
-) -> Result<(), DbErr> {
+) -> Result<bool, DbErr> {
     let db = get_business_db().await?;
     let txn = db.begin().await?;
     for item in list {
@@ -168,7 +168,16 @@ pub async fn update_calc_functions_selected(
             .await?;
     }
     txn.commit().await?;
-    Ok(())
+    Ok(true)
+}
+
+pub async fn delete_calc_functions_by_package_id(package_id: String) -> Result<bool, DbErr> {
+    let db = get_business_db().await?;
+    CalcEntity::delete_many()
+        .filter(CalcColumn::FluidPackageId.eq(package_id))
+        .exec(db)
+        .await?;
+    Ok(true)
 }
 
 /// 维护 isDefault 状态 (将其他设为 0)

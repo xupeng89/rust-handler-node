@@ -27,8 +27,15 @@ pub async fn get_calc_functions_by_package_ids_api(
 pub async fn update_calc_functions_selected_api(
     package_id: String,
     list: Vec<PpMethodFunctionDTO>,
-) -> Result<()> {
+) -> Result<bool> {
     update_calc_functions_selected(package_id, list)
+        .await
+        .map_err(handle_db_err)
+}
+
+#[napi(namespace = "modelFluidPackage")]
+pub async fn delete_calc_functions_by_fluid_package_id_api(package_id: String) -> Result<bool> {
+    delete_calc_functions_by_package_id(package_id)
         .await
         .map_err(handle_db_err)
 }
