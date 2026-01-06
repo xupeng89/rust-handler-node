@@ -3,7 +3,7 @@ use crate::service_database::database_business::entity::component_channel::model
     ActiveModel, Column as ModelColumn, Entity as ModelEntity, Model as ModelModel,
 };
 use napi_derive::napi;
-use sea_orm::{FromQueryResult, Order,QueryFilter, QueryOrder,QuerySelect, Set, entity::prelude::*};
+use sea_orm::{FromQueryResult, Order,QueryFilter, QueryOrder,QuerySelect,ActiveModelTrait, Set, entity::prelude::*};
 use serde::{Deserialize, Serialize};
 use sea_orm_migration::prelude::NullOrdering;
 
@@ -274,15 +274,18 @@ pub async fn find_by_ids(ids: Vec<String>) -> Result<Vec<ModelComponentAllDetail
         .collect())
 }
 
-pub async fn update_physical_data(id: String, base: String, temp: String) -> Result<u64, DbErr> {
+pub async fn update_physical_data(id: String, base: String, temp: String) -> Result<String, DbErr> {
     let db = get_business_db().await?;
-    let res = ModelEntity::update_many()
-        .col_expr(ModelColumn::BasePhysicalProperty, Expr::value(base))
-        .col_expr(ModelColumn::TemperatureEquationProperty, Expr::value(temp))
-        .filter(ModelColumn::Id.eq(id))
-        .exec(db)
-        .await?;
-    Ok(res.rows_affected)
+    let existing = ModelEntity::find_by_id(id.clone())
+        .one(db)
+        .await?
+        .ok_or_else(|| DbErr::RecordNotFound("Record not found".to_owned()))?;
+    let mut active_model: ActiveModel = existing.into();
+
+    active_model.base_physical_property = Set(base);
+    active_model.temperature_equation_property = Set(temp);
+    active_model.update(db).await?;
+    Ok(id)
 }
 
 pub async fn update_component_all_detail_data(

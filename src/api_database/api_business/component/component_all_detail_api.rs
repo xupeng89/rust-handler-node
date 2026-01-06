@@ -112,11 +112,11 @@ pub async fn update_component_physical_data_api(
     id: String,
     base: String,
     temp: String,
-) -> Result<u32> {
+) -> Result<String> {
     let res = update_physical_data(id, base, temp)
         .await
         .map_err(handle_db_err)?;
-    Ok(res as u32)
+    Ok(res)
 }
 
 #[napi(namespace = "modelComponentDetail")]
