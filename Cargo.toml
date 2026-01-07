@@ -25,6 +25,7 @@ sea-orm-migration = "~2.0.0-rc"
 anyhow = "1.0.100"
 paste = "1.0.15"
 regex = "1.12.2"
+zstd = "0.13.3"
 
 [build-dependencies]
 napi-build = "2"

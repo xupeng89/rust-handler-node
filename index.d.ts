@@ -1020,6 +1020,7 @@ export declare namespace shutterHandle {
     indexNum: number
     baseStateCode: string
   }
+  export function updateShutterEntityByIdOnly(id: string, objects: string, sysvars: string, status: string): Promise<number>
 }
 
 export declare namespace undoRedoHandle {
