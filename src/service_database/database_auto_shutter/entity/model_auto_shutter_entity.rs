@@ -16,13 +16,12 @@ pub struct Model {
     #[sea_orm(column_name = "update_at", default = "")]
     pub update_at: i64,
 
-    // 假设 objects 和 sysvars 存储的是 JSON 字符串
-    #[sea_orm(default = "")]
-    pub objects: String,
+    // // 假设 objects 和 sysvars 存储的是 JSON 字符串
+    // #[sea_orm(default = "")]
+    // pub objects: String,
 
-    #[sea_orm(default = "")]
-    pub sysvars: String,
-
+    // #[sea_orm(default = "")]
+    // pub sysvars: String,
     #[sea_orm(column_name = "model_id", default = "")]
     pub model_id: String,
 
@@ -40,6 +39,16 @@ pub struct Model {
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
-pub enum Relation {}
+pub enum Relation {
+    // This defines the relationship for the macro
+    #[sea_orm(has_one = "super::model_auto_shutter_data_entity::Entity")]
+    Data,
+}
 
+// THIS IS THE MISSING PIECE:
+impl Related<super::model_auto_shutter_data_entity::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::Data.def()
+    }
+}
 impl ActiveModelBehavior for ActiveModel {}

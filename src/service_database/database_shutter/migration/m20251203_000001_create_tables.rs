@@ -78,6 +78,30 @@ impl MigrationTrait for Migration {
                     .to_owned(),
             )
             .await?;
+        // 2. 创建数据表 (存大数据，Blob类型)
+        manager
+            .create_table(
+                Table::create()
+                    .table(ModelShutterDataEntity::Table)
+                    .if_not_exists()
+                    .col(
+                        ColumnDef::new(ModelShutterDataEntity::Id)
+                            .integer()
+                            .not_null()
+                            .primary_key(),
+                    ) // 与主表ID一一对应
+                    .col(ColumnDef::new(ModelShutterDataEntity::Objects).blob()) // 改用 Blob 存压缩数据
+                    .col(ColumnDef::new(ModelShutterDataEntity::Sysvars).blob())
+                    .foreign_key(
+                        ForeignKey::create()
+                            .name("fk_shutter_data_id")
+                            .from(ModelShutterDataEntity::Table, ModelShutterDataEntity::Id)
+                            .to(ModelShutterEntity::Table, ModelShutterEntity::Id)
+                            .on_delete(ForeignKeyAction::Cascade), // 主表删了，数据自动删
+                    )
+                    .to_owned(),
+            )
+            .await?;
 
         Ok(())
     }
@@ -86,7 +110,13 @@ impl MigrationTrait for Migration {
         manager
             .drop_table(Table::drop().table(ModelShutterEntity::Table).to_owned())
             .await?;
-
+        manager
+            .drop_table(
+                Table::drop()
+                    .table(ModelShutterDataEntity::Table)
+                    .to_owned(),
+            )
+            .await?;
         Ok(())
     }
 }
@@ -107,4 +137,12 @@ enum ModelShutterEntity {
     StateIndex,
     StateDesc,
     BaseStateCode,
+}
+
+#[derive(Iden)]
+enum ModelShutterDataEntity {
+    Table,
+    Id,
+    Objects,
+    Sysvars,
 }

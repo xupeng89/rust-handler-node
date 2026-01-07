@@ -2,7 +2,6 @@ use crate::{
     service_database::database_auto_shutter::db_auto_shutter_connection::get_auto_shutter_db,
     tool_handle::time_tool::integer_to_string,
 };
-
 use chrono::Utc;
 use napi_derive::napi;
 use sea_orm::{
@@ -10,73 +9,34 @@ use sea_orm::{
     PaginatorTrait, QueryFilter, QueryOrder, QuerySelect, Set, TransactionError, TransactionTrait,
 };
 use serde::{Deserialize, Serialize};
-// ======================================
-// 引入实体定义
-// ======================================
-// 1. 缓存表实体
-use crate::service_database::database_auto_shutter::entity::model_auto_shutter_entity::{
-    ActiveModel as AutoShutterActiveModel, Column as AutoShutterColumn,
-    Entity as AutoShutterEntity, Model as AutoShutterModel,
+use zstd::{decode_all, encode_all};
+
+// 引入拆分后的两个实体
+use crate::service_database::database_auto_shutter::entity::model_auto_shutter_data_entity::{
+    ActiveModel as DataActiveModel, Entity as DataEntity,
 };
-// use crate::service_database::database_cache::service::auto_shutter_cache_service::FullCacheData;
+use crate::service_database::database_auto_shutter::entity::model_auto_shutter_entity::{
+    ActiveModel as MainActiveModel, Column as MainColumn, Entity as MainEntity,
+};
 
 // ======================================
-// DTO 定义 (已调整，新增 FullCacheData 用于数据同步)
+// 内部工具：压缩与解压
 // ======================================
 
-// 读取完整数据
+fn compress_data(data: &str) -> Vec<u8> {
+    // 压缩级别 3 是性能和压缩率的最佳平衡点
+    encode_all(data.as_bytes(), 3).unwrap_or_default()
+}
 
-// pub async fn read_current_model_auto_shutter_entity(data: Vec<FullCacheData>) -> Result<(), DbErr> {
-//     let db = get_auto_shutter_db().await?;
-
-//     AutoShutterEntity::delete_many().exec(db).await?;
-//     let backend = db.get_database_backend();
-//     let reset_sql = "DELETE FROM sqlite_sequence WHERE name = 'model_auto_shutter_entity';";
-//     db.execute_raw(Statement::from_string(backend, reset_sql.to_string()))
-//         .await?;
-//     // 转换为 ActiveModel
-//     let cache_inserts: Vec<AutoShutterActiveModel> = data
-//         .into_iter()
-//         .map(|d| AutoShutterActiveModel {
-//             id: Set(d.id),
-//             model_id: Set(d.model_id),
-//             objects: Set(d.objects),
-//             sysvars: Set(d.sysvars),
-//             update_at: Set(d.update_at),
-//             sim_time: Set(d.sim_time),
-//             base_state_code: Set(d.base_state_code),
-//             ..Default::default()
-//         })
-//         .collect();
-
-//     // 批量插入缓存表
-//     if !cache_inserts.is_empty() {
-//         AutoShutterEntity::insert_many(cache_inserts)
-//             .exec(db)
-//             .await?;
-//     }
-
-//     Ok(())
-// }
-
-// pub async fn get_current_all_model_auto_shutter_entity() -> Result<Vec<FullCacheData>, DbErr> {
-//     let db = get_auto_shutter_db().await?;
-
-//     // 1. 获取所有缓存数据
-//     let all_cache_msg: Vec<AutoShutterModel> = AutoShutterEntity::find().all(db).await?;
-
-//     // 2. 转换为 FullCacheData DTO 并返回
-//     let result: Vec<FullCacheData> = all_cache_msg.into_iter().map(FullCacheData::from).collect();
-
-//     Ok(result)
-// }
-// use crate::tool_handle::time_tool::{millis_to_naive_dt_utc, naive_dt_utc_to_millis};
+fn decompress_data(data: &[u8]) -> String {
+    let decoded = decode_all(data).unwrap_or_default();
+    String::from_utf8(decoded).unwrap_or_default()
+}
 
 // ======================================
-// DTO 定义 (已调整，新增 FullCacheData 用于数据同步)
+// DTO 定义
 // ======================================
 
-// [Input/Update DTO] 不含 ID，用于插入或更新
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[napi(object, namespace = "autoShutter")]
 pub struct AutoShutterData {
@@ -86,7 +46,6 @@ pub struct AutoShutterData {
     pub base_state_code: String,
 }
 
-// [Output DTO - Full Model] 包含所有数据库字段，用于 read/sync 的数据传输
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[napi(object)]
 pub struct FullCacheData {
@@ -102,26 +61,6 @@ pub struct FullCacheData {
     pub state_desc: Option<String>,
 }
 
-// 读取完整数据
-impl From<AutoShutterModel> for FullCacheData {
-    fn from(ele: AutoShutterModel) -> Self {
-        FullCacheData {
-            id: ele.id,
-            model_id: ele.model_id,
-            objects: ele.objects,
-            sysvars: ele.sysvars,
-            update_at: integer_to_string(ele.update_at),
-            sim_time: ele.sim_time,
-            base_state_code: ele.base_state_code,
-            user_name: ele.user_name,
-            state_index: ele.state_index,
-            state_desc: ele.state_desc,
-        }
-    }
-}
-
-// 查询数据给列表使用
-// [Output - List Item] 列表查询只返回部分字段 (包含 ID)
 #[derive(Clone, Debug, Serialize, FromQueryResult)]
 #[napi(object, namespace = "autoShutter")]
 pub struct AutoShutterListItem {
@@ -130,6 +69,7 @@ pub struct AutoShutterListItem {
     pub sim_time: String,
     pub base_state_code: String,
 }
+
 #[derive(Clone, Debug, FromQueryResult)]
 struct AutoShutterSelectModel {
     pub id: i32,
@@ -138,92 +78,97 @@ struct AutoShutterSelectModel {
     pub base_state_code: String,
 }
 
-// 读取完整数据
-impl From<AutoShutterModel> for AutoShutterSelectModel {
-    fn from(ele: AutoShutterModel) -> Self {
-        AutoShutterSelectModel {
-            id: ele.id,
-            update_at: ele.update_at,
-            sim_time: ele.sim_time,
-            base_state_code: ele.base_state_code,
-        }
-    }
-}
+// ======================================
+// 业务逻辑实现
+// ======================================
 
-// 读取完整数据
-impl From<AutoShutterSelectModel> for AutoShutterListItem {
-    fn from(ele: AutoShutterSelectModel) -> Self {
-        AutoShutterListItem {
-            id: ele.id,
-            update_at: integer_to_string(ele.update_at),
-            sim_time: ele.sim_time,
-            base_state_code: ele.base_state_code,
-        }
-    }
-}
-
-// 读取完整数据
-impl From<AutoShutterModel> for AutoShutterListItem {
-    fn from(ele: AutoShutterModel) -> Self {
-        AutoShutterListItem {
-            id: ele.id,
-            update_at: integer_to_string(ele.update_at),
-            sim_time: ele.sim_time,
-            base_state_code: ele.base_state_code,
-        }
-    }
-}
-
-/// 查询当前快照数量
+/// 查询当前快照数量 (仅查主表，极快)
 pub async fn get_model_auto_shutter_entity_count(model_id: String) -> Result<u32, DbErr> {
     let db = get_auto_shutter_db().await?;
-    // 1. 获取所有缓存数据
-    let result_count: u64 = AutoShutterEntity::find()
-        .filter(AutoShutterColumn::ModelId.eq(model_id))
+    let result_count = MainEntity::find()
+        .filter(MainColumn::ModelId.eq(model_id))
         .count(db)
         .await?;
-
     Ok(result_count as u32)
 }
 
-/// 更新自动快照 (高并发安全，保持不变)
+/// 插入一个数据 (包含压缩处理)
+pub async fn read_one_model_auto_shutter_entity_cache(
+    data: AutoShutterData,
+    model_id: String,
+) -> Result<i32, DbErr> {
+    let db = get_auto_shutter_db().await?;
+
+    db.transaction::<_, i32, DbErr>(|txn| {
+        Box::pin(async move {
+            // 1. 插入主表元数据
+            let main_item = MainActiveModel {
+                model_id: Set(model_id),
+                update_at: Set(Utc::now().timestamp_millis()),
+                sim_time: Set(data.sim_time),
+                base_state_code: Set(data.base_state_code),
+                ..Default::default()
+            };
+            let main_res = MainEntity::insert(main_item).exec(txn).await?;
+            let new_id = main_res.last_insert_id;
+
+            // 2. 插入大数据表 (压缩后存入)
+            let data_item = DataActiveModel {
+                id: Set(new_id),
+                objects: Set(compress_data(&data.objects)),
+                sysvars: Set(compress_data(&data.sysvars)),
+            };
+            DataEntity::insert(data_item).exec(txn).await?;
+
+            Ok(new_id)
+        })
+    })
+    .await
+    .map_err(|e| match e {
+        TransactionError::Connection(e) => e,
+        TransactionError::Transaction(e) => e,
+    })
+}
+
+/// 更新自动快照 (高并发安全 + 二进制压缩)
 pub async fn update_model_auto_shutter_entity_cache(
     data: AutoShutterData,
     model_id: String,
 ) -> Result<i32, DbErr> {
-    // 返回值从 Result<u32, DbErr> 改为 Result<i32, DbErr>（i32 对应 id 类型）
     let db = get_auto_shutter_db().await?;
 
-    // 事务中捕获更新记录的 ID
     let updated_id = db
         .transaction::<_, i32, DbErr>(|txn| {
-            // 事务返回值改为 i32（ID 类型）
             Box::pin(async move {
-                let target_record = AutoShutterEntity::find()
-                    .filter(AutoShutterColumn::ModelId.eq(model_id))
-                    .order_by_asc(AutoShutterColumn::UpdateAt)
-                    .lock_exclusive() // 排他锁，避免并发更新冲突
+                // 找到最旧的一条记录进行覆盖（轮转逻辑）
+                let target_record = MainEntity::find()
+                    .filter(MainColumn::ModelId.eq(model_id))
+                    .order_by_asc(MainColumn::UpdateAt)
+                    .lock_exclusive()
                     .one(txn)
                     .await?;
 
                 if let Some(record) = target_record {
-                    let updated_id = record.id; // 捕获要更新记录的 ID
-                    let mut active: AutoShutterActiveModel = record.into_active_model();
+                    let tid = record.id;
 
-                    // 更新字段（保持原逻辑）
-                    active.objects = Set(data.objects);
-                    active.sysvars = Set(data.sysvars);
-                    active.update_at = Set(Utc::now().timestamp_millis());
-                    active.sim_time = Set(data.sim_time);
-                    active.base_state_code = Set(data.base_state_code);
+                    // 1. 更新主表
+                    let mut active_main = record.into_active_model();
+                    active_main.update_at = Set(Utc::now().timestamp_millis());
+                    active_main.sim_time = Set(data.sim_time);
+                    active_main.base_state_code = Set(data.base_state_code);
+                    active_main.update(txn).await?;
 
-                    active.update(txn).await?; // 执行更新
-                    Ok(updated_id) // 事务成功，返回捕获的 ID
+                    // 2. 更新数据表 (压缩)
+                    let active_data = DataActiveModel {
+                        id: Set(tid),
+                        objects: Set(compress_data(&data.objects)),
+                        sysvars: Set(compress_data(&data.sysvars)),
+                    };
+                    DataEntity::update(active_data).exec(txn).await?;
+
+                    Ok(tid)
                 } else {
-                    // 若未找到匹配记录，返回自定义错误（或根据业务返回 0/None，这里推荐返回错误）
-                    Err(DbErr::RecordNotFound(
-                        "未找到要更新的自动快门缓存记录".to_string(),
-                    ))
+                    Err(DbErr::RecordNotFound("未找到快照记录".to_string()))
                 }
             })
         })
@@ -233,141 +178,75 @@ pub async fn update_model_auto_shutter_entity_cache(
             TransactionError::Transaction(e) => e,
         })?;
 
-    Ok(updated_id) // 函数返回更新的 ID
+    Ok(updated_id)
 }
 
-/// 插入一个数据到缓存数据库
-pub async fn read_one_model_auto_shutter_entity_cache(
-    data: AutoShutterData,
-    model_id: String,
-) -> Result<i32, DbErr> {
-    let db = get_auto_shutter_db().await?;
-
-    let new_item = AutoShutterActiveModel {
-        model_id: Set(model_id),
-        objects: Set(data.objects),
-        sysvars: Set(data.sysvars),
-        update_at: Set(Utc::now().timestamp_millis()),
-        sim_time: Set(data.sim_time),
-        base_state_code: Set(data.base_state_code),
-        ..Default::default()
-    };
-    // 插入缓存表
-    let result = AutoShutterEntity::insert(new_item).exec(db).await?;
-
-    Ok(result.last_insert_id)
-}
-
-// pub async fn read_model_auto_shutter_entity_cache(data: Vec<FullCacheData>) -> Result<(), DbErr> {
-//     let db = get_auto_shutter_db().await?;
-
-//     // 转换为 ActiveModel
-//     let cache_inserts: Vec<AutoShutterActiveModel> = data
-//         .into_iter()
-//         .map(|d| AutoShutterActiveModel {
-//             id: Set(d.id),
-//             model_id: Set(d.model_id),
-//             objects: Set(d.objects),
-//             sysvars: Set(d.sysvars),
-//             update_at: Set(d.update_at),
-//             sim_time: Set(d.sim_time),
-//             base_state_code: Set(d.base_state_code),
-//             ..Default::default()
-//         })
-//         .collect();
-
-//     // 批量插入缓存表
-//     if !cache_inserts.is_empty() {
-//         AutoShutterEntity::insert_many(cache_inserts)
-//             .exec(db)
-//             .await?;
-//     }
-
-//     Ok(())
-// }
-
-// pub async fn get_all_model_auto_shutter_entity_cache() -> Result<Vec<FullCacheData>, DbErr> {
-//     let db = get_auto_shutter_db().await?;
-
-//     // 1. 获取所有缓存数据
-//     let all_cache_msg: Vec<AutoShutterModel> = AutoShutterEntity::find().all(db).await?;
-
-//     // 2. 转换为 FullCacheData DTO 并返回
-//     let result: Vec<FullCacheData> = all_cache_msg.into_iter().map(FullCacheData::from).collect();
-
-//     Ok(result)
-// }
-
-/// TS: updateAllModelAutoShutterEntityCache (现改为返回参数)
-pub async fn get_all_model_auto_shutter_entity_cache_model_id(
-    model_id: String,
-) -> Result<Vec<FullCacheData>, DbErr> {
-    let db = get_auto_shutter_db().await?;
-
-    // 1. 获取所有缓存数据
-    let all_cache_msg: Vec<AutoShutterModel> = AutoShutterEntity::find()
-        .filter(AutoShutterColumn::ModelId.eq(model_id))
-        .all(db)
-        .await?;
-
-    // 2. 转换为 FullCacheData DTO 并返回
-    let result: Vec<FullCacheData> = all_cache_msg.into_iter().map(FullCacheData::from).collect();
-
-    Ok(result)
-}
-
-/// 获取快照列表 (返回 AutoShutterListItem)
+/// 获取快照列表 (仅查主表，不加载大数据字段，速度极快)
 pub async fn get_all_model_auto_shutter_entity_list_cache(
-    order_flag: String, // "DESC" or "ASC"
+    order_flag: String,
     auto_count: u64,
     model_id: String,
 ) -> Result<Vec<AutoShutterListItem>, DbErr> {
     let db = get_auto_shutter_db().await?;
-
     let order = if order_flag.to_uppercase() == "ASC" {
         Order::Asc
     } else {
         Order::Desc
     };
-    let result = AutoShutterEntity::find()
+
+    let result = MainEntity::find()
         .select_only()
-        .column(AutoShutterColumn::Id)
-        .column(AutoShutterColumn::UpdateAt)
-        .column(AutoShutterColumn::SimTime)
-        .column(AutoShutterColumn::BaseStateCode)
-        .filter(AutoShutterColumn::ModelId.eq(model_id))
-        .order_by(AutoShutterColumn::UpdateAt, order)
+        .column(MainColumn::Id)
+        .column(MainColumn::UpdateAt)
+        .column(MainColumn::SimTime)
+        .column(MainColumn::BaseStateCode)
+        .filter(MainColumn::ModelId.eq(model_id))
+        .order_by(MainColumn::UpdateAt, order)
         .limit(auto_count)
         .into_model::<AutoShutterSelectModel>()
         .all(db)
         .await?;
 
-    Ok(result.into_iter().map(AutoShutterListItem::from).collect())
+    Ok(result
+        .into_iter()
+        .map(|ele| AutoShutterListItem {
+            id: ele.id,
+            update_at: integer_to_string(ele.update_at),
+            sim_time: ele.sim_time,
+            base_state_code: ele.base_state_code,
+        })
+        .collect())
 }
 
-/// 获取单个详情 (返回 FullCacheData 或 DbErr)
+/// 获取单个详情 (JOIN 查询 + 解压缩)
 pub async fn get_model_auto_shutter_entity_by_id_cache(
     id: i32,
     model_id: String,
 ) -> Result<FullCacheData, DbErr> {
     let db = get_auto_shutter_db().await?;
-    let model_id_clone = model_id.clone();
-    let result = AutoShutterEntity::find_by_id(id)
-        .filter(AutoShutterColumn::ModelId.eq(model_id))
+
+    // 使用 find_also_related 同时查出主表和压缩数据表
+    let result = MainEntity::find_by_id(id)
+        .filter(MainColumn::ModelId.eq(model_id))
+        .find_also_related(DataEntity)
         .one(db)
         .await?;
 
     match result {
-        Some(model) => {
-            // 找到数据，进行转换并返回
-            Ok(FullCacheData::from(model)) // 假设 FullCacheData::from(model)
+        Some((main, Some(data))) => {
+            Ok(FullCacheData {
+                id: main.id,
+                model_id: main.model_id,
+                objects: decompress_data(&data.objects), // 解压
+                sysvars: decompress_data(&data.sysvars), // 解压
+                update_at: integer_to_string(main.update_at),
+                sim_time: main.sim_time,
+                base_state_code: main.base_state_code,
+                user_name: main.user_name,
+                state_index: main.state_index,
+                state_desc: main.state_desc,
+            })
         }
-        None => {
-            // 找不到数据，返回错误
-            Err(DbErr::RecordNotFound(format!(
-                "ModelId: {} not found with ID: {}",
-                model_id_clone, id
-            )))
-        }
+        _ => Err(DbErr::RecordNotFound(format!("ID {} not found", id))),
     }
 }

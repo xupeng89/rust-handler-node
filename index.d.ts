@@ -82,8 +82,6 @@ export declare namespace autoShutter {
   }
   /** 获取目前快照数量 */
   export function getAllModelAutoShutterCacheEntityCount(modelId: string): Promise<number>
-  /** 查询缓存数据库中模型的数据 */
-  export function getAllShutterCacheApiModelId(modelId: string): Promise<Array<FullCacheData>>
   /** 获取单个快照详情 (Service: get_model_auto_shutter_entity_by_id_cache) */
   export function getAutoShutterCacheDetailApi(id: number, modelId: string): Promise<FullCacheData>
   /** 获取快照列表 (Service: get_all_model_auto_shutter_entity_list_cache) */
@@ -381,7 +379,7 @@ export declare namespace modelComponentDetail {
     temperatureEquationProperty?: string
   }
   export function selectComponentAllDetailHaveByNameApi(name: string, channelId: string): Promise<boolean>
-  export function updateComponentPhysicalDataApi(id: string, base: string, temp: string): Promise<number>
+  export function updateComponentPhysicalDataApi(id: string, base: string, temp: string): Promise<string>
   export function updateModelComponentAllDetailOptionApi(updateData: ModelComponentAllDetailUpdateDTO): Promise<string>
 }
 
@@ -549,9 +547,20 @@ export declare namespace modelConfig {
 }
 
 export declare namespace modelFluidPackage {
+  export function deleteCalcFunctionsByFluidPackageIdApi(packageId: string): Promise<boolean>
   export function getCalcFunctionsByPackageIdApi(packageId: string): Promise<Array<ModelPhysicalPropertyCalcDTO>>
   export function getCalcFunctionsByPackageIdsApi(packageIds: Array<string>): Promise<Array<ModelPhysicalPropertyCalcDTO>>
-  export function getFluidPackageCountApi(modelId: string, onlyDefault: boolean): Promise<number>
+  export function getFluidPackageByChannelIdsApi(channelIds: Array<string>): Promise<Array<ModelFluidPackageDTO>>
+  export function getFluidPackageByIdApi(packageId: string): Promise<ModelFluidPackageDTO | null>
+  export function getFluidPackageByIdsAndDefaultFlagCountApi(packageIds: Array<string>, isDefault: number): Promise<number>
+  export function getFluidPackageByIdsApi(packageIds: Array<string>): Promise<Array<ModelFluidPackageDTO>>
+  export function getFluidPackageModelIdAndNameApi(name: string, modelId: string): Promise<boolean>
+  export function getFluidPackageModelIdApi(modelId: string): Promise<Array<ModelFluidPackageDTO>>
+  export function getFluidPackageModelIdCountApi(modelId: string): Promise<number>
+  export function getFluidPackageModelIdDefaultApi(modelId: string, onlyDefault: number): Promise<ModelFluidPackageDTO | null>
+  export function getFluidPackageModelIdDefaultCountApi(modelId: string, onlyDefault: number): Promise<number>
+  export function insertCalcFunctionsApi(calcFuncList: Array<ModelPhysicalPropertyCalcDTO>): Promise<boolean>
+  export function insertFluidPackageApi(fluidPackageList: Array<ModelFluidPackageDTO>): Promise<boolean>
   export interface ModelFluidPackageDTO {
     id: string
     name: string
@@ -581,12 +590,12 @@ export declare namespace modelFluidPackage {
     phase: string
     mixture: number
   }
-  export interface PpMethodFunctionDto {
+  export interface PpMethodFunctionDTO {
     id: string
     funcCode: string
   }
   export function setFluidPackageDefaultApi(modelId: string, targetId: string): Promise<void>
-  export function updateCalcFunctionsSelectedApi(packageId: string, list: Array<PpMethodFunctionDTO>): Promise<void>
+  export function updateCalcFunctionsSelectedApi(packageId: string, list: Array<PpMethodFunctionDTO>): Promise<boolean>
   export function updateFluidPackageApi(data: ModelFluidPackageUpdateDTO): Promise<string>
 }
 
@@ -985,20 +994,6 @@ export declare namespace shutterHandle {
    * 签名: (id: string, modelId: string) => Promise<number> (返回 rows_affected)
    */
   export function deleteShutterEntity(id: string, modelId: string): Promise<number>
-  export interface FullShutterData {
-    id: string
-    name: string
-    indexNum: number
-    modelId: string
-    objects: string
-    sysvars: string
-    updateAt: string
-    baseStateCode: string
-    userName?: string
-    stateIndex?: number
-    stateDesc?: string
-    typeNum?: number
-  }
   export interface FullShutterModel {
     id: string
     name: string
@@ -1013,13 +1008,11 @@ export declare namespace shutterHandle {
     stateDesc?: string
     baseStateCode: string
   }
-  export function getAllShutterEntityDetailList(modelId: string): Promise<Array<FullShutterModel>>
   export function getAllShutterEntityList(modelId: string): Promise<Array<ShutterListItem>>
-  export function getShutterEntityById(id: string, modelId: string): Promise<FullShutterData | null>
-  export function getShutterEntityByIdOnly(id: string): Promise<FullShutterData | null>
+  export function getShutterEntityById(id: string, modelId: string): Promise<FullShutterModel | null>
   /** 创建/更新快照信息 (insertModelShutterEntity) */
-  export function insertShutterEntity(data: FullShutterData, modelId: string): Promise<number>
-  export function insertShutterEntityOnly(data: FullShutterData): Promise<void>
+  export function insertShutterEntity(data: FullShutterModel, modelId: string): Promise<number>
+  export function insertShutterEntityOnly(data: FullShutterModel): Promise<void>
   export interface ShutterListItem {
     id: string
     name: string
@@ -1027,12 +1020,6 @@ export declare namespace shutterHandle {
     indexNum: number
     baseStateCode: string
   }
-  export function updateShutterEntity(data: FullShutterData, modelId: string): Promise<number>
-  /**
-   * 根据 ID 更新部分信息 (updateModelShutterEntityByIndexOnly)
-   * 签名: (id: string, objects: string, sysvars: string, status: string) => Promise<number> (返回 rows_affected)
-   */
-  export function updateShutterEntityByIdOnly(id: string, objects: string, sysvars: string, status: string): Promise<number>
 }
 
 export declare namespace undoRedoHandle {

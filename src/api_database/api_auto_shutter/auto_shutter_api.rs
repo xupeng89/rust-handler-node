@@ -62,14 +62,14 @@ pub async fn update_auto_shutter_cache_api(data: AutoShutterData, model_id: Stri
     Ok(result)
 }
 
-#[napi(namespace = "autoShutter")]
-/// 查询缓存数据库中模型的数据
-pub async fn get_all_shutter_cache_api_model_id(model_id: String) -> Result<Vec<FullCacheData>> {
-    let result = get_all_model_auto_shutter_entity_cache_model_id(model_id)
-        .await
-        .map_err(handle_db_err)?;
-    Ok(result)
-}
+// #[napi(namespace = "autoShutter")]
+// /// 查询缓存数据库中模型的数据
+// pub async fn get_all_shutter_cache_api_model_id(model_id: String) -> Result<Vec<FullCacheData>> {
+//     let result = get_all_model_auto_shutter_entity_cache_model_id(model_id)
+//         .await
+//         .map_err(handle_db_err)?;
+//     Ok(result)
+// }
 
 #[napi(namespace = "autoShutter")]
 /// 获取快照列表 (Service: get_all_model_auto_shutter_entity_list_cache)

@@ -4,7 +4,7 @@ use crate::service_database::database_business::entity::fluid_package::model_flu
     Entity as PackageEntity, Column as PackageColumn, Model as PackageModel, ActiveModel as PackageActiveModel
 };
 use crate::service_database::database_business::entity::fluid_package::model_physical_property_calc_entity::{
-    Entity as CalcEntity, Column as CalcColumn, Model as CalcModel
+    Entity as CalcEntity, Column as CalcColumn, Model as CalcModel, ActiveModel as CalcActiveModel
 };
 use napi_derive::napi;
 use serde::{Deserialize, Serialize};
@@ -62,9 +62,29 @@ pub struct ModelPhysicalPropertyCalcDTO {
     pub phase: String,
     pub mixture: i32,
 }
+impl ModelPhysicalPropertyCalcDTO {
+    fn into_active_model(self) -> CalcActiveModel {
+        CalcActiveModel {
+            id: Set(self.id),
+            physical_property_name: Set(self.physical_property_name),
+            physical_property_id: Set(self.physical_property_id),
+            fluid_package_id: Set(self.fluid_package_id),
+            physical_property_code: Set(self.physical_property_code),
+            calc_code: Set(self.calc_code),
+            default_calc_code: Set(self.default_calc_code),
+            key: Set(self.key),
+            phase: Set(self.phase),
+            mixture: Set(self.mixture),
+        }
+    }
+}
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
-#[napi(object, namespace = "modelFluidPackage")]
+#[napi(
+    object,
+    namespace = "modelFluidPackage",
+    js_name = "PpMethodFunctionDTO"
+)]
 pub struct PpMethodFunctionDTO {
     pub id: String,
     pub func_code: String,
@@ -180,6 +200,119 @@ pub async fn delete_calc_functions_by_package_id(package_id: String) -> Result<b
     Ok(true)
 }
 
+/// 插入并处理重名 (基础 DB 操作)
+pub async fn insert_fluid_package_calc_function(
+    calc_func_list: Vec<ModelPhysicalPropertyCalcDTO>,
+) -> Result<bool, DbErr> {
+    let db = get_business_db().await?;
+    // 注意：Rust 端的重名逻辑建议调用外面传入的已处理好的 Name
+    let active_list: Vec<CalcActiveModel> = calc_func_list
+        .into_iter()
+        .map(|d| d.into_active_model())
+        .collect();
+
+    CalcEntity::insert_many(active_list).exec(db).await?;
+    Ok(true)
+}
+
+/// 通过组分通道id,获取流体包信息
+pub async fn get_fluid_package_by_channel_ids(
+    channel_ids: Vec<String>,
+) -> Result<Vec<ModelFluidPackageDTO>, DbErr> {
+    let db = get_business_db().await?;
+
+    let result = PackageEntity::find()
+        .filter(PackageColumn::CompoundChannelId.is_in(channel_ids))
+        .all(db)
+        .await?;
+    Ok(result.into_iter().map(ModelFluidPackageDTO::from).collect())
+}
+
+pub async fn get_fluid_package_by_id(
+    package_id: String,
+) -> Result<Option<ModelFluidPackageDTO>, DbErr> {
+    let db = get_business_db().await?;
+
+    let result = PackageEntity::find_by_id(package_id).one(db).await?;
+    Ok(result.map(ModelFluidPackageDTO::from))
+}
+
+pub async fn get_fluid_package_by_ids(
+    package_ids: Vec<String>,
+) -> Result<Vec<ModelFluidPackageDTO>, DbErr> {
+    let db = get_business_db().await?;
+
+    let result = PackageEntity::find()
+        .filter(PackageColumn::Id.is_in(package_ids))
+        .all(db)
+        .await?;
+    Ok(result.into_iter().map(ModelFluidPackageDTO::from).collect())
+}
+
+// pub async fn get_fluid_package_by_ids_and_default_flag(
+//     package_ids: Vec<String>,
+//     is_default: u32,
+// ) -> Result<Vec<ModelFluidPackageDTO>, DbErr> {
+//     let db = get_business_db().await?;
+
+//     let result = PackageEntity::find()
+//         .filter(PackageColumn::Id.is_in(package_ids))
+//         .filter(PackageColumn::IsDefault.eq(is_default))
+//         .all(db)
+//         .await?;
+//     Ok(result.into_iter().map(ModelFluidPackageDTO::from).collect())
+// }
+
+pub async fn get_fluid_package_by_ids_and_default_flag_count(
+    package_ids: Vec<String>,
+    is_default: u32,
+) -> Result<u32, DbErr> {
+    let db = get_business_db().await?;
+
+    let count = PackageEntity::find()
+        .filter(PackageColumn::Id.is_in(package_ids))
+        .filter(PackageColumn::IsDefault.eq(is_default))
+        .count(db)
+        .await?;
+    Ok(count as u32)
+}
+
+pub async fn get_fluid_package_by_model_id_and_default_flag(
+    model_id: String,
+    is_default: u32,
+) -> Result<Option<ModelFluidPackageDTO>, DbErr> {
+    let db = get_business_db().await?;
+
+    let result = PackageEntity::find()
+        .filter(PackageColumn::ModelId.eq(model_id))
+        .filter(PackageColumn::IsDefault.eq(is_default))
+        .one(db)
+        .await?;
+    Ok(result.map(ModelFluidPackageDTO::from))
+}
+
+pub async fn get_fluid_package_by_model_id_flag(
+    model_id: String,
+) -> Result<Vec<ModelFluidPackageDTO>, DbErr> {
+    let db = get_business_db().await?;
+
+    let result = PackageEntity::find()
+        .filter(PackageColumn::ModelId.eq(model_id))
+        .all(db)
+        .await?;
+    Ok(result.into_iter().map(ModelFluidPackageDTO::from).collect())
+}
+
+pub async fn get_fluid_package_by_model_id_count_flag(model_id: String) -> Result<u32, DbErr> {
+    let db = get_business_db().await?;
+
+    let result = PackageEntity::find()
+        .filter(PackageColumn::ModelId.eq(model_id))
+        .count(db)
+        .await?;
+    Ok(result as u32)
+}
+
 /// 维护 isDefault 状态 (将其他设为 0)
 pub async fn set_fluid_package_default(model_id: String, target_id: String) -> Result<(), DbErr> {
     let db = get_business_db().await?;
@@ -222,20 +355,37 @@ pub async fn update_fluid_package(data: ModelFluidPackageUpdateDTO) -> Result<St
 }
 
 /// 插入并处理重名 (基础 DB 操作)
-pub async fn insert_fluid_package(data: ModelFluidPackageDTO) -> Result<String, DbErr> {
+pub async fn insert_fluid_package(datas: Vec<ModelFluidPackageDTO>) -> Result<bool, DbErr> {
     let db = get_business_db().await?;
-    // 注意：Rust 端的重名逻辑建议调用外面传入的已处理好的 Name
-    let active: PackageActiveModel = data.into_active_model();
-    let res = PackageEntity::insert(active).exec(db).await?;
-    Ok(res.last_insert_id)
+    let active_list: Vec<PackageActiveModel> =
+        datas.into_iter().map(|d| d.into_active_model()).collect();
+
+    PackageEntity::insert_many(active_list).exec(db).await?;
+    Ok(true)
 }
 
 // 模型相关的查询辅助函数
-pub async fn get_fluid_package_count(model_id: String, only_default: bool) -> Result<u64, DbErr> {
+pub async fn get_fluid_package_model_id_default_count(
+    model_id: String,
+    only_default: u32,
+) -> Result<u64, DbErr> {
     let db = get_business_db().await?;
-    let mut query = PackageEntity::find().filter(PackageColumn::ModelId.eq(model_id));
-    if only_default {
-        query = query.filter(PackageColumn::IsDefault.eq(1));
-    }
-    query.count(db).await
+    PackageEntity::find()
+        .filter(PackageColumn::IsDefault.eq(only_default))
+        .filter(PackageColumn::ModelId.eq(model_id))
+        .count(db)
+        .await
+}
+
+pub async fn get_fluid_package_model_id_and_name(
+    name: String,
+    model_id: String,
+) -> Result<bool, DbErr> {
+    let db = get_business_db().await?;
+    let result = PackageEntity::find()
+        .filter(PackageColumn::Name.eq(name))
+        .filter(PackageColumn::ModelId.eq(model_id))
+        .count(db)
+        .await?;
+    Ok(result > 0)
 }
