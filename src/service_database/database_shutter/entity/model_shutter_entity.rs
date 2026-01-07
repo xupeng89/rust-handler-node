@@ -17,7 +17,7 @@ pub struct Model {
     pub type_num: Option<i32>,
     pub state_index: Option<i32>,
     pub state_desc: Option<String>,
-    #[sea_orm(column_name = "status")]
+
     pub base_state_code: String,
 }
 

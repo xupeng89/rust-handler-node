@@ -201,7 +201,7 @@ pub async fn insert_model_shutter_entity(
 /// 仅插入 (insertModelShutterEntityOnly)
 pub async fn insert_model_shutter_entity_only(data: FullShutterModel) -> Result<(), DbErr> {
     let db = get_shutter_db().await?;
-
+    let name = data.name.clone();
     db.transaction::<_, (), DbErr>(|txn| {
         Box::pin(async move {
             let active_main = MainActiveModel {
@@ -217,7 +217,7 @@ pub async fn insert_model_shutter_entity_only(data: FullShutterModel) -> Result<
                 type_num: Set(data.type_num),
             };
             active_main.insert(txn).await?;
-
+            eprint!("zhixingdaozhele ma {}", name);
             let active_data = DataActiveModel {
                 id: Set(data.id),
                 objects: Set(compress_data(&data.objects)),

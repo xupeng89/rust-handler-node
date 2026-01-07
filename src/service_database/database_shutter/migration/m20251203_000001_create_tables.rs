@@ -39,11 +39,6 @@ impl MigrationTrait for Migration {
                             .string_len(64) // 假设用于存储时间字符串
                             .not_null(),
                     )
-                    // 对应 TypeORM 的 objects: string @Column(name: "objects", type: "text")
-                    .col(ColumnDef::new(ModelShutterEntity::Objects).text())
-                    // 对应 TypeORM 的 sysvars: string @Column(name: "sysvars", type: "text")
-                    .col(ColumnDef::new(ModelShutterEntity::Sysvars).text())
-                    // 对应 TypeORM 的 modelId: string @Column(name: "model_id", default: "")
                     .col(
                         ColumnDef::new(ModelShutterEntity::ModelId)
                             .string_len(64)
@@ -129,8 +124,6 @@ enum ModelShutterEntity {
     Name,
     IndexNum,
     UpdateAt,
-    Objects,
-    Sysvars,
     ModelId,
     Username,
     Type,
