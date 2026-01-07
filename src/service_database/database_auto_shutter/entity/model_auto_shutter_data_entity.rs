@@ -8,8 +8,9 @@ use serde::{Deserialize, Serialize};
 pub struct Model {
     #[sea_orm(primary_key, auto_increment = false)]
     pub id: i32,
-
+    #[sea_orm(column_type = "Blob")]
     pub objects: Vec<u8>, // 二进制存储
+    #[sea_orm(column_type = "Blob")]
     pub sysvars: Vec<u8>,
 }
 

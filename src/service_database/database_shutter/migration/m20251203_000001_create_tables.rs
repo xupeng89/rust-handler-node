@@ -46,7 +46,7 @@ impl MigrationTrait for Migration {
                     )
                     // 对应 TypeORM 的 userName: string @Column(name: "username", nullable: true)
                     .col(
-                        ColumnDef::new(ModelShutterEntity::Username)
+                        ColumnDef::new(ModelShutterEntity::UserName)
                             .string_len(64)
                             .null(),
                     )
@@ -81,7 +81,7 @@ impl MigrationTrait for Migration {
                     .if_not_exists()
                     .col(
                         ColumnDef::new(ModelShutterDataEntity::Id)
-                            .integer()
+                            .string_len(36)
                             .not_null()
                             .primary_key(),
                     ) // 与主表ID一一对应
@@ -125,7 +125,7 @@ enum ModelShutterEntity {
     IndexNum,
     UpdateAt,
     ModelId,
-    Username,
+    UserName,
     Type,
     StateIndex,
     StateDesc,

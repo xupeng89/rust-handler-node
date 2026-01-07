@@ -59,12 +59,13 @@ pub async fn get_shutter_entity_by_id(
 // 签名: (id: string, objects: string, sysvars: string, status: string) => Promise<number> (返回 rows_affected)
 #[napi(namespace = "shutterHandle")]
 pub async fn update_shutter_entity_by_id_only(
-    id: String,
+    index_num: i32,
     objects: String,
     sysvars: String,
     status: String,
+    model_id: String,
 ) -> Result<u32> {
-    update_model_shutter_entity_by_id_only(id, objects, sysvars, status)
+    update_model_shutter_entity_by_id_only(index_num, objects, sysvars, status, model_id)
         .await
         .map(|rows| rows as u32)
         .map_err(handle_db_err)

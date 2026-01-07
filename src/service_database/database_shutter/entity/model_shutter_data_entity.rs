@@ -5,7 +5,9 @@ use sea_orm::entity::prelude::*;
 pub struct Model {
     #[sea_orm(primary_key, auto_increment = false)]
     pub id: String, // 与主表 ID 对应
+    #[sea_orm(column_type = "Blob")]
     pub objects: Vec<u8>, // 存储 zstd 压缩后的二进制
+    #[sea_orm(column_type = "Blob")]
     pub sysvars: Vec<u8>, // 存储 zstd 压缩后的二进制
 }
 

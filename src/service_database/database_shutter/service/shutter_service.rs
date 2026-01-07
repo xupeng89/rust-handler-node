@@ -19,7 +19,8 @@ use crate::service_database::database_shutter::entity::model_shutter_entity::{
 // 工具函数：压缩
 // ======================================
 fn compress_data(data: &str) -> Vec<u8> {
-    encode_all(data.as_bytes(), 3).unwrap_or_default()
+    let result = encode_all(data.as_bytes(), 3).unwrap_or_default();
+    result
 }
 
 fn decompress_data(data: &[u8]) -> String {
@@ -201,7 +202,7 @@ pub async fn insert_model_shutter_entity(
 /// 仅插入 (insertModelShutterEntityOnly)
 pub async fn insert_model_shutter_entity_only(data: FullShutterModel) -> Result<(), DbErr> {
     let db = get_shutter_db().await?;
-    let name = data.name.clone();
+
     db.transaction::<_, (), DbErr>(|txn| {
         Box::pin(async move {
             let active_main = MainActiveModel {
@@ -217,7 +218,7 @@ pub async fn insert_model_shutter_entity_only(data: FullShutterModel) -> Result<
                 type_num: Set(data.type_num),
             };
             active_main.insert(txn).await?;
-            eprint!("zhixingdaozhele ma {}", name);
+
             let active_data = DataActiveModel {
                 id: Set(data.id),
                 objects: Set(compress_data(&data.objects)),
@@ -254,46 +255,51 @@ pub async fn delete_model_shutter_entity(id: String, model_id: String) -> Result
 
 /// 根据 ID 更新部分信息 (适配分表+压缩架构)
 pub async fn update_model_shutter_entity_by_id_only(
-    id: String,
+    index_num: i32,
     objects: String,
     sysvars: String,
     base_state_code: String,
+    model_id: String,
 ) -> Result<u64, DbErr> {
     let db = get_shutter_db().await?;
 
-    // 涉及两个表的更新，必须使用事务
+    // 1. 先查出该 model_id 和 index_num 对应的唯一主键 ID
+    let target = MainEntity::find()
+        .filter(MainColumn::ModelId.eq(model_id))
+        .filter(MainColumn::IndexNum.eq(index_num))
+        .one(db)
+        .await?
+        .ok_or(DbErr::RecordNotFound(
+            "Shutter record not found".to_string(),
+        ))?;
+
+    let primary_id = target.id;
+
+    // 2. 开启事务更新两张表
     let rows_affected = db
         .transaction::<_, u64, DbErr>(|txn| {
-            let id_clone = id.clone();
+            let primary_id_clone = primary_id.clone();
             Box::pin(async move {
-                // 1. 更新主表 (model_shutter_entity) 的状态码
+                // 更新主表
                 let main_res = MainEntity::update_many()
                     .col_expr(MainColumn::BaseStateCode, Expr::value(base_state_code))
                     .col_expr(MainColumn::UpdateAt, Expr::value(Utc::now().to_rfc3339()))
-                    .filter(MainColumn::Id.eq(id_clone.clone()))
+                    .filter(MainColumn::Id.eq(primary_id_clone.clone()))
                     .exec(txn)
                     .await?;
 
-                // 如果主表没找到记录，直接返回 0
                 if main_res.rows_affected == 0 {
                     return Ok(0);
                 }
 
-                // 2. 更新数据表 (model_shutter_data) 的大字段 (进行 zstd 压缩)
+                // 更新数据表
                 DataEntity::update_many()
-                    .col_expr(
-                        DataColumn::Objects,
-                        Expr::value(compress_data(&objects)), // 压缩 String -> Vec<u8>
-                    )
-                    .col_expr(
-                        DataColumn::Sysvars,
-                        Expr::value(compress_data(&sysvars)), // 压缩 String -> Vec<u8>
-                    )
-                    .filter(DataColumn::Id.eq(id_clone))
+                    .col_expr(DataColumn::Objects, Expr::value(compress_data(&objects)))
+                    .col_expr(DataColumn::Sysvars, Expr::value(compress_data(&sysvars)))
+                    .filter(DataColumn::Id.eq(primary_id_clone))
                     .exec(txn)
                     .await?;
 
-                // 返回受影响的行数（通常为 1）
                 Ok(main_res.rows_affected)
             })
         })

@@ -11,7 +11,6 @@ pub struct Model {
     pub index_num: i32,
     pub update_at: String,
     pub model_id: String,
-    #[sea_orm(column_name = "username")]
     pub user_name: Option<String>,
     #[sea_orm(column_name = "type")]
     pub type_num: Option<i32>,
