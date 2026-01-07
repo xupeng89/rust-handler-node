@@ -134,6 +134,41 @@ pub async fn get_model_shutter_entity_by_id(
     }
 }
 
+/// 获取详情 (JOIN + 解压缩)
+pub async fn get_model_shutter_entity_by_index_num_model_id_only(
+    index_num: i32,
+    model_id: String,
+) -> Result<Option<FullShutterModel>, DbErr> {
+    let db = get_shutter_db().await?;
+
+    // 使用 find_also_related 一次性查出主表和压缩数据
+    let result = MainEntity::find()
+        .filter(MainColumn::IndexNum.eq(index_num))
+        .filter(MainColumn::ModelId.eq(model_id))
+        .find_also_related(DataEntity)
+        .one(db)
+        .await?;
+
+    if let Some((main, Some(data))) = result {
+        Ok(Some(FullShutterModel {
+            id: main.id,
+            name: main.name,
+            index_num: main.index_num,
+            model_id: main.model_id,
+            objects: decompress_data(&data.objects), // 解压
+            sysvars: decompress_data(&data.sysvars), // 解压
+            update_at: main.update_at,
+            base_state_code: main.base_state_code,
+            user_name: main.user_name,
+            state_index: main.state_index,
+            state_desc: main.state_desc,
+            type_num: main.type_num,
+        }))
+    } else {
+        Ok(None)
+    }
+}
+
 /// 插入或更新逻辑 (带事务和压缩)
 pub async fn insert_model_shutter_entity(
     data: FullShutterModel,

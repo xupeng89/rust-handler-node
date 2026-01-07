@@ -48,12 +48,15 @@ pub async fn get_shutter_entity_by_id(
         .map_err(handle_db_err)
 }
 
-// #[napi(namespace = "shutterHandle")]
-// pub async fn get_shutter_entity_by_id_only(id: String) -> Result<Option<FullShutterModel>> {
-//     get_model_shutter_entity_by_id_only(id)
-//         .await
-//         .map_err(handle_db_err)
-// }
+#[napi(namespace = "shutterHandle")]
+pub async fn get_model_shutter_entity_by_index_num_model_id_only_api(
+    index_num: i32,
+    model_id: String,
+) -> Result<Option<FullShutterModel>> {
+    get_model_shutter_entity_by_index_num_model_id_only(index_num, model_id)
+        .await
+        .map_err(handle_db_err)
+}
 
 // 根据 ID 更新部分信息 (updateModelShutterEntityByIndexOnly)
 // 签名: (id: string, objects: string, sysvars: string, status: string) => Promise<number> (返回 rows_affected)
