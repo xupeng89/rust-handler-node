@@ -215,7 +215,6 @@ pub async fn insert_model_shutter_entity_only(data: FullShutterModel) -> Result<
                 state_index: Set(data.state_index),
                 state_desc: Set(data.state_desc),
                 type_num: Set(data.type_num),
-                ..Default::default()
             };
             active_main.insert(txn).await?;
 
