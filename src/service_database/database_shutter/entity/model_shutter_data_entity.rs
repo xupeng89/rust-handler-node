@@ -1,7 +1,7 @@
 use sea_orm::entity::prelude::*;
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel)]
-#[sea_orm(table_name = "model_shutter_data")]
+#[sea_orm(table_name = "model_shutter_data_entity")]
 pub struct Model {
     #[sea_orm(primary_key, auto_increment = false)]
     pub id: String, // 与主表 ID 对应

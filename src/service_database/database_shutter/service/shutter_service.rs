@@ -1,4 +1,5 @@
 use crate::service_database::database_shutter::db_shutter_connection::get_shutter_db;
+use chrono::Utc;
 use napi_derive::napi;
 use sea_orm::{
     ActiveModelTrait, ColumnTrait, DbErr, EntityTrait, FromQueryResult, IntoActiveModel,
@@ -6,7 +7,6 @@ use sea_orm::{
 };
 use serde::{Deserialize, Serialize};
 use zstd::{decode_all, encode_all};
-
 // 引入两个实体
 use crate::service_database::database_shutter::entity::model_shutter_data_entity::{
     ActiveModel as DataActiveModel, Column as DataColumn, Entity as DataEntity,
@@ -270,6 +270,7 @@ pub async fn update_model_shutter_entity_by_id_only(
                 // 1. 更新主表 (model_shutter_entity) 的状态码
                 let main_res = MainEntity::update_many()
                     .col_expr(MainColumn::BaseStateCode, Expr::value(base_state_code))
+                    .col_expr(MainColumn::UpdateAt, Expr::value(Utc::now().to_rfc3339()))
                     .filter(MainColumn::Id.eq(id_clone.clone()))
                     .exec(txn)
                     .await?;
