@@ -590,6 +590,7 @@ module.exports.modelComponentHenryDetail = nativeBinding.modelComponentHenryDeta
 module.exports.modelComponentOil = nativeBinding.modelComponentOil
 module.exports.modelConfig = nativeBinding.modelConfig
 module.exports.modelFluidPackage = nativeBinding.modelFluidPackage
+module.exports.modelFluidPackageBinary = nativeBinding.modelFluidPackageBinary
 module.exports.modelHandle = nativeBinding.modelHandle
 module.exports.modelPfModelParams = nativeBinding.modelPfModelParams
 module.exports.modelPfVarParams = nativeBinding.modelPfVarParams

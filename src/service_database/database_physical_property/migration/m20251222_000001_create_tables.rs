@@ -1,5 +1,7 @@
 use sea_orm_migration::prelude::*;
 
+use crate::service_database::until_handle::drop_tables;
+
 #[derive(DeriveMigrationName)]
 pub struct Migration;
 
@@ -1441,78 +1443,27 @@ impl MigrationTrait for Migration {
 
     async fn down(&self, manager: &SchemaManager) -> Result<(), DbErr> {
         // 删除顺序通常与创建顺序相反
+        // 1. 定义表数组，显式标注类型为 &[&(dyn Iden + Sync)]
+        let all_tables: &[&(dyn Iden + Sync)] = &[
+            &PpBinaryNrtlRkEntity::Table,
+            &PpBinaryNrtlEntity::Table,
+            &PpBinaryPrEntity::Table,
+            &PpBinaryPsrkEntity::Table,
+            &PpBinaryRkEntity::Table,
+            &PpBinarySrkEntity::Table,
+            &PpBinaryUniquacEntity::Table,
+            &PpBinaryWilsionEntity::Table,
+            &PpCalcBasePropertyEntity::Table,
+            &PpCalcFunctionPropertyEntity::Table,
+            &PpCalcRelationPropertyEntity::Table,
+            &PpHenryDetailPropertyEntity::Table,
+            &PpComponentInformationEntity::Table,
+            &PpComponentBaseEntity::Table,
+            &PpComponentTemperatureEquationEntity::Table,
+        ];
 
-        manager
-            .drop_table(Table::drop().table(PpBinaryNrtlRkEntity::Table).to_owned())
-            .await?;
-        manager
-            .drop_table(Table::drop().table(PpBinaryNrtlEntity::Table).to_owned())
-            .await?;
-        manager
-            .drop_table(Table::drop().table(PpBinaryPrEntity::Table).to_owned())
-            .await?;
-        manager
-            .drop_table(Table::drop().table(PpBinaryPsrkEntity::Table).to_owned())
-            .await?;
-        manager
-            .drop_table(Table::drop().table(PpBinaryRkEntity::Table).to_owned())
-            .await?;
-        manager
-            .drop_table(Table::drop().table(PpBinarySrkEntity::Table).to_owned())
-            .await?;
-        manager
-            .drop_table(Table::drop().table(PpBinaryUniquacEntity::Table).to_owned())
-            .await?;
-        manager
-            .drop_table(Table::drop().table(PpBinaryWilsionEntity::Table).to_owned())
-            .await?;
-        manager
-            .drop_table(
-                Table::drop()
-                    .table(PpCalcBasePropertyEntity::Table)
-                    .to_owned(),
-            )
-            .await?;
-        manager
-            .drop_table(
-                Table::drop()
-                    .table(PpCalcFunctionPropertyEntity::Table)
-                    .to_owned(),
-            )
-            .await?;
-
-        manager
-            .drop_table(
-                Table::drop()
-                    .table(PpCalcRelationPropertyEntity::Table)
-                    .to_owned(),
-            )
-            .await?;
-        manager
-            .drop_table(
-                Table::drop()
-                    .table(PpHenryDetailPropertyEntity::Table)
-                    .to_owned(),
-            )
-            .await?;
-        manager
-            .drop_table(
-                Table::drop()
-                    .table(PpComponentInformationEntity::Table)
-                    .to_owned(),
-            )
-            .await?;
-        manager
-            .drop_table(Table::drop().table(PpComponentBaseEntity::Table).to_owned())
-            .await?;
-
-        manager
-            .drop_table(
-                Table::drop()
-                    .table(PpComponentTemperatureEquationEntity::Table)
-                    .to_owned(),
-            )
-            .await?;
+        // 2. 调用辅助函数
+        drop_tables(manager, all_tables).await?;
         Ok(())
     }
 }

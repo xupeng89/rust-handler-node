@@ -2,8 +2,9 @@
 
 use sea_orm::entity::prelude::*;
 
-#[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq)]
-#[sea_orm(table_name = "model_fluid_package_binary_nrtl_entity")]
+use serde::{Deserialize, Serialize};
+#[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Deserialize, Serialize)]
+#[sea_orm(table_name = "model_fluid_package_binary_uniquac_entity")]
 pub struct Model {
     #[sea_orm(primary_key, auto_increment = false)]
     pub id: String,
@@ -22,8 +23,12 @@ pub struct Model {
     pub bji: String,
     #[sea_orm(column_name = "CIJ")]
     pub cij: String,
+    #[sea_orm(column_name = "CJI")]
+    pub cji: String,
     #[sea_orm(column_name = "DIJ")]
     pub dij: String,
+    #[sea_orm(column_name = "DJI")]
+    pub dji: String,
     #[sea_orm(column_name = "EIJ")]
     pub eij: String,
     #[sea_orm(column_name = "EJI")]

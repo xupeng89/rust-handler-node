@@ -74,6 +74,7 @@ export const modelComponentHenryDetail = __napiModule.exports.modelComponentHenr
 export const modelComponentOil = __napiModule.exports.modelComponentOil
 export const modelConfig = __napiModule.exports.modelConfig
 export const modelFluidPackage = __napiModule.exports.modelFluidPackage
+export const modelFluidPackageBinary = __napiModule.exports.modelFluidPackageBinary
 export const modelHandle = __napiModule.exports.modelHandle
 export const modelPfModelParams = __napiModule.exports.modelPfModelParams
 export const modelPfVarParams = __napiModule.exports.modelPfVarParams

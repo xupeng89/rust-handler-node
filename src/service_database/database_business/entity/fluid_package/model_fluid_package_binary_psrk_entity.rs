@@ -2,8 +2,9 @@
 
 use sea_orm::entity::prelude::*;
 
-#[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq)]
-#[sea_orm(table_name = "model_fluid_package_binary_rk_entity")]
+use serde::{Deserialize, Serialize};
+#[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Deserialize, Serialize)]
+#[sea_orm(table_name = "model_fluid_package_binary_psrk_entity")]
 pub struct Model {
     #[sea_orm(primary_key, auto_increment = false)]
     pub id: String,
@@ -12,14 +13,14 @@ pub struct Model {
     pub compound_i_name: String,
     pub compound_j: String,
     pub compound_j_name: String,
-    #[sea_orm(column_name = "KAIJ")]
-    pub kaij: String,
-    #[sea_orm(column_name = "KBIJ")]
-    pub kbij: String,
-    #[sea_orm(column_name = "KCIJ")]
-    pub kcij: String,
-    pub min_t: String,
-    pub max_t: String,
+    #[sea_orm(column_name = "TIJ")]
+    pub tij: String,
+    #[sea_orm(column_name = "TJI")]
+    pub tji: String,
+    #[sea_orm(column_name = "VIJ")]
+    pub vij: String,
+    #[sea_orm(column_name = "VJI")]
+    pub vji: String,
     pub is_default: i32,
     pub is_default_id: String,
 }

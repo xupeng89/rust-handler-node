@@ -1,5 +1,8 @@
+use crate::service_database::{
+    database_business::entity::fluid_package::model_fluid_package_binary_handle::*,
+    until_handle::drop_tables,
+};
 use sea_orm_migration::prelude::*;
-
 #[derive(DeriveMigrationName)]
 pub struct Migration;
 
@@ -682,72 +685,275 @@ impl MigrationTrait for Migration {
                     .to_owned(),
             )
             .await?;
+
+        // --- 1. NRTL & NRTL_RK (结构完全一致) ---
+        let nrtl_tables = [BinaryTables::Nrtl, BinaryTables::NrtlRk];
+        for table in nrtl_tables {
+            manager
+                .create_table(
+                    Table::create()
+                        .table(table)
+                        .if_not_exists()
+                        .col(
+                            ColumnDef::new(BinaryCols::Id)
+                                .string()
+                                .not_null()
+                                .primary_key(),
+                        )
+                        .col(
+                            ColumnDef::new(BinaryCols::FluidPackageId)
+                                .string()
+                                .not_null(),
+                        )
+                        .col(ColumnDef::new(BinaryCols::CompoundI).string().not_null())
+                        .col(
+                            ColumnDef::new(BinaryCols::CompoundIName)
+                                .string()
+                                .not_null(),
+                        )
+                        .col(ColumnDef::new(BinaryCols::CompoundJ).string().not_null())
+                        .col(
+                            ColumnDef::new(BinaryCols::CompoundJName)
+                                .string()
+                                .not_null(),
+                        )
+                        .col(ColumnDef::new(BinaryCols::Aij).string().not_null())
+                        .col(ColumnDef::new(BinaryCols::Aji).string().not_null())
+                        .col(ColumnDef::new(BinaryCols::Bij).string().not_null())
+                        .col(ColumnDef::new(BinaryCols::Bji).string().not_null())
+                        .col(ColumnDef::new(BinaryCols::Cij).string().not_null())
+                        .col(ColumnDef::new(BinaryCols::Dij).string().not_null())
+                        .col(ColumnDef::new(BinaryCols::Eij).string().not_null())
+                        .col(ColumnDef::new(BinaryCols::Eji).string().not_null())
+                        .col(ColumnDef::new(BinaryCols::Fij).string().not_null())
+                        .col(ColumnDef::new(BinaryCols::Fji).string().not_null())
+                        .col(ColumnDef::new(BinaryCols::MinT).string().not_null())
+                        .col(ColumnDef::new(BinaryCols::MaxT).string().not_null())
+                        .col(ColumnDef::new(BinaryCols::IsDefault).integer().not_null())
+                        .col(ColumnDef::new(BinaryCols::IsDefaultId).string().not_null())
+                        .to_owned(),
+                )
+                .await?;
+        }
+
+        // --- 2. PR, RK, SRK (结构完全一致，含 KAIJ, KBIJ, KCIJ) ---
+        let eos_tables = [BinaryTables::Pr, BinaryTables::Rk, BinaryTables::Srk];
+        for table in eos_tables {
+            manager
+                .create_table(
+                    Table::create()
+                        .table(table)
+                        .if_not_exists()
+                        .col(
+                            ColumnDef::new(BinaryCols::Id)
+                                .string()
+                                .not_null()
+                                .primary_key(),
+                        )
+                        .col(
+                            ColumnDef::new(BinaryCols::FluidPackageId)
+                                .string()
+                                .not_null(),
+                        )
+                        .col(ColumnDef::new(BinaryCols::CompoundI).string().not_null())
+                        .col(
+                            ColumnDef::new(BinaryCols::CompoundIName)
+                                .string()
+                                .not_null(),
+                        )
+                        .col(ColumnDef::new(BinaryCols::CompoundJ).string().not_null())
+                        .col(
+                            ColumnDef::new(BinaryCols::CompoundJName)
+                                .string()
+                                .not_null(),
+                        )
+                        .col(ColumnDef::new(BinaryCols::Kaij).string().not_null())
+                        .col(ColumnDef::new(BinaryCols::Kbij).string().not_null())
+                        .col(ColumnDef::new(BinaryCols::Kcij).string().not_null())
+                        .col(ColumnDef::new(BinaryCols::MinT).string().not_null())
+                        .col(ColumnDef::new(BinaryCols::MaxT).string().not_null())
+                        .col(ColumnDef::new(BinaryCols::IsDefault).integer().not_null())
+                        .col(ColumnDef::new(BinaryCols::IsDefaultId).string().not_null())
+                        .to_owned(),
+                )
+                .await?;
+        }
+
+        // --- 3. PSRK (含 TIJ, TJI, VIJ, VJI) ---
+        manager
+            .create_table(
+                Table::create()
+                    .table(BinaryTables::Psrk)
+                    .if_not_exists()
+                    .col(
+                        ColumnDef::new(BinaryCols::Id)
+                            .string()
+                            .not_null()
+                            .primary_key(),
+                    )
+                    .col(
+                        ColumnDef::new(BinaryCols::FluidPackageId)
+                            .string()
+                            .not_null(),
+                    )
+                    .col(ColumnDef::new(BinaryCols::CompoundI).string().not_null())
+                    .col(
+                        ColumnDef::new(BinaryCols::CompoundIName)
+                            .string()
+                            .not_null(),
+                    )
+                    .col(ColumnDef::new(BinaryCols::CompoundJ).string().not_null())
+                    .col(
+                        ColumnDef::new(BinaryCols::CompoundJName)
+                            .string()
+                            .not_null(),
+                    )
+                    .col(ColumnDef::new(BinaryCols::Tij).string().not_null())
+                    .col(ColumnDef::new(BinaryCols::Tji).string().not_null())
+                    .col(ColumnDef::new(BinaryCols::Vij).string().not_null())
+                    .col(ColumnDef::new(BinaryCols::Vji).string().not_null())
+                    .col(ColumnDef::new(BinaryCols::IsDefault).integer().not_null())
+                    .col(ColumnDef::new(BinaryCols::IsDefaultId).string().not_null())
+                    .to_owned(),
+            )
+            .await?;
+
+        // --- 4. UNIQUAC (参数最多，含 CJI, DJI 等) ---
+        manager
+            .create_table(
+                Table::create()
+                    .table(BinaryTables::Uniquac)
+                    .if_not_exists()
+                    .col(
+                        ColumnDef::new(BinaryCols::Id)
+                            .string()
+                            .not_null()
+                            .primary_key(),
+                    )
+                    .col(
+                        ColumnDef::new(BinaryCols::FluidPackageId)
+                            .string()
+                            .not_null(),
+                    )
+                    .col(ColumnDef::new(BinaryCols::CompoundI).string().not_null())
+                    .col(
+                        ColumnDef::new(BinaryCols::CompoundIName)
+                            .string()
+                            .not_null(),
+                    )
+                    .col(ColumnDef::new(BinaryCols::CompoundJ).string().not_null())
+                    .col(
+                        ColumnDef::new(BinaryCols::CompoundJName)
+                            .string()
+                            .not_null(),
+                    )
+                    .col(ColumnDef::new(BinaryCols::Aij).string().not_null())
+                    .col(ColumnDef::new(BinaryCols::Aji).string().not_null())
+                    .col(ColumnDef::new(BinaryCols::Bij).string().not_null())
+                    .col(ColumnDef::new(BinaryCols::Bji).string().not_null())
+                    .col(ColumnDef::new(BinaryCols::Cij).string().not_null())
+                    .col(ColumnDef::new(BinaryCols::Cji).string().not_null())
+                    .col(ColumnDef::new(BinaryCols::Dij).string().not_null())
+                    .col(ColumnDef::new(BinaryCols::Dji).string().not_null())
+                    .col(ColumnDef::new(BinaryCols::Eij).string().not_null())
+                    .col(ColumnDef::new(BinaryCols::Eji).string().not_null())
+                    .col(ColumnDef::new(BinaryCols::Fij).string().not_null())
+                    .col(ColumnDef::new(BinaryCols::Fji).string().not_null())
+                    .col(ColumnDef::new(BinaryCols::MinT).string().not_null())
+                    .col(ColumnDef::new(BinaryCols::MaxT).string().not_null())
+                    .col(ColumnDef::new(BinaryCols::IsDefault).integer().not_null())
+                    .col(ColumnDef::new(BinaryCols::IsDefaultId).string().not_null())
+                    .to_owned(),
+            )
+            .await?;
+
+        // --- 5. Wilson (结构与 UNIQUAC 类似但略少字段) ---
+        manager
+            .create_table(
+                Table::create()
+                    .table(BinaryTables::Wilson)
+                    .if_not_exists()
+                    .col(
+                        ColumnDef::new(BinaryCols::Id)
+                            .string()
+                            .not_null()
+                            .primary_key(),
+                    )
+                    .col(
+                        ColumnDef::new(BinaryCols::FluidPackageId)
+                            .string()
+                            .not_null(),
+                    )
+                    .col(ColumnDef::new(BinaryCols::CompoundI).string().not_null())
+                    .col(
+                        ColumnDef::new(BinaryCols::CompoundIName)
+                            .string()
+                            .not_null(),
+                    )
+                    .col(ColumnDef::new(BinaryCols::CompoundJ).string().not_null())
+                    .col(
+                        ColumnDef::new(BinaryCols::CompoundJName)
+                            .string()
+                            .not_null(),
+                    )
+                    .col(ColumnDef::new(BinaryCols::Aij).string().not_null())
+                    .col(ColumnDef::new(BinaryCols::Aji).string().not_null())
+                    .col(ColumnDef::new(BinaryCols::Bij).string().not_null())
+                    .col(ColumnDef::new(BinaryCols::Bji).string().not_null())
+                    .col(ColumnDef::new(BinaryCols::Cij).string().not_null())
+                    .col(ColumnDef::new(BinaryCols::Cji).string().not_null())
+                    .col(ColumnDef::new(BinaryCols::Dij).string().not_null())
+                    .col(ColumnDef::new(BinaryCols::Dji).string().not_null())
+                    .col(ColumnDef::new(BinaryCols::Eij).string().not_null())
+                    .col(ColumnDef::new(BinaryCols::Eji).string().not_null())
+                    .col(ColumnDef::new(BinaryCols::MinT).string().not_null())
+                    .col(ColumnDef::new(BinaryCols::MaxT).string().not_null())
+                    .col(ColumnDef::new(BinaryCols::IsDefault).integer().not_null())
+                    .col(ColumnDef::new(BinaryCols::IsDefaultId).string().not_null())
+                    .to_owned(),
+            )
+            .await?;
         Ok(())
     }
 
     async fn down(&self, manager: &SchemaManager) -> Result<(), DbErr> {
-        manager
-            .drop_table(Table::drop().table(ModelModel::Table).to_owned())
-            .await?;
-        manager
-            .drop_table(Table::drop().table(ModelConfig::Table).to_owned())
-            .await?;
-        manager
-            .drop_table(Table::drop().table(ModelSystemVariable::Table).to_owned())
-            .await?;
-        manager
-            .drop_table(Table::drop().table(ModelUnitItem::Table).to_owned())
-            .await?;
-        manager
-            .drop_table(Table::drop().table(ModelUnitSet::Table).to_owned())
-            .await?;
-        manager
-            .drop_table(Table::drop().table(ModelNameGenerator::Table).to_owned())
-            .await?;
-        manager
-            .drop_table(Table::drop().table(ModelCompoundChannel::Table).to_owned())
-            .await?;
+        // 显式标注类型，确保不同实体的 Table 都能放入同一个数组
+        let all_tables: &[&(dyn Iden + Sync)] = &[
+            &ModelModel::Table,
+            &ModelConfig::Table,
+            &ModelSystemVariable::Table,
+            &ModelUnitItem::Table,
+            &ModelUnitSet::Table,
+            &ModelNameGenerator::Table,
+            &ModelCompoundChannel::Table,
+            &ModelCompoundAllDetail::Table,
+            &ModelCompoundHenry::Table,
+            &ModelCompoundHenryDetail::Table,
+            &ModelCompoundOil::Table,
+            &ModelPfModelParams::Table,
+            &ModelPfVarParams::Table,
+            &ModelPhysicalPropertyCalc::Table,
+            &ModelFluidPackage::Table,
+        ];
 
-        manager
-            .drop_table(
-                Table::drop()
-                    .table(ModelCompoundAllDetail::Table)
-                    .to_owned(),
-            )
-            .await?;
+        // 调用统一删除逻辑
+        drop_tables(manager, all_tables).await?;
 
-        manager
-            .drop_table(Table::drop().table(ModelCompoundHenry::Table).to_owned())
-            .await?;
-
-        manager
-            .drop_table(
-                Table::drop()
-                    .table(ModelCompoundHenryDetail::Table)
-                    .to_owned(),
-            )
-            .await?;
-        manager
-            .drop_table(Table::drop().table(ModelCompoundOil::Table).to_owned())
-            .await?;
-
-        manager
-            .drop_table(Table::drop().table(ModelPfModelParams::Table).to_owned())
-            .await?;
-
-        manager
-            .drop_table(Table::drop().table(ModelPfVarParams::Table).to_owned())
-            .await?;
-        manager
-            .drop_table(
-                Table::drop()
-                    .table(ModelPhysicalPropertyCalc::Table)
-                    .to_owned(),
-            )
-            .await?;
-        manager
-            .drop_table(Table::drop().table(ModelFluidPackage::Table).to_owned())
-            .await?;
+        let all_tables = [
+            BinaryTables::Nrtl,
+            BinaryTables::NrtlRk,
+            BinaryTables::Pr,
+            BinaryTables::Psrk,
+            BinaryTables::Rk,
+            BinaryTables::Srk,
+            BinaryTables::Uniquac,
+            BinaryTables::Wilson,
+        ];
+        for table in all_tables {
+            manager
+                .drop_table(Table::drop().table(table).to_owned())
+                .await?;
+        }
         Ok(())
     }
 }

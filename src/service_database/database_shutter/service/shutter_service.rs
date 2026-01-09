@@ -1,4 +1,5 @@
 use crate::service_database::database_shutter::db_shutter_connection::get_shutter_db;
+use crate::tool_handle::time_tool::integer_to_string;
 use chrono::Utc;
 use napi_derive::napi;
 use sea_orm::{
@@ -19,8 +20,7 @@ use crate::service_database::database_shutter::entity::model_shutter_entity::{
 // 工具函数：压缩
 // ======================================
 fn compress_data(data: &str) -> Vec<u8> {
-    let result = encode_all(data.as_bytes(), 3).unwrap_or_default();
-    result
+    encode_all(data.as_bytes(), 3).unwrap_or_default()
 }
 
 fn decompress_data(data: &[u8]) -> String {
@@ -57,24 +57,6 @@ pub struct ShutterListItem {
     pub index_num: i32,
     pub base_state_code: String,
 }
-
-// #[derive(Clone, Debug, Serialize, Deserialize)]
-// #[napi(object, namespace = "shutterHandle")]
-// pub struct FullShutterData {
-//     pub id: String,
-//     pub name: String,
-//     pub index_num: i32,
-//     pub model_id: String,
-//     pub objects: String,
-//     pub sysvars: String,
-//     pub update_at: String,
-//     pub base_state_code: String,
-//     pub user_name: Option<String>,
-//     pub state_index: Option<i32>,
-//     pub state_desc: Option<String>,
-//     pub type_num: Option<i32>,
-// }
-
 // ======================================
 // 数据库操作改造
 // ======================================
@@ -318,7 +300,10 @@ pub async fn update_model_shutter_entity_by_id_only(
                 // 更新主表
                 let main_res = MainEntity::update_many()
                     .col_expr(MainColumn::BaseStateCode, Expr::value(base_state_code))
-                    .col_expr(MainColumn::UpdateAt, Expr::value(Utc::now().to_rfc3339()))
+                    .col_expr(
+                        MainColumn::UpdateAt,
+                        Expr::value(integer_to_string(Utc::now().timestamp_millis())),
+                    )
                     .filter(MainColumn::Id.eq(primary_id_clone.clone()))
                     .exec(txn)
                     .await?;
@@ -345,4 +330,19 @@ pub async fn update_model_shutter_entity_by_id_only(
         })?;
 
     Ok(rows_affected)
+}
+
+pub async fn update_model_shutter_entity_name_by_id_and_model_id_only(
+    id: String,
+    name: String,
+    model_id: String,
+) -> Result<bool, DbErr> {
+    let db = get_shutter_db().await?;
+    MainEntity::update_many()
+        .col_expr(MainColumn::Name, Expr::value(name))
+        .filter(MainColumn::Id.eq(id))
+        .filter(MainColumn::ModelId.eq(model_id))
+        .exec(db)
+        .await?;
+    Ok(true)
 }

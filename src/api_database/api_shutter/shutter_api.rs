@@ -73,3 +73,15 @@ pub async fn update_shutter_entity_by_id_only(
         .map(|rows| rows as u32)
         .map_err(handle_db_err)
 }
+
+#[napi(namespace = "shutterHandle")]
+pub async fn update_shutter_entity_name_by_id_and_model_id_only(
+    id: String,
+    name: String,
+    model_id: String,
+) -> Result<u32> {
+    update_model_shutter_entity_name_by_id_and_model_id_only(id, name, model_id)
+        .await
+        .map(|rows| rows as u32)
+        .map_err(handle_db_err)
+}

@@ -1,155 +1,242 @@
+use crate::error_handle::err_handle::*;
 use napi::Result;
 use napi_derive::napi;
-
-use crate::error_handle::err_handle::*;
+use paste::paste;
 
 use crate::service_database::database_business::service::fluid_package::{
      model_fluid_package_service::*,
 };
+use crate::{generate_napi_methods,generate_napi_u32_methods};
+// #[napi(namespace = "modelFluidPackage")]
+// pub async fn get_calc_functions_by_package_id_api(
+//     package_id: String,
+// ) -> Result<Vec<ModelPhysicalPropertyCalcDTO>> {
+//     get_calc_functions_by_package_id(package_id)
+//         .await
+//         .map_err(handle_db_err)
+// }
 
-#[napi(namespace = "modelFluidPackage")]
-pub async fn get_calc_functions_by_package_id_api(
-    package_id: String,
-) -> Result<Vec<ModelPhysicalPropertyCalcDTO>> {
-    get_calc_functions_by_package_id(package_id)
-        .await
-        .map_err(handle_db_err)
+// #[napi(namespace = "modelFluidPackage")]
+// pub async fn get_calc_functions_by_package_ids_api(
+//     package_ids: Vec<String>,
+// ) -> Result<Vec<ModelPhysicalPropertyCalcDTO>> {
+//     get_calc_functions_by_package_ids(package_ids)
+//         .await
+//         .map_err(handle_db_err)
+// }
+
+// #[napi(namespace = "modelFluidPackage")]
+// pub async fn update_calc_functions_selected_api(
+//     package_id: String,
+//     list: Vec<PpMethodFunctionDTO>,
+// ) -> Result<bool> {
+//     update_calc_functions_selected(package_id, list)
+//         .await
+//         .map_err(handle_db_err)
+// }
+
+// #[napi(namespace = "modelFluidPackage")]
+// pub async fn delete_calc_functions_by_fluid_package_id_api(package_id: String) -> Result<bool> {
+//     delete_calc_functions_by_package_id(package_id)
+//         .await
+//         .map_err(handle_db_err)
+// }
+
+// #[napi(namespace = "modelFluidPackage")]
+// pub async fn delete_calc_functions_by_fluid_package_ids_api(
+//     package_ids: Vec<String>,
+// ) -> Result<bool> {
+//     delete_calc_functions_by_package_ids(package_ids)
+//         .await
+//         .map_err(handle_db_err)
+// }
+
+// #[napi(namespace = "modelFluidPackage")]
+// pub async fn insert_calc_functions_api(
+//     calc_func_list: Vec<ModelPhysicalPropertyCalcDTO>,
+// ) -> Result<bool> {
+//     insert_fluid_package_calc_function(calc_func_list)
+//         .await
+//         .map_err(handle_db_err)
+// }
+
+// #[napi(namespace = "modelFluidPackage")]
+// pub async fn update_fluid_package_api(data: ModelFluidPackageUpdateDTO) -> Result<String> {
+//     update_fluid_package(data).await.map_err(handle_db_err)
+// }
+
+// #[napi(namespace = "modelFluidPackage")]
+// pub async fn get_fluid_package_by_channel_ids_api(
+//     channel_ids: Vec<String>,
+// ) -> Result<Vec<ModelFluidPackageDTO>> {
+//     get_fluid_package_by_channel_ids(channel_ids)
+//         .await
+//         .map_err(handle_db_err)
+// }
+
+// #[napi(namespace = "modelFluidPackage")]
+// pub async fn get_fluid_package_by_id_api(
+//     package_id: String,
+// ) -> Result<Option<ModelFluidPackageDTO>> {
+//     get_fluid_package_by_id(package_id)
+//         .await
+//         .map_err(handle_db_err)
+// }
+
+// #[napi(namespace = "modelFluidPackage")]
+// pub async fn get_fluid_package_by_ids_and_default_flag_count_api(
+//     package_ids: Vec<String>,
+//     is_default: u32,
+// ) -> Result<u32> {
+//     get_fluid_package_by_ids_and_default_flag_count(package_ids, is_default)
+//         .await
+//         .map_err(handle_db_err)
+// }
+
+// #[napi(namespace = "modelFluidPackage")]
+// pub async fn get_fluid_package_by_ids_api(
+//     package_ids: Vec<String>,
+// ) -> Result<Vec<ModelFluidPackageDTO>> {
+//     get_fluid_package_by_ids(package_ids)
+//         .await
+//         .map_err(handle_db_err)
+// }
+
+// #[napi(namespace = "modelFluidPackage")]
+// pub async fn get_fluid_package_model_id_default_api(
+//     model_id: String,
+//     only_default: u32,
+// ) -> Result<Option<ModelFluidPackageDTO>> {
+//     get_fluid_package_by_model_id_and_default_flag(model_id, only_default)
+//         .await
+//         .map_err(handle_db_err)
+// }
+
+// #[napi(namespace = "modelFluidPackage")]
+// pub async fn get_fluid_package_model_id_api(model_id: String) -> Result<Vec<ModelFluidPackageDTO>> {
+//     get_fluid_package_by_model_id_flag(model_id)
+//         .await
+//         .map_err(handle_db_err)
+// }
+
+// #[napi(namespace = "modelFluidPackage")]
+// pub async fn get_fluid_package_model_id_count_api(model_id: String) -> Result<u32> {
+//     get_fluid_package_by_model_id_count_flag(model_id)
+//         .await
+//         .map_err(handle_db_err)
+// }
+
+// #[napi(namespace = "modelFluidPackage")]
+// pub async fn insert_fluid_package_api(
+//     fluid_package_list: Vec<ModelFluidPackageDTO>,
+// ) -> Result<bool> {
+//     insert_fluid_package(fluid_package_list)
+//         .await
+//         .map_err(handle_db_err)
+// }
+
+// #[napi(namespace = "modelFluidPackage")]
+// pub async fn set_fluid_package_default_api(model_id: String, target_id: String) -> Result<()> {
+//     set_fluid_package_default(model_id, target_id)
+//         .await
+//         .map_err(handle_db_err)
+// }
+
+// #[napi(namespace = "modelFluidPackage")]
+// pub async fn get_fluid_package_model_id_default_count_api(
+//     model_id: String,
+//     only_default: u32,
+// ) -> Result<u32> {
+//     let count = get_fluid_package_model_id_default_count(model_id, only_default)
+//         .await
+//         .map_err(handle_db_err)?;
+//     Ok(count as u32)
+// }
+
+// #[napi(namespace = "modelFluidPackage")]
+// pub async fn get_fluid_package_model_id_and_name_api(
+//     name: String,
+//     model_id: String,
+// ) -> Result<Option<ModelFluidPackageDTO>> {
+//     get_fluid_package_model_id_and_name(name, model_id)
+//         .await
+//         .map_err(handle_db_err)
+// }
+
+// #[napi(namespace = "modelFluidPackage")]
+// pub async fn get_fluid_package_model_id_and_like_name_api(
+//     name: String,
+//     model_id: String,
+// ) -> Result<Vec<ModelFluidPackageDTO>> {
+//     get_fluid_package_model_id_and_like_name(name, model_id)
+//         .await
+//         .map_err(handle_db_err)
+// }
+
+// #[napi(namespace = "modelFluidPackage")]
+// pub async fn delete_fluid_package_by_ids_api(package_ids: Vec<String>) -> Result<bool> {
+//     delete_fluid_package_by_ids(package_ids)
+//         .await
+//         .map_err(handle_db_err)
+// }
+
+paste! {
+    generate_napi_methods! {
+        "modelFluidPackage",
+
+        // 格式：函数名(参数: 类型) -> 返回值类型 => Service层对应函数名
+
+        // 计算函数相关
+
+        get_calc_functions_by_package_id_api(package_id: String) -> Vec<ModelPhysicalPropertyCalcDTO> => get_calc_functions_by_package_id,
+        get_calc_functions_by_package_ids_api(package_ids: Vec<String>) -> Vec<ModelPhysicalPropertyCalcDTO> => get_calc_functions_by_package_ids,
+        update_calc_functions_selected_api(package_id: String, list: Vec<PpMethodFunctionDTO>) -> bool => update_calc_functions_selected,
+        delete_calc_functions_by_fluid_package_id_api(package_id: String) -> bool => delete_calc_functions_by_package_id,
+        delete_calc_functions_by_fluid_package_ids_api(package_ids: Vec<String>) -> bool => delete_calc_functions_by_package_ids,
+        insert_calc_functions_api(calc_func_list: Vec<ModelPhysicalPropertyCalcDTO>) -> bool => insert_fluid_package_calc_function,
+
+        // 物性包基本操作
+        update_fluid_package_api(data: ModelFluidPackageUpdateDTO) -> String => update_fluid_package,
+        get_fluid_package_by_channel_ids_api(channel_ids: Vec<String>) -> Vec<ModelFluidPackageDTO> => get_fluid_package_by_channel_ids,
+        get_fluid_package_by_id_api(package_id: String) -> Option<ModelFluidPackageDTO> => get_fluid_package_by_id,
+        get_fluid_package_by_ids_api(package_ids: Vec<String>) -> Vec<ModelFluidPackageDTO> => get_fluid_package_by_ids,
+
+        // 统计与过滤
+        get_fluid_package_by_ids_and_default_flag_count_api(package_ids: Vec<String>, is_default: u32) -> u32 => get_fluid_package_by_ids_and_default_flag_count,
+        get_fluid_package_model_id_default_api(model_id: String, only_default: u32) -> Option<ModelFluidPackageDTO> => get_fluid_package_by_model_id_and_default_flag,
+        get_fluid_package_model_id_api(model_id: String) -> Vec<ModelFluidPackageDTO> => get_fluid_package_by_model_id_flag,
+        get_fluid_package_model_id_count_api(model_id: String) -> u32 => get_fluid_package_by_model_id_count_flag,
+
+        // 插入与默认值设置
+        insert_fluid_package_api(fluid_package_list: Vec<ModelFluidPackageDTO>) -> bool => insert_fluid_package,
+        set_fluid_package_default_api(model_id: String, target_id: String) -> () => set_fluid_package_default,
+
+        // 名称搜索相关
+        get_fluid_package_model_id_and_name_api(name: String, model_id: String) -> Option<ModelFluidPackageDTO> => get_fluid_package_model_id_and_name,
+        get_fluid_package_model_id_and_like_name_api(name: String, model_id: String) -> Vec<ModelFluidPackageDTO> => get_fluid_package_model_id_and_like_name,
+        delete_fluid_package_by_ids_api(package_ids: Vec<String>) -> bool => delete_fluid_package_by_ids,
+        // get_fluid_package_model_id_default_count_api(
+        //     model_id: String,
+        //     only_default: u32) -> Result<u32> =>get_fluid_package_model_id_default_count
+    }
 }
 
-#[napi(namespace = "modelFluidPackage")]
-pub async fn get_calc_functions_by_package_ids_api(
-    package_ids: Vec<String>,
-) -> Result<Vec<ModelPhysicalPropertyCalcDTO>> {
-    get_calc_functions_by_package_ids(package_ids)
-        .await
-        .map_err(handle_db_err)
+paste! {
+    generate_napi_u32_methods! {
+        "modelFluidPackage",
+        get_fluid_package_model_id_default_count_api(
+            model_id: String,
+            only_default: u32) -> Result<u32> =>get_fluid_package_model_id_default_count
+    }
 }
 
-#[napi(namespace = "modelFluidPackage")]
-pub async fn update_calc_functions_selected_api(
-    package_id: String,
-    list: Vec<PpMethodFunctionDTO>,
-) -> Result<bool> {
-    update_calc_functions_selected(package_id, list)
-        .await
-        .map_err(handle_db_err)
-}
-
-#[napi(namespace = "modelFluidPackage")]
-pub async fn delete_calc_functions_by_fluid_package_id_api(package_id: String) -> Result<bool> {
-    delete_calc_functions_by_package_id(package_id)
-        .await
-        .map_err(handle_db_err)
-}
-
-#[napi(namespace = "modelFluidPackage")]
-pub async fn insert_calc_functions_api(
-    calc_func_list: Vec<ModelPhysicalPropertyCalcDTO>,
-) -> Result<bool> {
-    insert_fluid_package_calc_function(calc_func_list)
-        .await
-        .map_err(handle_db_err)
-}
-
-#[napi(namespace = "modelFluidPackage")]
-pub async fn update_fluid_package_api(data: ModelFluidPackageUpdateDTO) -> Result<String> {
-    update_fluid_package(data).await.map_err(handle_db_err)
-}
-
-#[napi(namespace = "modelFluidPackage")]
-pub async fn get_fluid_package_by_channel_ids_api(
-    channel_ids: Vec<String>,
-) -> Result<Vec<ModelFluidPackageDTO>> {
-    get_fluid_package_by_channel_ids(channel_ids)
-        .await
-        .map_err(handle_db_err)
-}
-
-#[napi(namespace = "modelFluidPackage")]
-pub async fn get_fluid_package_by_id_api(
-    package_id: String,
-) -> Result<Option<ModelFluidPackageDTO>> {
-    get_fluid_package_by_id(package_id)
-        .await
-        .map_err(handle_db_err)
-}
-
-#[napi(namespace = "modelFluidPackage")]
-pub async fn get_fluid_package_by_ids_and_default_flag_count_api(
-    package_ids: Vec<String>,
-    is_default: u32,
-) -> Result<u32> {
-    get_fluid_package_by_ids_and_default_flag_count(package_ids, is_default)
-        .await
-        .map_err(handle_db_err)
-}
-
-#[napi(namespace = "modelFluidPackage")]
-pub async fn get_fluid_package_by_ids_api(
-    package_ids: Vec<String>,
-) -> Result<Vec<ModelFluidPackageDTO>> {
-    get_fluid_package_by_ids(package_ids)
-        .await
-        .map_err(handle_db_err)
-}
-
-#[napi(namespace = "modelFluidPackage")]
-pub async fn get_fluid_package_model_id_default_api(
-    model_id: String,
-    only_default: u32,
-) -> Result<Option<ModelFluidPackageDTO>> {
-    get_fluid_package_by_model_id_and_default_flag(model_id, only_default)
-        .await
-        .map_err(handle_db_err)
-}
-
-#[napi(namespace = "modelFluidPackage")]
-pub async fn get_fluid_package_model_id_api(model_id: String) -> Result<Vec<ModelFluidPackageDTO>> {
-    get_fluid_package_by_model_id_flag(model_id)
-        .await
-        .map_err(handle_db_err)
-}
-
-#[napi(namespace = "modelFluidPackage")]
-pub async fn get_fluid_package_model_id_count_api(model_id: String) -> Result<u32> {
-    get_fluid_package_by_model_id_count_flag(model_id)
-        .await
-        .map_err(handle_db_err)
-}
-
-#[napi(namespace = "modelFluidPackage")]
-pub async fn insert_fluid_package_api(
-    fluid_package_list: Vec<ModelFluidPackageDTO>,
-) -> Result<bool> {
-    insert_fluid_package(fluid_package_list)
-        .await
-        .map_err(handle_db_err)
-}
-
-#[napi(namespace = "modelFluidPackage")]
-pub async fn set_fluid_package_default_api(model_id: String, target_id: String) -> Result<()> {
-    set_fluid_package_default(model_id, target_id)
-        .await
-        .map_err(handle_db_err)
-}
-
-#[napi(namespace = "modelFluidPackage")]
-pub async fn get_fluid_package_model_id_default_count_api(
-    model_id: String,
-    only_default: u32,
-) -> Result<u32> {
-    let count = get_fluid_package_model_id_default_count(model_id, only_default)
-        .await
-        .map_err(handle_db_err)?;
-    Ok(count as u32)
-}
-
-#[napi(namespace = "modelFluidPackage")]
-pub async fn get_fluid_package_model_id_and_name_api(
-    name: String,
-    model_id: String,
-) -> Result<bool> {
-    get_fluid_package_model_id_and_name(name, model_id)
-        .await
-        .map_err(handle_db_err)
-}
+// // 针对有特殊转换逻辑的函数（如原本的 count as u32），建议保留手动编写或在宏里增加转换逻辑
+// #[napi(namespace = "modelFluidPackage")]
+// pub async fn get_fluid_package_model_id_default_count_api(
+//     model_id: String,
+//     only_default: u32,
+// ) -> Result<u32> {
+//     get_fluid_package_model_id_default_count(model_id, only_default)
+//         .await
+//         .map_err(handle_db_err)
+// }

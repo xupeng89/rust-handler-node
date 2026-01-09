@@ -126,6 +126,7 @@ module.exports.modelComponentHenryDetail = __napiModule.exports.modelComponentHe
 module.exports.modelComponentOil = __napiModule.exports.modelComponentOil
 module.exports.modelConfig = __napiModule.exports.modelConfig
 module.exports.modelFluidPackage = __napiModule.exports.modelFluidPackage
+module.exports.modelFluidPackageBinary = __napiModule.exports.modelFluidPackageBinary
 module.exports.modelHandle = __napiModule.exports.modelHandle
 module.exports.modelPfModelParams = __napiModule.exports.modelPfModelParams
 module.exports.modelPfVarParams = __napiModule.exports.modelPfVarParams

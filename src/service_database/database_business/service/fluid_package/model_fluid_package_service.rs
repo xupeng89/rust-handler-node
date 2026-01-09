@@ -200,6 +200,14 @@ pub async fn delete_calc_functions_by_package_id(package_id: String) -> Result<b
     Ok(true)
 }
 
+pub async fn delete_calc_functions_by_package_ids(package_ids: Vec<String>) -> Result<bool, DbErr> {
+    let db = get_business_db().await?;
+    CalcEntity::delete_many()
+        .filter(CalcColumn::FluidPackageId.is_in(package_ids))
+        .exec(db)
+        .await?;
+    Ok(true)
+}
 /// 插入并处理重名 (基础 DB 操作)
 pub async fn insert_fluid_package_calc_function(
     calc_func_list: Vec<ModelPhysicalPropertyCalcDTO>,
@@ -249,19 +257,15 @@ pub async fn get_fluid_package_by_ids(
     Ok(result.into_iter().map(ModelFluidPackageDTO::from).collect())
 }
 
-// pub async fn get_fluid_package_by_ids_and_default_flag(
-//     package_ids: Vec<String>,
-//     is_default: u32,
-// ) -> Result<Vec<ModelFluidPackageDTO>, DbErr> {
-//     let db = get_business_db().await?;
+pub async fn delete_fluid_package_by_ids(package_ids: Vec<String>) -> Result<bool, DbErr> {
+    let db = get_business_db().await?;
 
-//     let result = PackageEntity::find()
-//         .filter(PackageColumn::Id.is_in(package_ids))
-//         .filter(PackageColumn::IsDefault.eq(is_default))
-//         .all(db)
-//         .await?;
-//     Ok(result.into_iter().map(ModelFluidPackageDTO::from).collect())
-// }
+    PackageEntity::delete_many()
+        .filter(PackageColumn::Id.is_in(package_ids))
+        .exec(db)
+        .await?;
+    Ok(true)
+}
 
 pub async fn get_fluid_package_by_ids_and_default_flag_count(
     package_ids: Vec<String>,
@@ -368,24 +372,38 @@ pub async fn insert_fluid_package(datas: Vec<ModelFluidPackageDTO>) -> Result<bo
 pub async fn get_fluid_package_model_id_default_count(
     model_id: String,
     only_default: u32,
-) -> Result<u64, DbErr> {
+) -> Result<u32, DbErr> {
     let db = get_business_db().await?;
-    PackageEntity::find()
+    let result = PackageEntity::find()
         .filter(PackageColumn::IsDefault.eq(only_default))
         .filter(PackageColumn::ModelId.eq(model_id))
         .count(db)
-        .await
+        .await?;
+    Ok(result as u32)
 }
 
 pub async fn get_fluid_package_model_id_and_name(
     name: String,
     model_id: String,
-) -> Result<bool, DbErr> {
+) -> Result<Option<ModelFluidPackageDTO>, DbErr> {
     let db = get_business_db().await?;
     let result = PackageEntity::find()
         .filter(PackageColumn::Name.eq(name))
         .filter(PackageColumn::ModelId.eq(model_id))
-        .count(db)
+        .one(db)
         .await?;
-    Ok(result > 0)
+    Ok(result.map(ModelFluidPackageDTO::from))
+}
+
+pub async fn get_fluid_package_model_id_and_like_name(
+    name: String,
+    model_id: String,
+) -> Result<Vec<ModelFluidPackageDTO>, DbErr> {
+    let db = get_business_db().await?;
+    let result = PackageEntity::find()
+        .filter(PackageColumn::Name.like(name))
+        .filter(PackageColumn::ModelId.eq(model_id))
+        .all(db)
+        .await?;
+    Ok(result.into_iter().map(ModelFluidPackageDTO::from).collect())
 }

@@ -1,2 +1,11 @@
+pub mod model_fluid_package_binary_handle;
+pub mod model_fluid_package_binary_nrtl_entity;
+pub mod model_fluid_package_binary_nrtl_rk_entity;
+pub mod model_fluid_package_binary_pr_entity;
+pub mod model_fluid_package_binary_psrk_entity;
+pub mod model_fluid_package_binary_rk_entity;
+pub mod model_fluid_package_binary_srk_entity;
+pub mod model_fluid_package_binary_uniquac_entity;
+pub mod model_fluid_package_binary_wilsion_entity;
 pub mod model_fluid_package_entity;
 pub mod model_physical_property_calc_entity;

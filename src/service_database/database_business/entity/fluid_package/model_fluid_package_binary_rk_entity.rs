@@ -2,8 +2,9 @@
 
 use sea_orm::entity::prelude::*;
 
-#[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq)]
-#[sea_orm(table_name = "model_fluid_package_binary_srk_entity")]
+use serde::{Deserialize, Serialize};
+#[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Deserialize, Serialize)]
+#[sea_orm(table_name = "model_fluid_package_binary_rk_entity")]
 pub struct Model {
     #[sea_orm(primary_key, auto_increment = false)]
     pub id: String,

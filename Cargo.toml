@@ -26,6 +26,7 @@ anyhow = "1.0.100"
 paste = "1.0.15"
 regex = "1.12.2"
 zstd = "0.13.3"
+futures = "0.3.31"
 
 [build-dependencies]
 napi-build = "2"

@@ -548,13 +548,16 @@ export declare namespace modelConfig {
 
 export declare namespace modelFluidPackage {
   export function deleteCalcFunctionsByFluidPackageIdApi(packageId: string): Promise<boolean>
+  export function deleteCalcFunctionsByFluidPackageIdsApi(packageIds: Array<string>): Promise<boolean>
+  export function deleteFluidPackageByIdsApi(packageIds: Array<string>): Promise<boolean>
   export function getCalcFunctionsByPackageIdApi(packageId: string): Promise<Array<ModelPhysicalPropertyCalcDTO>>
   export function getCalcFunctionsByPackageIdsApi(packageIds: Array<string>): Promise<Array<ModelPhysicalPropertyCalcDTO>>
   export function getFluidPackageByChannelIdsApi(channelIds: Array<string>): Promise<Array<ModelFluidPackageDTO>>
   export function getFluidPackageByIdApi(packageId: string): Promise<ModelFluidPackageDTO | null>
   export function getFluidPackageByIdsAndDefaultFlagCountApi(packageIds: Array<string>, isDefault: number): Promise<number>
   export function getFluidPackageByIdsApi(packageIds: Array<string>): Promise<Array<ModelFluidPackageDTO>>
-  export function getFluidPackageModelIdAndNameApi(name: string, modelId: string): Promise<boolean>
+  export function getFluidPackageModelIdAndLikeNameApi(name: string, modelId: string): Promise<Array<ModelFluidPackageDTO>>
+  export function getFluidPackageModelIdAndNameApi(name: string, modelId: string): Promise<ModelFluidPackageDTO | null>
   export function getFluidPackageModelIdApi(modelId: string): Promise<Array<ModelFluidPackageDTO>>
   export function getFluidPackageModelIdCountApi(modelId: string): Promise<number>
   export function getFluidPackageModelIdDefaultApi(modelId: string, onlyDefault: number): Promise<ModelFluidPackageDTO | null>
@@ -597,6 +600,43 @@ export declare namespace modelFluidPackage {
   export function setFluidPackageDefaultApi(modelId: string, targetId: string): Promise<void>
   export function updateCalcFunctionsSelectedApi(packageId: string, list: Array<PpMethodFunctionDTO>): Promise<boolean>
   export function updateFluidPackageApi(data: ModelFluidPackageUpdateDTO): Promise<string>
+}
+
+export declare namespace modelFluidPackageBinary {
+  /** 通用二元交互参数DTO */
+  export interface BinaryParameterDto {
+    id: string
+    fluidPackageId: string
+    compoundI: string
+    compoundJ: string
+    aij?: string
+    aji?: string
+    bij?: string
+    bji?: string
+    cij?: string
+    cji?: string
+    dij?: string
+    dji?: string
+    eij?: string
+    eji?: string
+    fij?: string
+    fji?: string
+    kaij?: string
+    kbij?: string
+    kcij?: string
+    tij?: string
+    tji?: string
+    vij?: string
+    vji?: string
+    minT?: string
+    maxT?: string
+    isDefault?: number
+    isDefaultId?: string
+  }
+  export function deleteBinaryParameters(funcCode: string, packageId: string): Promise<boolean>
+  export function getBinaryParametersByIds(funcCode: string, ids: Array<string>): Promise<string>
+  export function getBinaryParametersByPackage(funcCode: string, packageId: string): Promise<string>
+  export function updateBinaryInteractionParameters(funcCode: string, dataJson: string): Promise<void>
 }
 
 export declare namespace modelHandle {
@@ -1009,6 +1049,7 @@ export declare namespace shutterHandle {
     baseStateCode: string
   }
   export function getAllShutterEntityList(modelId: string): Promise<Array<ShutterListItem>>
+  export function getModelShutterEntityByIndexNumModelIdOnlyApi(indexNum: number, modelId: string): Promise<FullShutterModel | null>
   export function getShutterEntityById(id: string, modelId: string): Promise<FullShutterModel | null>
   /** 创建/更新快照信息 (insertModelShutterEntity) */
   export function insertShutterEntity(data: FullShutterModel, modelId: string): Promise<number>
@@ -1020,7 +1061,7 @@ export declare namespace shutterHandle {
     indexNum: number
     baseStateCode: string
   }
-  export function updateShutterEntityByIdOnly(id: string, objects: string, sysvars: string, status: string): Promise<number>
+  export function updateShutterEntityByIdOnly(indexNum: number, objects: string, sysvars: string, status: string, modelId: string): Promise<number>
 }
 
 export declare namespace undoRedoHandle {

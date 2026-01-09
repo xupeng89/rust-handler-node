@@ -9,7 +9,6 @@ use sea_orm::{
     PaginatorTrait, QueryFilter, QueryOrder, QuerySelect, Set, TransactionError, TransactionTrait,
 };
 use serde::{Deserialize, Serialize};
-use zstd::{decode_all, encode_all};
 
 // 引入拆分后的两个实体
 use crate::service_database::database_auto_shutter::entity::model_auto_shutter_data_entity::{
@@ -22,7 +21,7 @@ use crate::service_database::database_auto_shutter::entity::model_auto_shutter_e
 // ======================================
 // 内部工具：压缩与解压
 // ======================================
-
+use zstd::{decode_all, encode_all};
 fn compress_data(data: &str) -> Vec<u8> {
     // 压缩级别 3 是性能和压缩率的最佳平衡点
     encode_all(data.as_bytes(), 3).unwrap_or_default()
@@ -184,7 +183,7 @@ pub async fn update_model_auto_shutter_entity_cache(
 /// 获取快照列表 (仅查主表，不加载大数据字段，速度极快)
 pub async fn get_all_model_auto_shutter_entity_list_cache(
     order_flag: String,
-    auto_count: u64,
+    auto_count: u32,
     model_id: String,
 ) -> Result<Vec<AutoShutterListItem>, DbErr> {
     let db = get_auto_shutter_db().await?;
@@ -202,7 +201,7 @@ pub async fn get_all_model_auto_shutter_entity_list_cache(
         .column(MainColumn::BaseStateCode)
         .filter(MainColumn::ModelId.eq(model_id))
         .order_by(MainColumn::UpdateAt, order)
-        .limit(auto_count)
+        .limit(auto_count as u64)
         .into_model::<AutoShutterSelectModel>()
         .all(db)
         .await?;

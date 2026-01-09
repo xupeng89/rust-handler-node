@@ -1,5 +1,7 @@
 use sea_orm_migration::prelude::*;
 
+use crate::service_database::until_handle::drop_tables;
+
 #[derive(DeriveMigrationName)]
 pub struct Migration;
 
@@ -690,67 +692,22 @@ impl MigrationTrait for Migration {
     }
 
     async fn down(&self, manager: &SchemaManager) -> Result<(), DbErr> {
-        manager
-            .drop_table(Table::drop().table(ConfConfigEntity::Table).to_owned())
-            .await?;
-        manager
-            .drop_table(Table::drop().table(ConfFunctionPicEntity::Table).to_owned())
-            .await?;
+        let all_tables: &[&(dyn Iden + Sync)] = &[
+            &ConfConfigEntity::Table,
+            &ConfFunctionPicEntity::Table,
+            &ConfGraphicCustomEntity::Table,
+            &ConfModelEntity::Table,
+            &ConfPfModelParamsEntity::Table,
+            &ConfSystemVariableEntity::Table,
+            &ConfUnitSetEntity::Table,
+            &ConfUnitItemEntity::Table,
+            &ConfUnitItemCategoryEntity::Table,
+            &ConfUnitSecondCategoryEntity::Table,
+            &ConfUnitFirstCategoryEntity::Table,
+        ];
 
-        manager
-            .drop_table(
-                Table::drop()
-                    .table(ConfGraphicCustomEntity::Table)
-                    .to_owned(),
-            )
-            .await?;
-
-        manager
-            .drop_table(Table::drop().table(ConfModelEntity::Table).to_owned())
-            .await?;
-        manager
-            .drop_table(
-                Table::drop()
-                    .table(ConfPfModelParamsEntity::Table)
-                    .to_owned(),
-            )
-            .await?;
-        manager
-            .drop_table(
-                Table::drop()
-                    .table(ConfSystemVariableEntity::Table)
-                    .to_owned(),
-            )
-            .await?;
-        manager
-            .drop_table(Table::drop().table(ConfUnitSetEntity::Table).to_owned())
-            .await?;
-        manager
-            .drop_table(Table::drop().table(ConfUnitItemEntity::Table).to_owned())
-            .await?;
-
-        manager
-            .drop_table(
-                Table::drop()
-                    .table(ConfUnitItemCategoryEntity::Table)
-                    .to_owned(),
-            )
-            .await?;
-        manager
-            .drop_table(
-                Table::drop()
-                    .table(ConfUnitSecondCategoryEntity::Table)
-                    .to_owned(),
-            )
-            .await?;
-        manager
-            .drop_table(
-                Table::drop()
-                    .table(ConfUnitFirstCategoryEntity::Table)
-                    .to_owned(),
-            )
-            .await?;
-
+        // 调用我们修改后的函数
+        drop_tables(manager, all_tables).await?;
         Ok(())
     }
 }
