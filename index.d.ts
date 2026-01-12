@@ -80,15 +80,10 @@ export declare namespace autoShutter {
     simTime: string
     baseStateCode: string
   }
-  /** 获取目前快照数量 */
   export function getAllModelAutoShutterCacheEntityCount(modelId: string): Promise<number>
-  /** 获取单个快照详情 (Service: get_model_auto_shutter_entity_by_id_cache) */
   export function getAutoShutterCacheDetailApi(id: number, modelId: string): Promise<FullCacheData>
-  /** 获取快照列表 (Service: get_all_model_auto_shutter_entity_list_cache) */
   export function getAutoShutterCacheListApi(orderFlag: string, autoCount: number, modelId: string): Promise<Array<AutoShutterListItem>>
-  /** 插入新的快照记录 (Service: insert_model_auto_shutter_entity_cache) */
   export function insertAutoShutterCacheApi(data: AutoShutterData, modelId: string): Promise<number>
-  /** 更新自动快照 (Service: update_model_auto_shutter_entity_cache) */
   export function updateAutoShutterCacheApi(data: AutoShutterData, modelId: string): Promise<number>
 }
 
@@ -603,6 +598,10 @@ export declare namespace modelFluidPackage {
 }
 
 export declare namespace modelFluidPackageBinary {
+  export interface BinaryAllMessageResultDTO {
+    funcCode: string
+    datas: any
+  }
   /** 通用二元交互参数DTO */
   export interface BinaryParameterDto {
     id: string
@@ -633,10 +632,20 @@ export declare namespace modelFluidPackageBinary {
     isDefault?: number
     isDefaultId?: string
   }
+  export function deleteBinaryInteractionByCas(fluidPackageId: string, casNos: Array<string>): Promise<void>
   export function deleteBinaryParameters(funcCode: string, packageId: string): Promise<boolean>
+  export function deleteBinaryParametersByIdsHasDefault(ids: Array<string>, funcCode: string): Promise<boolean>
+  export function deleteBinaryParametersByIdsNoDefault(ids: Array<string>, funcCode: string): Promise<boolean>
+  export function deleteBinaryParametersByPackageId(packageId: string): Promise<void>
+  export function deleteBinaryParametersByPackageIds(packageIds: Array<string>): Promise<void>
+  export function getAllBinaryMessageByPackageIdIsDefault(packageId: string, isDefault: number): Promise<Array<BinaryAllMessageResultDTO>>
+  export function getAllBinaryMessageByPackageIds(packageIds: Array<string>): Promise<Array<BinaryAllMessageResultDTO>>
+  export function getAllBinaryMessageByPackageIdsDefault(packageIds: Array<string>, isDefault: number): Promise<Array<BinaryAllMessageResultDTO>>
+  export function getAllBinaryParameterByPackageIdsDefaultApi(funcCode: string, fluidPackageIds: Array<string>, isDefault: number): Promise<string>
+  export function getBinaryParametersByFluidPackageIdDefault(funcCode: string, packageId: string, isDefault: number): Promise<string>
   export function getBinaryParametersByIds(funcCode: string, ids: Array<string>): Promise<string>
   export function getBinaryParametersByPackage(funcCode: string, packageId: string): Promise<string>
-  export function updateBinaryInteractionParameters(funcCode: string, dataJson: string): Promise<void>
+  export function updateBinaryInteractionParameters(funcCode: string, dataJson: string): Promise<boolean>
 }
 
 export declare namespace modelHandle {
@@ -1029,10 +1038,6 @@ export declare namespace pointInfor {
 }
 
 export declare namespace shutterHandle {
-  /**
-   * 删除快照信息 (deleteModelShutterEntity)
-   * 签名: (id: string, modelId: string) => Promise<number> (返回 rows_affected)
-   */
   export function deleteShutterEntity(id: string, modelId: string): Promise<number>
   export interface FullShutterModel {
     id: string
@@ -1051,7 +1056,6 @@ export declare namespace shutterHandle {
   export function getAllShutterEntityList(modelId: string): Promise<Array<ShutterListItem>>
   export function getModelShutterEntityByIndexNumModelIdOnlyApi(indexNum: number, modelId: string): Promise<FullShutterModel | null>
   export function getShutterEntityById(id: string, modelId: string): Promise<FullShutterModel | null>
-  /** 创建/更新快照信息 (insertModelShutterEntity) */
   export function insertShutterEntity(data: FullShutterModel, modelId: string): Promise<number>
   export function insertShutterEntityOnly(data: FullShutterModel): Promise<void>
   export interface ShutterListItem {
@@ -1062,6 +1066,7 @@ export declare namespace shutterHandle {
     baseStateCode: string
   }
   export function updateShutterEntityByIdOnly(indexNum: number, objects: string, sysvars: string, status: string, modelId: string): Promise<number>
+  export function updateShutterEntityNameByIdAndModelIdOnly(id: string, name: string, modelId: string): Promise<boolean>
 }
 
 export declare namespace undoRedoHandle {

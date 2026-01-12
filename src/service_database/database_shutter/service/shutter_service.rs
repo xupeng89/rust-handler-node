@@ -253,7 +253,7 @@ pub async fn insert_model_shutter_entity_only(data: FullShutterModel) -> Result<
 }
 
 /// 删除快照 (需同时删除两表数据)
-pub async fn delete_model_shutter_entity(id: String, model_id: String) -> Result<u64, DbErr> {
+pub async fn delete_model_shutter_entity(id: String, model_id: String) -> Result<u32, DbErr> {
     let db = get_shutter_db().await?;
 
     // 注意：如果在数据库设置了级联删除（ON DELETE CASCADE），只需删除主表。
@@ -267,7 +267,7 @@ pub async fn delete_model_shutter_entity(id: String, model_id: String) -> Result
     // 手动删除数据表内容
     DataEntity::delete_by_id(id).exec(db).await?;
 
-    Ok(result.rows_affected)
+    Ok(result.rows_affected as u32)
 }
 
 /// 根据 ID 更新部分信息 (适配分表+压缩架构)
@@ -277,7 +277,7 @@ pub async fn update_model_shutter_entity_by_id_only(
     sysvars: String,
     base_state_code: String,
     model_id: String,
-) -> Result<u64, DbErr> {
+) -> Result<u32, DbErr> {
     let db = get_shutter_db().await?;
 
     // 1. 先查出该 model_id 和 index_num 对应的唯一主键 ID
@@ -329,7 +329,7 @@ pub async fn update_model_shutter_entity_by_id_only(
             TransactionError::Transaction(e) => e,
         })?;
 
-    Ok(rows_affected)
+    Ok(rows_affected as u32)
 }
 
 pub async fn update_model_shutter_entity_name_by_id_and_model_id_only(

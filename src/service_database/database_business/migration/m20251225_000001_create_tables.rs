@@ -913,6 +913,52 @@ impl MigrationTrait for Migration {
                     .to_owned(),
             )
             .await?;
+
+        manager
+            .create_table(
+                Table::create()
+                    .table(ModelReactionPackage::Table)
+                    .if_not_exists()
+                    // 对应实体中的 id: String (primary_key)
+                    .col(
+                        ColumnDef::new(ModelReactionPackage::Id)
+                            .string()
+                            .not_null()
+                            .primary_key(),
+                    )
+                    // 对应 reaction_name
+                    .col(
+                        ColumnDef::new(ModelReactionPackage::ReactionName)
+                            .string()
+                            .not_null(),
+                    )
+                    // 对应 model_id
+                    .col(
+                        ColumnDef::new(ModelReactionPackage::ModelId)
+                            .string()
+                            .not_null(),
+                    )
+                    // 对应 compound_channel_id
+                    .col(
+                        ColumnDef::new(ModelReactionPackage::CompoundChannelId)
+                            .string()
+                            .not_null(),
+                    )
+                    // 对应 fluid_package_ids
+                    .col(
+                        ColumnDef::new(ModelReactionPackage::FluidPackageIds)
+                            .string()
+                            .not_null(),
+                    )
+                    // 对应 reaction_package_type
+                    .col(
+                        ColumnDef::new(ModelReactionPackage::ReactionPackageType)
+                            .string()
+                            .not_null(),
+                    )
+                    .to_owned(),
+            )
+            .await?;
         Ok(())
     }
 
@@ -934,6 +980,7 @@ impl MigrationTrait for Migration {
             &ModelPfVarParams::Table,
             &ModelPhysicalPropertyCalc::Table,
             &ModelFluidPackage::Table,
+            &ModelReactionPackage::Table,
         ];
 
         // 调用统一删除逻辑
@@ -1165,4 +1212,15 @@ pub enum ModelPhysicalPropertyCalc {
     Key,
     Phase,
     Mixture,
+}
+
+#[derive(Iden)]
+enum ModelReactionPackage {
+    Table,
+    Id,
+    ReactionName,
+    ModelId,
+    CompoundChannelId,
+    FluidPackageIds,
+    ReactionPackageType,
 }

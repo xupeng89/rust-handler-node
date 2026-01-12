@@ -1,6 +1,8 @@
 use crate::service_database::database_business::db_business_connection::get_business_db;
 use napi_derive::napi;
-use sea_orm::{ActiveModelTrait, ActiveValue::Unchanged, QueryFilter, Set, entity::prelude::*};
+use sea_orm::{
+    ActiveModelTrait, ActiveValue::Unchanged, ExprTrait, QueryFilter, Set, entity::prelude::*,
+};
 use serde::{Deserialize, Serialize};
 /// 通用二元交互参数DTO
 #[napi(
@@ -47,6 +49,7 @@ pub struct BinaryParameterDto {
 macro_rules! fill_binary_fields {
     // 类别 1: 完整版活动系数 (如 NRTL-RK, 部分 NRTL)
     (activity_f, $am:expr, $dto:expr) => {
+        // fill_all_activity!($am, $dto);
         fill_common_activity!($am, $dto); // 填充 A, B, C
         if let Some(v) = &$dto.dij {
             $am.dij = Set(v.clone());
@@ -67,6 +70,7 @@ macro_rules! fill_binary_fields {
 
     // 类别 2: Wilson/UNIQUAC 专用 (有 A-E 和 T，无 F)
     (activity_e, $am:expr, $dto:expr) => {
+        // fill_all_activity!($am, $dto);
         fill_common_activity!($am, $dto); // 填充 A, B, C
         if let Some(v) = &$dto.cji {
             $am.cji = Set(v.clone());
@@ -83,17 +87,11 @@ macro_rules! fill_binary_fields {
         if let Some(v) = &$dto.eji {
             $am.eji = Set(v.clone());
         }
-        // 增加 Wilson 特有的 T 范围
-        if let Some(v) = &$dto.min_t {
-            $am.min_t = Set(v.clone());
-        }
-        if let Some(v) = &$dto.max_t {
-            $am.max_t = Set(v.clone());
-        }
     };
 
     // 类别 3: 状态方程类 (PR, RK, SRK)
     (eos, $am:expr, $dto:expr) => {
+        // fill_all_activity!($am, $dto);
         if let Some(v) = &$dto.kaij {
             $am.kaij = Set(v.clone());
         }
@@ -103,16 +101,17 @@ macro_rules! fill_binary_fields {
         if let Some(v) = &$dto.kcij {
             $am.kcij = Set(v.clone());
         }
-        if let Some(v) = &$dto.min_t {
-            $am.min_t = Set(v.clone());
-        }
-        if let Some(v) = &$dto.max_t {
-            $am.max_t = Set(v.clone());
-        }
+        // if let Some(v) = &$dto.min_t {
+        //     $am.min_t = Set(v.clone());
+        // }
+        // if let Some(v) = &$dto.max_t {
+        //     $am.max_t = Set(v.clone());
+        // }
     };
 
     // 类别 4: PSRK 专用
     (psrk, $am:expr, $dto:expr) => {
+        // fill_all_activity!($am, $dto);
         if let Some(v) = &$dto.tij {
             $am.tij = Set(v.clone());
         }
@@ -146,8 +145,17 @@ macro_rules! fill_common_activity {
         if let Some(v) = &$dto.cij {
             $am.cij = Set(v.clone());
         }
+
+        // 增加 Wilson 特有的 T 范围
+        if let Some(v) = &$dto.min_t {
+            $am.min_t = Set(v.clone());
+        }
+        if let Some(v) = &$dto.max_t {
+            $am.max_t = Set(v.clone());
+        }
     };
 }
+
 macro_rules! impl_binary_service {
     ($service_name:ident, $entity:ident, $type:ident) => {
         pub struct $service_name;
@@ -169,9 +177,7 @@ macro_rules! impl_binary_service {
                     fluid_package_id: Set(item.fluid_package_id.clone()),
                     compound_i: Set(item.compound_i.clone()),
                     compound_j: Set(item.compound_j.clone()),
-                    // 这里必须列出实体中所有必须的字段，或者使用通配符（如果 codegen 生成了 Default）
-                    // 事实上，sea-orm 1.x 版本的 ActiveModel 通常实现了 Default
-                    // 如果报没有 Default，说明你的版本或配置不同，我们可以用下面的“全字段 Set”法
+
                     ..Default::default()
                 };
 
@@ -217,12 +223,65 @@ macro_rules! impl_binary_service {
                     .await
             }
 
+            /// 根据 FluidPackageId 和default 查询所有参数
+            pub async fn find_by_package_id_and_default(
+                package_id: String,
+                is_default: u32,
+            ) -> Result<Vec<$entity::Model>, DbErr> {
+                let db = get_business_db().await?;
+                $entity::Entity::find()
+                    .filter($entity::Column::FluidPackageId.eq(package_id))
+                    .filter($entity::Column::IsDefault.eq(is_default))
+                    .all(db)
+                    .await
+            }
+
+            /// 根据 FluidPackageId 和default 查询所有参数
+            pub async fn get_all_binary_parameter_by_package_ids_default(
+                package_ids: Vec<String>,
+                is_default: u32,
+            ) -> Result<Vec<$entity::Model>, DbErr> {
+                let db = get_business_db().await?;
+                $entity::Entity::find()
+                    .filter($entity::Column::FluidPackageId.is_in(package_ids))
+                    .filter($entity::Column::IsDefault.eq(is_default))
+                    .all(db)
+                    .await
+            }
+            /// 根据 FluidPackageId 和default 查询所有参数
+            pub async fn get_all_binary_parameter_by_package_ids(
+                package_ids: Vec<String>,
+            ) -> Result<Vec<$entity::Model>, DbErr> {
+                let db = get_business_db().await?;
+                $entity::Entity::find()
+                    .filter($entity::Column::FluidPackageId.is_in(package_ids))
+                    .all(db)
+                    .await
+            }
+
             pub async fn find_by_ids(ids: Vec<String>) -> Result<Vec<$entity::Model>, DbErr> {
                 let db = get_business_db().await?;
                 $entity::Entity::find()
                     .filter($entity::Column::Id.is_in(ids))
                     .all(db)
                     .await
+            }
+
+            pub async fn delete_by_package_id_and_cas_nos(
+                package_id: String,
+                cas_nos: Vec<String>,
+            ) -> Result<bool, DbErr> {
+                let db = get_business_db().await?;
+                $entity::Entity::delete_many()
+                    .filter($entity::Column::FluidPackageId.eq(package_id))
+                    .filter(
+                        $entity::Column::CompoundI
+                            .is_in(cas_nos.clone())
+                            .or($entity::Column::CompoundJ.is_in(cas_nos)),
+                    )
+                    .exec(db)
+                    .await?;
+                Ok(true)
             }
 
             /// 根据 FluidPackageId 删除所有相关参数
@@ -233,6 +292,59 @@ macro_rules! impl_binary_service {
                     .exec(db)
                     .await?;
                 Ok(true)
+            }
+            pub async fn delete_by_package_ids(package_ids: Vec<String>) -> Result<bool, DbErr> {
+                let db = get_business_db().await?;
+                $entity::Entity::delete_many()
+                    .filter($entity::Column::FluidPackageId.is_in(package_ids))
+                    .exec(db)
+                    .await?;
+                Ok(true)
+            }
+
+            pub async fn delete_by_ids_and_func_code_no_default(
+                ids: Vec<String>,
+            ) -> Result<bool, DbErr> {
+                let db = get_business_db().await?;
+                $entity::Entity::delete_many()
+                    .filter($entity::Column::Id.is_in(ids))
+                    .exec(db)
+                    .await?;
+                Ok(true)
+            }
+            pub async fn delete_by_ids_and_func_code_has_default(
+                ids: Vec<String>,
+            ) -> Result<bool, DbErr> {
+                let db = get_business_db().await?;
+                let entity_list = $entity::Entity::find()
+                    .filter($entity::Column::Id.is_in(&ids))
+                    .all(db)
+                    .await?;
+                // 3. 过滤出非空的 is_default_id（避免删除空 ID）
+                let mut all_ids = ids; // 直接重用传入的 ids 向量
+
+                for entity in entity_list {
+                    all_ids.push(entity.is_default_id);
+                }
+                all_ids.sort();
+                // 去重（避免重复删除同一 ID，提升性能）
+                all_ids.dedup();
+
+                // 5. 边界处理：无需要删除的 ID 时直接返回 false
+                if all_ids.is_empty() {
+                    return Ok(false);
+                }
+
+                // 6. 批量删除合并后的所有 ID
+                let delete_result = $entity::Entity::delete_many()
+                    .filter($entity::Column::Id.is_in(all_ids))
+                    .exec(db) // 使用引用
+                    .await?;
+
+                // 7. 验证删除结果（可选：确认是否有记录被删除）
+                let is_success = delete_result.rows_affected > 0;
+
+                Ok(is_success)
             }
         }
     };

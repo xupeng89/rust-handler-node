@@ -9,3 +9,5 @@ pub mod model_fluid_package_binary_uniquac_entity;
 pub mod model_fluid_package_binary_wilsion_entity;
 pub mod model_fluid_package_entity;
 pub mod model_physical_property_calc_entity;
+// pub mod model_reaction_detail;
+// pub mod model_reaction_package;
