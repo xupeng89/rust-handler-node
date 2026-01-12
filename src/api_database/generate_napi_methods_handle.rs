@@ -11,11 +11,9 @@ macro_rules! generate_napi_methods {
         $(
             #[napi(namespace = $namespace)]
             pub async fn $fn_name( $( $arg : $arg_ty ),* ) -> Result<$ret> {
-                Ok(
-                    $service_fn( $( $arg ),* )
-                        .await
-                        .map_err(handle_db_err)?
-                )
+                $service_fn( $( $arg ),* )
+                    .await
+                    .map_err(handle_db_err)
             }
         )*
     };
@@ -34,11 +32,9 @@ macro_rules! generate_napi_u32_methods {
         $(
             #[napi(namespace = $namespace)]
             pub async fn $fn_name( $( $arg : $arg_ty ),* ) -> Result<u32> {
-                Ok(
-                    $service_fn( $( $arg ),* )
-                        .await
-                        .map_err(handle_db_err)?
-                )
+                $service_fn( $( $arg ),* )
+                    .await
+                    .map_err(handle_db_err)
             }
         )*
     };
@@ -57,11 +53,9 @@ macro_rules! generate_napi_i32_methods {
         $(
             #[napi(namespace = $namespace)]
             pub async fn $fn_name( $( $arg : $arg_ty ),* ) -> Result<i32> {
-                Ok(
-                    $service_fn( $( $arg ),* )
-                        .await
-                        .map_err(handle_db_err)?
-                )
+                $service_fn( $( $arg ),* )
+                    .await
+                    .map_err(handle_db_err)
             }
         )*
     };
