@@ -1,5 +1,6 @@
 pub mod model_config_entity;
 pub mod model_entity;
+pub mod model_file_comparison_entity;
 pub mod model_name_generator_entity;
 pub mod model_pf_model_params;
 pub mod model_pf_var_default_params_entity;

@@ -541,6 +541,17 @@ export declare namespace modelConfig {
   export function updateModelConfigByModelIdApi(modelId: string, data: ModelConfigUpdateDTO): Promise<string>
 }
 
+export declare namespace modelFile {
+  export function deleteFileComparisonByNameApi(fileName: string): Promise<void>
+  export function getModelFileCodeByNameApi(fileName: string): Promise<string>
+  export function insertOrUpdateFileComparisonApi(code: string, fileName: string): Promise<void>
+  export interface ModelFileComparisonDTO {
+    id?: number
+    code: string
+    fileName: string
+  }
+}
+
 export declare namespace modelFluidPackage {
   export function deleteCalcFunctionsByFluidPackageIdApi(packageId: string): Promise<boolean>
   export function deleteCalcFunctionsByFluidPackageIdsApi(packageIds: Array<string>): Promise<boolean>
@@ -736,6 +747,57 @@ export declare namespace modelPfVarParams {
     max?: string
   }
   export function updateModelPfVarParamsByNameApi(data: ModelPfVarParamsUpdateDTO): Promise<number>
+}
+
+export declare namespace modelReaction {
+  export function deleteModelReactionsByIdsApi(ids: Array<string>): Promise<boolean>
+  export function getModelReactionByIdApi(id: string): Promise<ModelReactionPackageDTO | null>
+  export function getModelReactionByNameLikeApi(name: string, modelId: string): Promise<Array<ModelReactionPackageDTO>>
+  export function getModelReactionsByChannelIdApi(channelId: string): Promise<Array<ModelReactionPackageDTO>>
+  export function getModelReactionsByIdsAndModelIdApi(ids: Array<string>, modelId: string): Promise<Array<ModelReactionPackageDTO>>
+  export function getModelReactionsByModelIdApi(modelId: string): Promise<Array<ModelReactionPackageDTO>>
+  export function insertModelReactionListApi(datas: Array<ModelReactionPackageDTO>): Promise<boolean>
+  export interface ModelReactionPackageDTO {
+    id: string
+    reactionName: string
+    modelId: string
+    compoundChannelId: string
+    fluidPackageIds: string
+    reactionPackageType: string
+  }
+  export interface ModelReactionPackageUpdateDTO {
+    id: string
+    reactionName?: string
+    modelId?: string
+    compoundChannelId?: string
+    fluidPackageIds?: string
+    reactionPackageType?: string
+  }
+  export function updateModelReactionApi(data: ModelReactionPackageUpdateDTO): Promise<boolean>
+}
+
+export declare namespace modelReactionDetail {
+  export function checkModelReactionPackageCountApi(packageName: string, modelId: string): Promise<number>
+  export function deleteModelReactionDetailsByIdsApi(ids: Array<string>): Promise<boolean>
+  export function getModelReactionDetailByIdApi(id: string): Promise<ModelReactionDetailDTO | null>
+  export function getModelReactionDetailsByReactionIdApi(reactionId: string): Promise<Array<ModelReactionDetailDTO>>
+  export function getModelReactionDetailsListByReactionIdsApi(ids: Array<string>): Promise<Array<ModelReactionDetailDTO>>
+  export function insertModelReactionDetailApi(datas: Array<ModelReactionDetailDTO>): Promise<boolean>
+  export interface ModelReactionDetailDTO {
+    id: string
+    reactionPackageId: string
+    modelId: string
+    name: string
+    reactionType: string
+    level: number
+    equation: string
+    balance: string
+    reactionHeat: string
+    list: string
+    baseInfo: string
+    reactionName: string
+  }
+  export function updateModelReactionDetailApi(data: ModelReactionDetailDTO): Promise<boolean>
 }
 
 export declare namespace modelSystem {

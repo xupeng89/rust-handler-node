@@ -959,6 +959,100 @@ impl MigrationTrait for Migration {
                     .to_owned(),
             )
             .await?;
+        manager
+            .create_table(
+                Table::create()
+                    .table(ModelReactionDetail::Table)
+                    .if_not_exists()
+                    .col(
+                        ColumnDef::new(ModelReactionDetail::Id)
+                            .string()
+                            .not_null()
+                            .primary_key(),
+                    )
+                    .col(
+                        ColumnDef::new(ModelReactionDetail::ReactionPackageId)
+                            .string()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(ModelReactionDetail::ModelId)
+                            .string()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(ModelReactionDetail::Name)
+                            .string()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(ModelReactionDetail::ReactionType)
+                            .string()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(ModelReactionDetail::Level)
+                            .integer()
+                            .not_null(),
+                    ) // i32 -> integer
+                    .col(
+                        ColumnDef::new(ModelReactionDetail::Equation)
+                            .text()
+                            .not_null(),
+                    ) // 较长内容用 text
+                    .col(
+                        ColumnDef::new(ModelReactionDetail::Balance)
+                            .text()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(ModelReactionDetail::ReactionHeat)
+                            .string()
+                            .not_null(),
+                    )
+                    .col(ColumnDef::new(ModelReactionDetail::List).text().not_null())
+                    .col(
+                        ColumnDef::new(ModelReactionDetail::BaseInfo)
+                            .text()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(ModelReactionDetail::ReactionName)
+                            .string()
+                            .not_null(),
+                    )
+                    .to_owned(),
+            )
+            .await?;
+
+        manager
+            .create_table(
+                Table::create()
+                    .table(ModelFileComparisonEntity::Table)
+                    .if_not_exists()
+                    // 对应实体中的 id: String (primary_key)
+                    .col(
+                        ColumnDef::new(ModelFileComparisonEntity::Id)
+                            .integer()
+                            .not_null()
+                            .auto_increment()
+                            .primary_key(),
+                    )
+                    // 对应 reaction_name
+                    .col(
+                        ColumnDef::new(ModelFileComparisonEntity::Code)
+                            .string()
+                            .not_null(),
+                    )
+                    // 对应 model_id
+                    .col(
+                        ColumnDef::new(ModelFileComparisonEntity::FileName)
+                            .string()
+                            .not_null(),
+                    )
+                    .to_owned(),
+            )
+            .await?;
         Ok(())
     }
 
@@ -981,6 +1075,8 @@ impl MigrationTrait for Migration {
             &ModelPhysicalPropertyCalc::Table,
             &ModelFluidPackage::Table,
             &ModelReactionPackage::Table,
+            &ModelReactionDetail::Table,
+            &ModelFileComparisonEntity::Table,
         ];
 
         // 调用统一删除逻辑
@@ -1223,4 +1319,28 @@ enum ModelReactionPackage {
     CompoundChannelId,
     FluidPackageIds,
     ReactionPackageType,
+}
+#[derive(Iden)]
+enum ModelReactionDetail {
+    Table,
+    Id,
+    ReactionPackageId,
+    ModelId,
+    Name,
+    ReactionType,
+    Level,
+    Equation,
+    Balance,
+    ReactionHeat,
+    List,
+    BaseInfo,
+    ReactionName,
+}
+
+#[derive(Iden)]
+enum ModelFileComparisonEntity {
+    Table,
+    Id,
+    Code,
+    FileName,
 }

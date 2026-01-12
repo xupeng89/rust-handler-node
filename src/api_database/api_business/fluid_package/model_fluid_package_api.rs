@@ -3,9 +3,7 @@ use napi::Result;
 use napi_derive::napi;
 use paste::paste;
 
-use crate::service_database::database_business::service::fluid_package::{
-     model_fluid_package_service::*,
-};
+use crate::service_database::database_business::service::fluid_package::model_fluid_package_service::*;
 use crate::{generate_napi_methods,generate_napi_u32_methods};
 
 paste! {
@@ -43,10 +41,7 @@ paste! {
         get_fluid_package_model_id_and_name_api(name: String, model_id: String) -> Option<ModelFluidPackageDTO> => get_fluid_package_model_id_and_name,
         get_fluid_package_model_id_and_like_name_api(name: String, model_id: String) -> Vec<ModelFluidPackageDTO> => get_fluid_package_model_id_and_like_name,
         delete_fluid_package_by_ids_api(package_ids: Vec<String>) -> bool => delete_fluid_package_by_ids,
-        // get_fluid_package_model_id_default_count_api(
-        //     model_id: String,
-        //     only_default: u32) -> Result<u32> =>get_fluid_package_model_id_default_count
-    }
+   }
 }
 
 paste! {
@@ -57,14 +52,3 @@ paste! {
             only_default: u32) -> Result<u32> =>get_fluid_package_model_id_default_count
     }
 }
-
-// // 针对有特殊转换逻辑的函数（如原本的 count as u32），建议保留手动编写或在宏里增加转换逻辑
-// #[napi(namespace = "modelFluidPackage")]
-// pub async fn get_fluid_package_model_id_default_count_api(
-//     model_id: String,
-//     only_default: u32,
-// ) -> Result<u32> {
-//     get_fluid_package_model_id_default_count(model_id, only_default)
-//         .await
-//         .map_err(handle_db_err)
-// }
