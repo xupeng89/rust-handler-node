@@ -123,11 +123,22 @@ pub async fn get_model_reaction_details_by_reaction_id(
 }
 
 pub async fn get_model_reaction_details_list_by_reaction_ids(
-    ids: Vec<String>,
+    reaction_ids: Vec<String>,
 ) -> Result<Vec<ModelReactionDetailDTO>, DbErr> {
     let db = get_business_db().await?;
     let res = DetailEntity::find()
-        .filter(DetailColumn::ReactionPackageId.is_in(ids))
+        .filter(DetailColumn::ReactionPackageId.is_in(reaction_ids))
+        .all(db)
+        .await?;
+    Ok(res.into_iter().map(ModelReactionDetailDTO::from).collect())
+}
+
+pub async fn get_model_reaction_details_list_by_model_id(
+    model_id: String,
+) -> Result<Vec<ModelReactionDetailDTO>, DbErr> {
+    let db = get_business_db().await?;
+    let res = DetailEntity::find()
+        .filter(DetailColumn::ModelId.eq(model_id))
         .all(db)
         .await?;
     Ok(res.into_iter().map(ModelReactionDetailDTO::from).collect())

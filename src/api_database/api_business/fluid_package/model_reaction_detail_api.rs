@@ -14,8 +14,9 @@ paste! {
 
                 get_model_reaction_details_by_reaction_id_api(reaction_id: String) -> Vec<ModelReactionDetailDTO> => get_model_reaction_details_by_reaction_id,
 
-                get_model_reaction_details_list_by_reaction_ids_api(ids: Vec<String>) -> Vec<ModelReactionDetailDTO> => get_model_reaction_details_list_by_reaction_ids,
+                get_model_reaction_details_list_by_reaction_ids_api(reaction_ids: Vec<String>) -> Vec<ModelReactionDetailDTO> => get_model_reaction_details_list_by_reaction_ids,
 
+                get_model_reaction_details_list_by_model_id_api(model_id: String) -> Vec<ModelReactionDetailDTO> => get_model_reaction_details_list_by_model_id,
                 // 详情表写入与修改
                 insert_model_reaction_detail_api(datas: Vec<ModelReactionDetailDTO>) -> bool => insert_model_reaction_detail,
 

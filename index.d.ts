@@ -781,7 +781,8 @@ export declare namespace modelReactionDetail {
   export function deleteModelReactionDetailsByIdsApi(ids: Array<string>): Promise<boolean>
   export function getModelReactionDetailByIdApi(id: string): Promise<ModelReactionDetailDTO | null>
   export function getModelReactionDetailsByReactionIdApi(reactionId: string): Promise<Array<ModelReactionDetailDTO>>
-  export function getModelReactionDetailsListByReactionIdsApi(ids: Array<string>): Promise<Array<ModelReactionDetailDTO>>
+  export function getModelReactionDetailsListByModelIdApi(modelId: string): Promise<Array<ModelReactionDetailDTO>>
+  export function getModelReactionDetailsListByReactionIdsApi(reactionIds: Array<string>): Promise<Array<ModelReactionDetailDTO>>
   export function insertModelReactionDetailApi(datas: Array<ModelReactionDetailDTO>): Promise<boolean>
   export interface ModelReactionDetailDTO {
     id: string
@@ -797,7 +798,21 @@ export declare namespace modelReactionDetail {
     baseInfo: string
     reactionName: string
   }
-  export function updateModelReactionDetailApi(data: ModelReactionDetailDTO): Promise<boolean>
+  export interface ModelReactionDetailUpdateDTO {
+    id: string
+    reactionPackageId?: string
+    modelId: string
+    name?: string
+    reactionType?: string
+    level?: number
+    equation?: string
+    balance?: string
+    reactionHeat?: string
+    list?: string
+    baseInfo?: string
+    reactionName?: string
+  }
+  export function updateModelReactionDetailApi(data: ModelReactionDetailUpdateDTO): Promise<boolean>
 }
 
 export declare namespace modelSystem {
