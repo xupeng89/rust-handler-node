@@ -1,6 +1,7 @@
 pub mod model_api;
 pub mod model_config_api;
 pub mod model_file_comparison_api;
+pub mod model_graphic_page_api;
 pub mod model_name_generator_api;
 pub mod model_pf_model_params_api;
 pub mod model_pf_var_params_api;

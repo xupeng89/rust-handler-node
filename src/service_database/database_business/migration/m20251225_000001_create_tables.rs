@@ -1021,6 +1021,11 @@ impl MigrationTrait for Migration {
                             .string()
                             .not_null(),
                     )
+                    .col(
+                        ColumnDef::new(ModelReactionDetail::ConcBasis)
+                            .string()
+                            .not_null(),
+                    )
                     .to_owned(),
             )
             .await?;
@@ -1053,6 +1058,145 @@ impl MigrationTrait for Migration {
                     .to_owned(),
             )
             .await?;
+        manager
+            .create_table(
+                Table::create()
+                    .table(ModelGraphicPageEntity::Table)
+                    .if_not_exists()
+                    .col(
+                        ColumnDef::new(ModelGraphicPageEntity::Id)
+                            .string()
+                            .not_null()
+                            .primary_key(),
+                    )
+                    .col(
+                        ColumnDef::new(ModelGraphicPageEntity::ModelId)
+                            .string()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(ModelGraphicPageEntity::Name)
+                            .string()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(ModelGraphicPageEntity::Description)
+                            .string()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(ModelGraphicPageEntity::Scale)
+                            .string()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(ModelGraphicPageEntity::Translate)
+                            .string()
+                            .not_null(),
+                    )
+                    .to_owned(),
+            )
+            .await?;
+        manager
+            .create_table(
+                Table::create()
+                    .table(ModelGlobalScriptEntity::Table)
+                    .if_not_exists()
+                    .col(
+                        ColumnDef::new(ModelGlobalScriptEntity::Id)
+                            .string()
+                            .not_null()
+                            .primary_key(),
+                    )
+                    .col(
+                        ColumnDef::new(ModelGlobalScriptEntity::ModelId)
+                            .string()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(ModelGlobalScriptEntity::Name)
+                            .string()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(ModelGlobalScriptEntity::UnitId)
+                            .string()
+                            .not_null(),
+                    ) // 对应 unitId
+                    .col(
+                        ColumnDef::new(ModelGlobalScriptEntity::Type)
+                            .integer()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(ModelGlobalScriptEntity::IndexNum)
+                            .integer()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(ModelGlobalScriptEntity::Content)
+                            .text()
+                            .not_null(),
+                    ) // 脚本内容长，用 Text
+                    .col(
+                        ColumnDef::new(ModelGlobalScriptEntity::Actived)
+                            .integer()
+                            .not_null(),
+                    )
+                    .to_owned(),
+            )
+            .await?;
+        manager
+            .create_table(
+                Table::create()
+                    .table(ModelInitializeDataInColdState::Table)
+                    .if_not_exists()
+                    .col(
+                        ColumnDef::new(ModelInitializeDataInColdState::Id)
+                            .integer()
+                            .not_null()
+                            .auto_increment()
+                            .primary_key(),
+                    )
+                    .col(
+                        ColumnDef::new(ModelInitializeDataInColdState::Name)
+                            .string()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(ModelInitializeDataInColdState::ModelId)
+                            .string()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(ModelInitializeDataInColdState::MaterialObject)
+                            .string()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(ModelInitializeDataInColdState::FluidPackageId)
+                            .string()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(ModelInitializeDataInColdState::GraphicElementModelList)
+                            .text()
+                            .not_null(),
+                    ) // JSON List
+                    .col(
+                        ColumnDef::new(ModelInitializeDataInColdState::ConfigMsg)
+                            .text()
+                            .not_null(),
+                    ) // JSON Object
+                    .col(
+                        ColumnDef::new(ModelInitializeDataInColdState::IsDefault)
+                            .integer()
+                            .not_null()
+                            .default(0),
+                    )
+                    .to_owned(),
+            )
+            .await?;
         Ok(())
     }
 
@@ -1077,6 +1221,9 @@ impl MigrationTrait for Migration {
             &ModelReactionPackage::Table,
             &ModelReactionDetail::Table,
             &ModelFileComparisonEntity::Table,
+            &ModelGraphicPageEntity::Table,
+            &ModelGlobalScriptEntity::Table,
+            &ModelInitializeDataInColdState::Table,
         ];
 
         // 调用统一删除逻辑
@@ -1335,6 +1482,7 @@ enum ModelReactionDetail {
     List,
     BaseInfo,
     ReactionName,
+    ConcBasis,
 }
 
 #[derive(Iden)]
@@ -1343,4 +1491,42 @@ enum ModelFileComparisonEntity {
     Id,
     Code,
     FileName,
+}
+
+#[derive(Iden)]
+enum ModelGraphicPageEntity {
+    Table,
+    Id,
+    ModelId,
+    Name,
+    Description,
+    Scale,
+    Translate,
+}
+
+#[derive(Iden)]
+enum ModelGlobalScriptEntity {
+    Table,
+    Id,
+    ModelId,
+    Name,
+    #[iden = "unitId"] // 映射数据库中的 unitId
+    UnitId,
+    Type,
+    IndexNum,
+    Content,
+    Actived,
+}
+
+#[derive(Iden)]
+enum ModelInitializeDataInColdState {
+    Table,
+    Id,
+    Name,
+    ModelId,
+    MaterialObject,
+    FluidPackageId,
+    GraphicElementModelList,
+    ConfigMsg,
+    IsDefault,
 }

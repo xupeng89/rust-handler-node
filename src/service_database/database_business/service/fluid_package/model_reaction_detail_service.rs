@@ -24,6 +24,7 @@ pub struct ModelReactionDetailDTO {
     pub list: String,
     pub base_info: String,
     pub reaction_name: String,
+    pub conc_basis: String,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, FromQueryResult)]
@@ -45,6 +46,7 @@ pub struct ModelReactionDetailUpdateDTO {
     pub list: Option<String>,
     pub base_info: Option<String>,
     pub reaction_name: Option<String>,
+    pub conc_basis: Option<String>,
 }
 
 // ======================================
@@ -66,6 +68,7 @@ impl From<DetailModel> for ModelReactionDetailDTO {
             list: m.list,
             base_info: m.base_info,
             reaction_name: m.reaction_name,
+            conc_basis: m.conc_basis,
         }
     }
 }
@@ -85,6 +88,7 @@ impl ModelReactionDetailDTO {
             list: Set(self.list),
             base_info: Set(self.base_info),
             reaction_name: Set(self.reaction_name),
+            conc_basis: Set(self.conc_basis),
         }
     }
 }
@@ -196,6 +200,9 @@ pub async fn update_model_reaction_detail(
     }
     if let Some(val) = data.reaction_name {
         active.reaction_name = Set(val)
+    }
+    if let Some(val) = data.conc_basis {
+        active.conc_basis = Set(val)
     }
     active.model_id = Set(data.model_id);
 

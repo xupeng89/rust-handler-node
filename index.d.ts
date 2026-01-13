@@ -295,6 +295,37 @@ export declare namespace initDB {
   export function moveDbByUrl(targetPath: string): Promise<void>
 }
 
+export declare namespace modelColdState {
+  export function createModelColdStateApi(data: ModelInitializeDataInColdStateDTO): Promise<number>
+  export function deleteModelColdStateApi(id: number, modelId: string): Promise<boolean>
+  export function getModelColdStateDefaultApi(modelId: string): Promise<ModelInitializeDataInColdStateDTO | null>
+  export function getModelColdStateListApi(modelId: string): Promise<Array<ModelInitializeDataInColdStateDTO>>
+  export function getModelOneByIdModelIdApi(id: number, modelId: string): Promise<ModelInitializeDataInColdStateDTO | null>
+  export interface ModelColdStateUpdateDTO {
+    id: number
+    name?: string
+    modelId: string
+    materialObject?: string
+    fluidPackageId?: string
+    graphicElementModelList?: string
+    configMsg?: string
+    isDefault?: number
+  }
+  export interface ModelInitializeDataInColdStateDTO {
+    id: number
+    name: string
+    modelId: string
+    materialObject: string
+    fluidPackageId: string
+    graphicElementModelList: string
+    configMsg: string
+    isDefault: number
+  }
+  export function setModelOthersNotDefaultApi(modelId: string): Promise<boolean>
+  export function updateModelColdStateApi(data: ModelColdStateUpdateDTO): Promise<boolean>
+  export function updateModelIsDefaultByModelIdApi(modelId: string, isDefault: number): Promise<boolean>
+}
+
 export declare namespace modelComponentChannel {
   export function deleteComponentChannelByIdsApi(ids: Array<string>): Promise<number>
   export function getAllComponentChannelByIdsApi(ids: Array<string>): Promise<Array<ModelComponentChannelDTO>>
@@ -552,6 +583,38 @@ export declare namespace modelFile {
   }
 }
 
+export declare namespace modelFlowSheet {
+  export function createFlowSheetApi(data: ModelGraphicPageDTO): Promise<boolean>
+  export function deleteFlowSheetByIdApi(id: string): Promise<boolean>
+  export function getFlowSheetByIdApi(id: string): Promise<ModelGraphicPageDTO | null>
+  export function getFlowSheetListApi(modelId: string): Promise<Array<ModelGraphicPageDTO>>
+  export interface ModelFlowSheetUpdateDTO {
+    id: string
+    modelId?: string
+    name?: string
+    description?: string
+    scale?: string
+    translate?: string
+  }
+  export interface ModelGraphicPageDTO {
+    id: string
+    modelId: string
+    name: string
+    description: string
+    scale: string
+    translate: string
+  }
+  export interface ModelGraphicPageUpdateDTO {
+    id: string
+    modelId: string
+    name?: string
+    description?: string
+    scale?: string
+    translate?: string
+  }
+  export function updateFlowSheetApi(data: ModelFlowSheetUpdateDTO): Promise<boolean>
+}
+
 export declare namespace modelFluidPackage {
   export function deleteCalcFunctionsByFluidPackageIdApi(packageId: string): Promise<boolean>
   export function deleteCalcFunctionsByFluidPackageIdsApi(packageIds: Array<string>): Promise<boolean>
@@ -797,6 +860,7 @@ export declare namespace modelReactionDetail {
     list: string
     baseInfo: string
     reactionName: string
+    concBasis: string
   }
   export interface ModelReactionDetailUpdateDTO {
     id: string
@@ -811,8 +875,40 @@ export declare namespace modelReactionDetail {
     list?: string
     baseInfo?: string
     reactionName?: string
+    concBasis?: string
   }
   export function updateModelReactionDetailApi(data: ModelReactionDetailUpdateDTO): Promise<boolean>
+}
+
+export declare namespace modelScript {
+  export function deleteModelScriptsApi(ids: Array<string>): Promise<boolean>
+  export function getModelAllByModelIdApi(modelId: string): Promise<Array<ModelGlobalScriptDTO>>
+  export function getModelScriptByIdApi(id: string): Promise<ModelGlobalScriptDTO | null>
+  export function getModelScriptsByIdsApi(ids: Array<string>): Promise<Array<ModelGlobalScriptDTO>>
+  export function getModelScriptsByTypeApi(modelId: string, typeNum: number): Promise<Array<ModelGlobalScriptDTO>>
+  export function getModelUnitScriptsApi(modelId: string, unitId: string): Promise<Array<ModelGlobalScriptDTO>>
+  export function insertModelScriptApi(data: ModelGlobalScriptDTO): Promise<boolean>
+  export interface ModelGlobalScriptDTO {
+    id: string
+    modelId: string
+    name: string
+    unitId: string
+    type: number
+    indexNum: number
+    content: string
+    actived: number
+  }
+  export interface ModelGlobalScriptUpdateDTO {
+    id: string
+    modelId: string
+    name?: string
+    unitId?: string
+    type?: number
+    indexNum?: number
+    content?: string
+    actived?: number
+  }
+  export function updateModelScriptApi(data: ModelGlobalScriptUpdateDTO): Promise<boolean>
 }
 
 export declare namespace modelSystem {

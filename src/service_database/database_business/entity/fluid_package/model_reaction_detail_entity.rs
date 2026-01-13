@@ -18,6 +18,7 @@ pub struct Model {
     pub list: String,
     pub base_info: String,
     pub reaction_name: String,
+    pub conc_basis: String,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
