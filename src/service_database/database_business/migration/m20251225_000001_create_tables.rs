@@ -1197,6 +1197,99 @@ impl MigrationTrait for Migration {
                     .to_owned(),
             )
             .await?;
+
+        manager
+            .create_table(
+                Table::create()
+                    .table(ModelStatusInformationEntity::Table)
+                    .if_not_exists()
+                    .col(
+                        ColumnDef::new(ModelStatusInformationEntity::Id)
+                            .string()
+                            .not_null()
+                            .primary_key(),
+                    )
+                    .col(
+                        ColumnDef::new(ModelStatusInformationEntity::ModelId)
+                            .string()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(ModelStatusInformationEntity::Name)
+                            .string()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(ModelStatusInformationEntity::Code)
+                            .string()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(ModelStatusInformationEntity::UpdateAt)
+                            .integer()
+                            .not_null()
+                            .default(0),
+                    )
+                    .to_owned(),
+            )
+            .await?;
+
+        // 2. Params 表
+        manager
+            .create_table(
+                Table::create()
+                    .table(ModelStatusParamsEntity::Table)
+                    .if_not_exists()
+                    .col(
+                        ColumnDef::new(ModelStatusParamsEntity::Id)
+                            .integer()
+                            .not_null()
+                            .auto_increment()
+                            .primary_key(),
+                    )
+                    .col(
+                        ColumnDef::new(ModelStatusParamsEntity::ModelId)
+                            .string()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(ModelStatusParamsEntity::InitParams)
+                            .text()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(ModelStatusParamsEntity::GraphicId)
+                            .string()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(ModelStatusParamsEntity::Code)
+                            .string()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(ModelStatusParamsEntity::Type)
+                            .string()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(ModelStatusParamsEntity::Name)
+                            .string()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(ModelStatusParamsEntity::Status)
+                            .integer()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(ModelStatusParamsEntity::Actived)
+                            .integer()
+                            .not_null(),
+                    )
+                    .to_owned(),
+            )
+            .await?;
         Ok(())
     }
 
@@ -1224,6 +1317,8 @@ impl MigrationTrait for Migration {
             &ModelGraphicPageEntity::Table,
             &ModelGlobalScriptEntity::Table,
             &ModelInitializeDataInColdState::Table,
+            &ModelStatusInformationEntity::Table,
+            &ModelStatusParamsEntity::Table,
         ];
 
         // 调用统一删除逻辑
@@ -1529,4 +1624,27 @@ enum ModelInitializeDataInColdState {
     GraphicElementModelList,
     ConfigMsg,
     IsDefault,
+}
+#[derive(Iden)]
+enum ModelStatusInformationEntity {
+    Table,
+    Id,
+    ModelId,
+    Name,
+    Code,
+    UpdateAt,
+}
+
+#[derive(Iden)]
+enum ModelStatusParamsEntity {
+    Table,
+    Id,
+    ModelId,
+    InitParams,
+    GraphicId,
+    Code,
+    Type,
+    Name,
+    Status,
+    Actived,
 }
