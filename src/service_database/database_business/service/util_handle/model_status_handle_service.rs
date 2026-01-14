@@ -20,7 +20,7 @@ use crate::tool_handle::json_status_handle::{pack_to_storage_handle, unpack_from
 
 // --- Information DTO ---
 #[derive(Clone, Debug, Serialize, Deserialize)]
-#[napi(object, namespace = "modelStatus")]
+#[napi(object, namespace = "modelStatus", js_name = "ModelStatusParamsDTO")]
 pub struct ModelStatusInformationDTO {
     pub id: String,
     pub model_id: String,

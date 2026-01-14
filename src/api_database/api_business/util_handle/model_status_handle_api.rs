@@ -48,11 +48,11 @@ paste! {
 
         get_model_params_by_graphic_id_all_versions_api(graphic_id: String,model_id: String) -> Vec<ModelStatusParamsDTO> => get_params_by_graphic_id_all_versions,
 
-        get_model_status_params_by_ids_and_all_code_api(graphic_ids: Vec<String>, r#type: String,model_id: String) -> Vec<serde_json::Value> => get_status_params_by_ids_and_all_code,
+        get_model_status_params_by_ids_and_all_code_api(graphic_ids: Vec<String>, type_str: String,model_id: String) -> Vec<serde_json::Value> => get_status_params_by_ids_and_all_code,
 
         insert_model_all_params_redo_api(ntities: Vec<serde_json::Value>) -> () => insert_all_params_redo,
 
-        update_model_params_by_type_only_init_params_api(update_datas: Vec<serde_json::Value>, r#type: String, model_id: String) -> bool => update_params_by_type_only_init_params
+        update_model_params_by_type_only_init_params_api(update_datas: Vec<serde_json::Value>, type_str: String, model_id: String) -> bool => update_params_by_type_only_init_params
 
 
     }
