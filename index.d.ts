@@ -917,9 +917,9 @@ export declare namespace modelStatus {
   export function getModelParamsByGraphicIdAllVersionsApi(graphicId: string, modelId: string): Promise<Array<ModelStatusParamsDTO>>
   export function getModelParamsByIdsAndCodeApi(graphicIds: Array<string>, modelId: string, code?: string | undefined | null): Promise<Array<any>>
   export function getModelParamsByMaterialListApi(modelId: string, nodeType: string): Promise<Array<any>>
-  export function getModelStatusParamsByIdsAndAllCodeApi(graphicIds: Array<string>, r#type: string, modelId: string): Promise<Array<any>>
+  export function getModelStatusParamsByIdsAndAllCodeApi(graphicIds: Array<string>, typeStr: string, modelId: string): Promise<Array<any>>
   export function insertModelAllParamsRedoApi(ntities: Array<any>): Promise<void>
-  export interface ModelStatusInformationDto {
+  export interface ModelStatusParamsDTO {
     id: string
     modelId: string
     name: string
@@ -943,7 +943,7 @@ export declare namespace modelStatus {
   export function updateModelInfoNameApi(modelId: string, code: string, name: string): Promise<number>
   export function updateModelInfoUpdateAtApi(modelId: string, code: string): Promise<number>
   export function updateModelNodeNameApi(modelId: string, graphicId: string, name: string): Promise<number>
-  export function updateModelParamsByTypeOnlyInitParamsApi(updateDatas: Array<any>, r#type: string, modelId: string): Promise<boolean>
+  export function updateModelParamsByTypeOnlyInitParamsApi(updateDatas: Array<any>, typeStr: string, modelId: string): Promise<boolean>
   export function updateOrCreatStatusByInforAndParamsApi(data: ModelStatusInformationDTO, elementList: Array<ModelStatusParamsDTO>): Promise<boolean>
 }
 
