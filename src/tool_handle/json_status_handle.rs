@@ -79,17 +79,23 @@ pub fn pack_to_storage_handle(mut entity: Map<String, Value>) -> Map<String, Val
 
 /// 【拆箱/还原】将数据库中的 initParams 字符串解析并平铺回 Map 根部 (用于返回给前端)
 pub fn unpack_from_storage_handle(mut db_entity: Map<String, Value>) -> Map<String, Value> {
-    // 修复：合并嵌套的 if 为链式操作
+    // 修复生命周期问题：通过 match 转移所有权
     if let Some(params_map) = db_entity
         .remove("initParams")
-        .as_ref()
-        .and_then(|v| v.as_str())
-        .and_then(|s| serde_json::from_str::<Value>(s).ok())
-        .and_then(|v| v.as_object())
+        .and_then(|v| v.as_str().map(|s| s.to_string())) // 1. 拿到 String 的所有权
+        .and_then(|s| serde_json::from_str::<Value>(&s).ok()) // 2. 解析为 Value
+        .and_then(|v| {
+            // 3. 关键：将 Value 内部的 Object (Map) 提取出来，转移所有权
+            if let Value::Object(m) = v {
+                Some(m)
+            } else {
+                None
+            }
+        })
     {
-        // 将解析出来的键值对全部平铺回主 Map
+        // 4. 将解析出来的键值对平铺回主 Map
         for (k, v) in params_map {
-            db_entity.insert(k.clone(), v.clone());
+            db_entity.insert(k, v);
         }
     }
 
