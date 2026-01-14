@@ -1290,6 +1290,135 @@ impl MigrationTrait for Migration {
                     .to_owned(),
             )
             .await?;
+        manager
+            .create_table(
+                Table::create()
+                    .table(ModelTrendChartConfigEntity::Table)
+                    .if_not_exists()
+                    .col(
+                        ColumnDef::new(ModelTrendChartConfigEntity::Id)
+                            .integer()
+                            .not_null()
+                            .auto_increment()
+                            .primary_key(),
+                    )
+                    .col(
+                        ColumnDef::new(ModelTrendChartConfigEntity::ModelId)
+                            .string()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(ModelTrendChartConfigEntity::Name)
+                            .string()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(ModelTrendChartConfigEntity::Description)
+                            .string()
+                            .not_null(),
+                    )
+                    .to_owned(),
+            )
+            .await?;
+        manager
+            .create_table(
+                Table::create()
+                    .table(ModelVariableChooseEntity::Table)
+                    .if_not_exists()
+                    .col(
+                        ColumnDef::new(ModelVariableChooseEntity::Id)
+                            .string()
+                            .not_null()
+                            .primary_key(),
+                    )
+                    .col(
+                        ColumnDef::new(ModelVariableChooseEntity::Type)
+                            .string()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(ModelVariableChooseEntity::ModelId)
+                            .string()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(ModelVariableChooseEntity::GraphicSourceId)
+                            .string()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(ModelVariableChooseEntity::ConnectMaterialType)
+                            .string()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(ModelVariableChooseEntity::ShowName)
+                            .string()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(ModelVariableChooseEntity::FilterMsg)
+                            .text()
+                            .not_null(),
+                    ) // Text 类型
+                    .col(
+                        ColumnDef::new(ModelVariableChooseEntity::UnitCode)
+                            .string()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(ModelVariableChooseEntity::GraphicType)
+                            .string()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(ModelVariableChooseEntity::FromType)
+                            .string()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(ModelVariableChooseEntity::DataType)
+                            .string()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(ModelVariableChooseEntity::DataMode)
+                            .string()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(ModelVariableChooseEntity::DcsName)
+                            .string()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(ModelVariableChooseEntity::ValueName)
+                            .string()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(ModelVariableChooseEntity::Sort)
+                            .integer()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(ModelVariableChooseEntity::YMaxValue)
+                            .integer()
+                            .null(),
+                    ) // Option
+                    .col(
+                        ColumnDef::new(ModelVariableChooseEntity::YMinValue)
+                            .integer()
+                            .null(),
+                    ) // Option
+                    .col(
+                        ColumnDef::new(ModelVariableChooseEntity::Information)
+                            .string()
+                            .not_null(),
+                    )
+                    .to_owned(),
+            )
+            .await?;
         Ok(())
     }
 
@@ -1319,6 +1448,8 @@ impl MigrationTrait for Migration {
             &ModelInitializeDataInColdState::Table,
             &ModelStatusInformationEntity::Table,
             &ModelStatusParamsEntity::Table,
+            &ModelTrendChartConfigEntity::Table,
+            &ModelVariableChooseEntity::Table,
         ];
 
         // 调用统一删除逻辑
@@ -1647,4 +1778,36 @@ enum ModelStatusParamsEntity {
     Name,
     Status,
     Actived,
+}
+
+#[derive(Iden)]
+enum ModelTrendChartConfigEntity {
+    Table,
+    Id,
+    ModelId,
+    Name,
+    Description,
+}
+
+#[derive(Iden)]
+enum ModelVariableChooseEntity {
+    Table,
+    Id,
+    Type,
+    ModelId,
+    GraphicSourceId,
+    ConnectMaterialType,
+    ShowName,
+    FilterMsg,
+    UnitCode,
+    GraphicType,
+    FromType,
+    DataType,
+    DataMode,
+    DcsName,
+    ValueName,
+    Sort,
+    YMaxValue,
+    YMinValue,
+    Information,
 }

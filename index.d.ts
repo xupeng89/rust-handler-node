@@ -919,7 +919,7 @@ export declare namespace modelStatus {
   export function getModelParamsByMaterialListApi(modelId: string, nodeType: string): Promise<Array<any>>
   export function getModelStatusParamsByIdsAndAllCodeApi(graphicIds: Array<string>, typeStr: string, modelId: string): Promise<Array<any>>
   export function insertModelAllParamsRedoApi(ntities: Array<any>): Promise<void>
-  export interface ModelStatusParamsDTO {
+  export interface ModelStatusInformationDTO {
     id: string
     modelId: string
     name: string

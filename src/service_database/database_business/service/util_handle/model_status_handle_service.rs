@@ -1,6 +1,6 @@
 use crate::service_database::database_business::db_business_connection::get_business_db;
 use crate::service_database::database_business::entity::model_util_handle::model_status_information_entity::{
-    Column as InforColumn, Entity as InforEntity,
+    Column as InforColumn, Entity as InforEntity,ActiveModel as InforActiveModel,
     Model as InforModel,
 };
 use crate::service_database::database_business::entity::model_util_handle::model_status_params_entity::{
@@ -20,7 +20,11 @@ use crate::tool_handle::json_status_handle::{pack_to_storage_handle, unpack_from
 
 // --- Information DTO ---
 #[derive(Clone, Debug, Serialize, Deserialize)]
-#[napi(object, namespace = "modelStatus", js_name = "ModelStatusParamsDTO")]
+#[napi(
+    object,
+    namespace = "modelStatus",
+    js_name = "ModelStatusInformationDTO"
+)]
 pub struct ModelStatusInformationDTO {
     pub id: String,
     pub model_id: String,
@@ -422,6 +426,15 @@ pub async fn update_or_creat_status_by_infor_and_params(
     if existing > 0 {
         batch_sync_params(element_list, data.code, data.model_id).await?;
     } else {
+        let main_item = InforActiveModel {
+            id: Set(data.id),
+            model_id: Set(data.model_id),
+            update_at: Set(data.update_at),
+            name: Set(data.name),
+            code: Set(data.code),
+        };
+        InforEntity::insert(main_item).exec(db).await?;
+
         let active_models: Vec<ParamsActiveModel> = element_list
             .into_iter()
             .map(|item| ParamsActiveModel {

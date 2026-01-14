@@ -1,3 +1,5 @@
 pub mod model_global_script_service;
 pub mod model_initialize_data_in_cold_state_service;
 pub mod model_status_handle_service;
+pub mod model_trend_chart_config_service;
+pub mod model_variable_choose_service;
