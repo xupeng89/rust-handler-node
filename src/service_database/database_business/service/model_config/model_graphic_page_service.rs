@@ -7,7 +7,11 @@ use napi_derive::napi;
 use sea_orm::{ActiveModelTrait, QueryFilter, Set, entity::prelude::*};
 use serde::{Deserialize, Serialize};
 #[derive(Clone, Debug, Serialize, Deserialize)]
-#[napi(object, namespace = "modelFlowSheet", js_name = "ModelGraphicPageDTO")]
+#[napi(
+    object,
+    namespace = "modelGraphicPage",
+    js_name = "ModelGraphicPageDTO"
+)]
 pub struct ModelGraphicPageDTO {
     pub id: String,
     pub model_id: String,
@@ -20,12 +24,12 @@ pub struct ModelGraphicPageDTO {
 #[derive(Clone, Debug, serde::Deserialize)]
 #[napi(
     object,
-    namespace = "modelFlowSheet",
-    js_name = "ModelFlowSheetUpdateDTO"
+    namespace = "modelGraphicPage",
+    js_name = "ModelGraphicPageUpdateDTO"
 )]
-pub struct ModelFlowSheetUpdateDTO {
+pub struct ModelGraphicPageUpdateDTO {
     pub id: String,
-    pub model_id: Option<String>,
+    pub model_id: String,
     pub name: Option<String>,
     pub description: Option<String>,
     pub scale: Option<String>,
@@ -58,28 +62,15 @@ impl ModelGraphicPageDTO {
     }
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
-#[napi(
-    object,
-    namespace = "modelFlowSheet",
-    js_name = "ModelGraphicPageUpdateDTO"
-)]
-pub struct ModelGraphicPageUpdateDTO {
-    pub id: String,
-    pub model_id: String,
-    pub name: Option<String>,
-    pub description: Option<String>,
-    pub scale: Option<String>,
-    pub translate: Option<String>,
-}
-
-pub async fn get_one_by_id(id: String) -> Result<Option<ModelGraphicPageDTO>, DbErr> {
+pub async fn get_graphic_page_one_by_id(id: String) -> Result<Option<ModelGraphicPageDTO>, DbErr> {
     let db = get_business_db().await?;
     let res = GraphicEntity::find_by_id(id).one(db).await?;
     Ok(res.map(ModelGraphicPageDTO::from))
 }
 
-pub async fn get_list_by_model_id(model_id: String) -> Result<Vec<ModelGraphicPageDTO>, DbErr> {
+pub async fn get_graphic_page_list_by_model_id(
+    model_id: String,
+) -> Result<Vec<ModelGraphicPageDTO>, DbErr> {
     let db = get_business_db().await?;
     let res = GraphicEntity::find()
         .filter(GraphicColumn::ModelId.eq(model_id))
@@ -88,14 +79,14 @@ pub async fn get_list_by_model_id(model_id: String) -> Result<Vec<ModelGraphicPa
     Ok(res.into_iter().map(ModelGraphicPageDTO::from).collect())
 }
 
-pub async fn create(data: ModelGraphicPageDTO) -> Result<bool, DbErr> {
+pub async fn create_graphic_page(data: ModelGraphicPageDTO) -> Result<bool, DbErr> {
     let db = get_business_db().await?;
     let am = data.into_active_model();
     GraphicEntity::insert(am).exec(db).await?;
     Ok(true)
 }
 
-pub async fn update(data: ModelFlowSheetUpdateDTO) -> Result<bool, DbErr> {
+pub async fn update_graphic_page(data: ModelGraphicPageUpdateDTO) -> Result<bool, DbErr> {
     let db = get_business_db().await?;
     let existing = GraphicEntity::find_by_id(data.id.clone())
         .one(db)
@@ -104,9 +95,6 @@ pub async fn update(data: ModelFlowSheetUpdateDTO) -> Result<bool, DbErr> {
 
     let mut am: GraphicActiveModel = existing.into();
 
-    if let Some(v) = data.model_id {
-        am.model_id = Set(v);
-    }
     if let Some(v) = data.name {
         am.name = Set(v);
     }
@@ -124,7 +112,7 @@ pub async fn update(data: ModelFlowSheetUpdateDTO) -> Result<bool, DbErr> {
     Ok(true)
 }
 
-pub async fn delete_by_id(id: String) -> Result<bool, DbErr> {
+pub async fn delete_by_id_graphic_page(id: String) -> Result<bool, DbErr> {
     let db = get_business_db().await?;
     let res = GraphicEntity::delete_by_id(id).exec(db).await?;
     Ok(res.rows_affected > 0)

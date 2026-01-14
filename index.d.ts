@@ -583,38 +583,6 @@ export declare namespace modelFile {
   }
 }
 
-export declare namespace modelFlowSheet {
-  export function createFlowSheetApi(data: ModelGraphicPageDTO): Promise<boolean>
-  export function deleteFlowSheetByIdApi(id: string): Promise<boolean>
-  export function getFlowSheetByIdApi(id: string): Promise<ModelGraphicPageDTO | null>
-  export function getFlowSheetListApi(modelId: string): Promise<Array<ModelGraphicPageDTO>>
-  export interface ModelFlowSheetUpdateDTO {
-    id: string
-    modelId?: string
-    name?: string
-    description?: string
-    scale?: string
-    translate?: string
-  }
-  export interface ModelGraphicPageDTO {
-    id: string
-    modelId: string
-    name: string
-    description: string
-    scale: string
-    translate: string
-  }
-  export interface ModelGraphicPageUpdateDTO {
-    id: string
-    modelId: string
-    name?: string
-    description?: string
-    scale?: string
-    translate?: string
-  }
-  export function updateFlowSheetApi(data: ModelFlowSheetUpdateDTO): Promise<boolean>
-}
-
 export declare namespace modelFluidPackage {
   export function deleteCalcFunctionsByFluidPackageIdApi(packageId: string): Promise<boolean>
   export function deleteCalcFunctionsByFluidPackageIdsApi(packageIds: Array<string>): Promise<boolean>
@@ -720,6 +688,30 @@ export declare namespace modelFluidPackageBinary {
   export function getBinaryParametersByIds(funcCode: string, ids: Array<string>): Promise<string>
   export function getBinaryParametersByPackage(funcCode: string, packageId: string): Promise<string>
   export function updateBinaryInteractionParameters(funcCode: string, dataJson: string): Promise<boolean>
+}
+
+export declare namespace modelGraphicPage {
+  export function createGraphicPageApi(data: ModelGraphicPageDTO): Promise<boolean>
+  export function deleteGraphicPageByIdApi(id: string): Promise<boolean>
+  export function getGraphicPageByIdApi(id: string): Promise<ModelGraphicPageDTO | null>
+  export function getGraphicPageListApi(modelId: string): Promise<Array<ModelGraphicPageDTO>>
+  export interface ModelGraphicPageDTO {
+    id: string
+    modelId: string
+    name: string
+    description: string
+    scale: string
+    translate: string
+  }
+  export interface ModelGraphicPageUpdateDTO {
+    id: string
+    modelId: string
+    name?: string
+    description?: string
+    scale?: string
+    translate?: string
+  }
+  export function updateGraphicPageApi(data: ModelGraphicPageUpdateDTO): Promise<boolean>
 }
 
 export declare namespace modelHandle {
@@ -909,6 +901,31 @@ export declare namespace modelScript {
     actived?: number
   }
   export function updateModelScriptApi(data: ModelGlobalScriptUpdateDTO): Promise<boolean>
+}
+
+export declare namespace modelStatus {
+  export function batchModelSyncStatusParamsApi(datas: Array<ModelStatusParamsDTO>, code: string, modelId: string): Promise<boolean>
+  export function deleteModelStatusCascadeApi(codes: Array<string>, modelId: string): Promise<boolean>
+  export function getModelDynamicInfoByCodeApi(code: string, modelId: string): Promise<any | null>
+  export function getModelLatestStatusApi(modelId: string): Promise<ModelStatusInformationDTO | null>
+  export interface ModelStatusInformationDto {
+    id: string
+    modelId: string
+    name: string
+    code: string
+    updateAt: number
+  }
+  export interface ModelStatusParamsDto {
+    id?: number
+    modelId: string
+    initParams: string
+    graphicId: string
+    code: string
+    type: string
+    name: string
+    status: number
+    actived: number
+  }
 }
 
 export declare namespace modelSystem {
