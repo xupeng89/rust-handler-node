@@ -79,23 +79,19 @@ pub fn pack_to_storage_handle(mut entity: Map<String, Value>) -> Map<String, Val
 
 /// 【拆箱/还原】将数据库中的 initParams 字符串解析并平铺回 Map 根部 (用于返回给前端)
 pub fn unpack_from_storage_handle(mut db_entity: Map<String, Value>) -> Map<String, Value> {
-    // 1. 尝试取出并移除 initParams 字符串
-    if let Some(params_val) = db_entity.remove("initParams") {
-        if let Some(params_str) = params_val.as_str() {
-            // 2. 解析 JSON 字符串为对象
-            if let Ok(Value::Object(params_map)) = serde_json::from_str::<Value>(params_str) {
-                // 3. 将解析出来的键值对全部平铺回主 Map
-                for (k, v) in params_map {
-                    db_entity.insert(k, v);
-                }
-            }
+    // 修复：合并嵌套的 if 为链式操作
+    if let Some(params_map) = db_entity
+        .remove("initParams")
+        .as_ref()
+        .and_then(|v| v.as_str())
+        .and_then(|s| serde_json::from_str::<Value>(s).ok())
+        .and_then(|v| v.as_object())
+    {
+        // 将解析出来的键值对全部平铺回主 Map
+        for (k, v) in params_map {
+            db_entity.insert(k.clone(), v.clone());
         }
     }
-
-    // // 4. 处理字段名映射转换 (可选，如果数据库列名和前端字段名不一致)
-    // if let Some(&gid) = db_entity.remove("graphicId") {
-    //     db_entity.insert("id".to_string(), gid);
-    // }
 
     db_entity
 }

@@ -246,53 +246,51 @@ pub async fn delete_params_where_graphic_id_null(model_id: String) -> Result<u32
     Ok(res.rows_affected as u32)
 }
 
-async fn upsert_params_by_code(
+/// 内部辅助结构体：用于减少函数参数数量
+struct UpsertParamsContext {
     model_id: String,
     graphic_id: String,
     r#type: String,
     actived: i32,
     status: i32,
     name: String,
-    init_params: serde_json::Value, // 传入的动态对象
+    init_params: serde_json::Value,
     code: String,
+}
+
+async fn upsert_params_by_code(
+    ctx: UpsertParamsContext,
     db: &DatabaseTransaction,
 ) -> Result<bool, DbErr> {
-    // 模拟 pack_to_storage_handle 的逻辑，处理传入的 init_params
-    // 如果传入的是对象，转为字符串；如果是字符串，直接使用
-    let init_params_str = if init_params.is_object() {
-        // 这里可以调用你之前的分类提取逻辑
-        // 简化处理：直接转字符串
-        init_params.to_string()
+    let init_params_str = if ctx.init_params.is_object() {
+        ctx.init_params.to_string()
     } else {
-        init_params.as_str().unwrap_or("{}").to_string()
+        ctx.init_params.as_str().unwrap_or("{}").to_string()
     };
 
-    // 检查是否存在
     let existing = ParamsEntity::find()
-        .filter(ParamsColumn::ModelId.eq(model_id.clone()))
-        .filter(ParamsColumn::GraphicId.eq(graphic_id.clone()))
-        .filter(ParamsColumn::Code.eq(code.clone()))
+        .filter(ParamsColumn::ModelId.eq(ctx.model_id.clone()))
+        .filter(ParamsColumn::GraphicId.eq(ctx.graphic_id.clone()))
+        .filter(ParamsColumn::Code.eq(ctx.code.clone()))
         .one(db)
         .await?;
 
     if let Some(model) = existing {
-        // 更新
         let mut am: ParamsActiveModel = model.into();
-        am.actived = Set(actived);
-        am.status = Set(status);
-        am.name = Set(name);
+        am.actived = Set(ctx.actived);
+        am.status = Set(ctx.status);
+        am.name = Set(ctx.name);
         am.init_params = Set(init_params_str);
         am.update(db).await?;
     } else {
-        // 插入
         let am = ParamsActiveModel {
-            model_id: Set(model_id),
-            graphic_id: Set(graphic_id),
-            code: Set(code),
-            r#type: Set(r#type),
-            name: Set(name),
-            status: Set(status),
-            actived: Set(actived),
+            model_id: Set(ctx.model_id),
+            graphic_id: Set(ctx.graphic_id),
+            code: Set(ctx.code),
+            r#type: Set(ctx.r#type),
+            name: Set(ctx.name),
+            status: Set(ctx.status),
+            actived: Set(ctx.actived),
             init_params: Set(init_params_str),
             ..Default::default()
         };
@@ -317,18 +315,18 @@ pub async fn add_node_to_all_status_versions(
     db.transaction::<_, (), DbErr>(|txn| {
         Box::pin(async move {
             for version in all_versions {
-                upsert_params_by_code(
-                    model_id.clone(),
-                    data.graphic_id.clone(),
-                    data.r#type.clone(),
-                    data.actived.clone(),
-                    data.status.clone(),
-                    data.name.clone(),
-                    serde_json::from_str(&data.init_params).unwrap(),
-                    version.code, // 使用版本表里的 code
-                    txn,
-                )
-                .await?;
+                // 将参数打包进上下文结构体
+                let ctx = UpsertParamsContext {
+                    model_id: model_id.clone(),
+                    graphic_id: data.graphic_id.clone(),
+                    r#type: data.r#type.clone(),
+                    actived: data.actived, // 修复：去除了 .clone()
+                    status: data.status,   // 修复：去除了 .clone()
+                    name: data.name.clone(),
+                    init_params: serde_json::from_str(&data.init_params).unwrap_or(json!({})),
+                    code: version.code,
+                };
+                upsert_params_by_code(ctx, txn).await?;
             }
             Ok(())
         })

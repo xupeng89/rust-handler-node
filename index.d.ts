@@ -904,10 +904,21 @@ export declare namespace modelScript {
 }
 
 export declare namespace modelStatus {
+  export function addModelNodeToAllStatusVersionsApi(modelId: string, data: ModelStatusParamsDTO): Promise<boolean>
   export function batchModelSyncStatusParamsApi(datas: Array<ModelStatusParamsDTO>, code: string, modelId: string): Promise<boolean>
+  export function deleteModelParamsByGraphicIdApi(modelId: string, graphicId: string): Promise<number>
+  export function deleteModelParamsWhereGraphicIdNullApi(modelId: string): Promise<number>
   export function deleteModelStatusCascadeApi(codes: Array<string>, modelId: string): Promise<boolean>
+  export function getModelActivedParamsByCodeApi(code: string, actived: number, modelId: string): Promise<Array<any>>
+  export function getModelAllCodeParamsByListApi(graphicId: string, modelId: string): Promise<Array<any>>
   export function getModelDynamicInfoByCodeApi(code: string, modelId: string): Promise<any | null>
   export function getModelLatestStatusApi(modelId: string): Promise<ModelStatusInformationDTO | null>
+  export function getModelParamsByCodeListApi(graphicId: string, modelId: string, code: string): Promise<any | null>
+  export function getModelParamsByGraphicIdAllVersionsApi(graphicId: string, modelId: string): Promise<Array<ModelStatusParamsDTO>>
+  export function getModelParamsByIdsAndCodeApi(graphicIds: Array<string>, modelId: string, code?: string | undefined | null): Promise<Array<any>>
+  export function getModelParamsByMaterialListApi(modelId: string, nodeType: string): Promise<Array<any>>
+  export function getModelStatusParamsByIdsAndAllCodeApi(graphicIds: Array<string>, r#type: string, modelId: string): Promise<Array<any>>
+  export function insertModelAllParamsRedoApi(ntities: Array<any>): Promise<void>
   export interface ModelStatusInformationDto {
     id: string
     modelId: string
@@ -915,7 +926,7 @@ export declare namespace modelStatus {
     code: string
     updateAt: number
   }
-  export interface ModelStatusParamsDto {
+  export interface ModelStatusParamsDTO {
     id?: number
     modelId: string
     initParams: string
@@ -926,6 +937,14 @@ export declare namespace modelStatus {
     status: number
     actived: number
   }
+  export function updateModelActiveStatusBulkApi(datas: Array<any>, codes: Array<string>, modelId: string): Promise<boolean>
+  export function updateModelAllGraphicModelApi(updateData: Array<any>): Promise<boolean>
+  export function updateModelDynamicObjectsExApi(modelId: string, code: string, resGraphicElementList: Array<any>): Promise<boolean>
+  export function updateModelInfoNameApi(modelId: string, code: string, name: string): Promise<number>
+  export function updateModelInfoUpdateAtApi(modelId: string, code: string): Promise<number>
+  export function updateModelNodeNameApi(modelId: string, graphicId: string, name: string): Promise<number>
+  export function updateModelParamsByTypeOnlyInitParamsApi(updateDatas: Array<any>, r#type: string, modelId: string): Promise<boolean>
+  export function updateOrCreatStatusByInforAndParamsApi(data: ModelStatusInformationDTO, elementList: Array<ModelStatusParamsDTO>): Promise<boolean>
 }
 
 export declare namespace modelSystem {
@@ -1002,32 +1021,11 @@ export declare namespace modelUnit {
 }
 
 export declare namespace model_type {
-  /** 自定义节点名称 */
-  export const enum CustomNodeName {
-    ScriptLogic = '脚本逻辑',
-    ScriptUO = '脚本模块',
-    CustomUserUO = '自定义算法',
-    CustomUserLogic0 = '电加热',
-    CustomUserLogic1 = '防喘振控制器',
-    CustomUserLogic2 = 'ITCC压缩机升速',
-    CustomUserLogic3 = '轴系监测'
-  }
   /** 图形/连线分类 */
   export const enum GraphType {
     Node = 'Node',
     Edge = 'Edge',
     Image = 'Image'
-  }
-  /** 传感器节点名称 */
-  export const enum ModelSensorNodeName {
-    TSensor = '温度传感器',
-    PSensor = '压力传感器',
-    LSensor = '液位传感器',
-    CompSensor = '组分传感器',
-    FSensor = '流量传感器',
-    NvfSensor = '标准体积流量传感器',
-    VfSensor = '体积流量传感器',
-    DSensor = '密度传感器'
   }
   /** 节点类型核心枚举 */
   export const enum NodeType {
@@ -1053,7 +1051,6 @@ export declare namespace model_type {
     Delay = 'Delay',
     Pulse = 'Pulse',
     PositionInformation = 'PositionInformation',
-    CustomVueNode = 'CustomVueNode',
     Aiuo = 'Aiuo',
     TSensor = 'TSensor',
     PSensor = 'PSensor',
@@ -1072,21 +1069,18 @@ export declare namespace model_type {
     ScriptUO = 'ScriptUO',
     CustomCustomerUO = 'CustomCustomerUO',
     CustomUserUO = 'CustomUserUO',
-    CustomSpecialUO = 'CustomSpecialUO',
-    CustomUserLogic0 = 'CustomUserLogic0',
-    CustomUserLogic1 = 'CustomUserLogic1',
-    CustomUserLogic2 = 'CustomUserLogic2',
-    CustomUserLogic3 = 'CustomUserLogic3'
+    CustomSpecialUO = 'CustomSpecialUO'
   }
-  /** 自定义模块前缀 */
-  export const enum NodeTypeCustom {
-    CustomCustomerUO = 'CustomCustomerUO',
-    CustomUserUO = 'CustomUserUO',
-    CustomSpecialUO = 'CustomSpecialUO',
-    CustomSysUO = 'CustomSysUO',
-    CustomUserLogic = 'CustomUserLogic',
-    CustomCustomerLogic = 'CustomCustomerLogic',
-    CustomSysLogic = 'CustomSysLogic'
+  export const enum NodeTypeCategory {
+    Other = 'Other',
+    Sensor = 'Sensor',
+    Logic = 'Logic',
+    Energy = 'Energy',
+    Material = 'Material',
+    Aiuo = 'Aiuo',
+    DCSPoint = 'DCSPoint',
+    GraphicEle = 'GraphicEle',
+    ScriptUO = 'ScriptUO'
   }
 }
 
